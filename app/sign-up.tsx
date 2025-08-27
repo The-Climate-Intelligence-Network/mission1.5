@@ -1,6 +1,11 @@
 import { router } from "expo-router";
 import React, { useState, useEffect } from "react";
-import { SafeAreaView, InteractionManager } from "react-native";
+import {
+  SafeAreaView,
+  InteractionManager,
+  Platform,
+  Image,
+} from "react-native";
 import { Box } from "@/components/ui/box";
 import { Text } from "@/components/ui/text";
 import { Heading } from "@/components/ui/heading";
@@ -23,6 +28,7 @@ import {
 import { useSession } from "@/context/auth";
 import { useAppToast } from "@/lib/toast-utils";
 import { GoogleIcon } from "@/assets/ico/google-icon";
+import { AppleIcon } from "@/assets/ico/apple-icon";
 
 export default function SignUp() {
   const [fullName, setFullName] = useState("");
@@ -32,11 +38,13 @@ export default function SignUp() {
   const [loading, setLoading] = useState(false);
   const [githubLoading, setGithubLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [appleLoading, setAppleLoading] = useState(false);
   const [lastSubmitTime, setLastSubmitTime] = useState(0);
   const {
     signUp,
     signInWithGitHub,
     signInWithGoogle,
+    signInWithApple,
     isGoogleProcessing,
     session,
   } = useSession();
@@ -193,6 +201,41 @@ export default function SignUp() {
     }
   }
 
+  async function handleAppleSignUp() {
+    if (Platform.OS !== "ios") {
+      showError(
+        "Apple Sign Up Error",
+        "Apple Sign In is only available on iOS devices"
+      );
+      return;
+    }
+
+    setAppleLoading(true);
+    try {
+      const { error } = await signInWithApple();
+
+      if (error) {
+        if (error.message === "Apple Sign In was cancelled") {
+          // Don't show error for user cancellation
+          return;
+        }
+        showError(
+          "Apple Sign Up Error",
+          error.message || "Failed to sign up with Apple"
+        );
+      } else {
+        showSuccess("Welcome!", "You have successfully signed up with Apple.");
+      }
+    } catch (error) {
+      showError(
+        "Apple Sign Up Error",
+        "An unexpected error occurred with Apple sign up"
+      );
+    } finally {
+      setAppleLoading(false);
+    }
+  }
+
   return (
     <SafeAreaView
       style={{ flex: 1 }}
@@ -203,38 +246,40 @@ export default function SignUp() {
           {/* Back Button */}
           <HStack className="items-center mb-6">
             <Button
-              variant="link"
+              variant="solid"
               size="sm"
               onPress={() => router.back()}
-              className="p-2 -ml-2"
+              className="border-2 border-[#333333] shadow-[2px_2px_0_#333333] bg-[#FCFCFC] px-4 py-2"
             >
-              <Icon as={ArrowLeft} size="md" className="text-typography-600" />
+              <HStack space="sm" className="items-center">
+                <Icon as={ArrowLeft} size="sm" className="text-[#333333]" />
+                <Text className="text-[#333333] font-bold tracking-wide">
+                  Go Back
+                </Text>
+              </HStack>
             </Button>
-            <Text
-              size="lg"
-              className="text-typography-900 dark:text-typography-950 font-semibold ml-2"
-            >
-              Go Back
-            </Text>
           </HStack>
 
           <Box className="flex-1 justify-center">
-            <VStack space="xl" className="items-center">
+            <VStack space="md" className="items-center">
               {/* Header */}
-              <VStack space="lg" className="items-center mb-8">
-                <Box className="p-4 bg-primary-100 dark:bg-primary-900/30 rounded-full">
-                  <Icon as={UserPlus} size="xl" className="text-primary-500" />
-                </Box>
-                <VStack space="xs" className="items-center">
+              <VStack space="md" className="items-center mb-2">
+                <Image
+                  source={require("@/assets/icon.png")}
+                  style={{ width: 64, height: 64 }}
+                  resizeMode="contain"
+                />
+                <VStack space="md" className="items-center">
                   <Heading
                     size="2xl"
-                    className="text-typography-900 dark:text-typography-950 text-center"
+                    className="text-[#333333] text-center font-extrabold tracking-wider"
+                    retro
                   >
                     Join the Network
                   </Heading>
                   <Text
                     size="lg"
-                    className="text-typography-600 dark:text-typography-750 text-center"
+                    className="text-[#333333] text-center font-semibold tracking-wide"
                   >
                     Start making a difference in climate research
                   </Text>
@@ -243,17 +288,18 @@ export default function SignUp() {
 
               {/* Sign Up Card */}
               <Card className="w-full max-w-sm p-8">
-                <VStack space="lg">
+                <VStack space="lg" className="items-center">
                   <VStack space="md" className="items-center">
                     <Heading
                       size="lg"
-                      className="text-typography-900 dark:text-typography-950"
+                      className="text-[#333333] font-extrabold tracking-wider"
+                      retro
                     >
                       Mission 1.5
                     </Heading>
                     <Text
                       size="sm"
-                      className="text-typography-600 dark:text-typography-750 text-center"
+                      className="text-[#333333] text-center font-semibold tracking-wide"
                     >
                       Create your account to start contributing to climate
                       science
@@ -264,7 +310,7 @@ export default function SignUp() {
                   <VStack space="xs" className="w-full">
                     <Text
                       size="sm"
-                      className="text-typography-600 dark:text-typography-750"
+                      className="text-[#333333] font-bold tracking-wide"
                     >
                       Full Name
                     </Text>
@@ -286,7 +332,7 @@ export default function SignUp() {
                   <VStack space="xs" className="w-full">
                     <Text
                       size="sm"
-                      className="text-typography-600 dark:text-typography-750"
+                      className="text-[#333333] font-bold tracking-wide"
                     >
                       Email
                     </Text>
@@ -309,7 +355,7 @@ export default function SignUp() {
                   <VStack space="xs" className="w-full">
                     <Text
                       size="sm"
-                      className="text-typography-600 dark:text-typography-750"
+                      className="text-[#333333] font-bold tracking-wide"
                     >
                       Password
                     </Text>
@@ -332,7 +378,7 @@ export default function SignUp() {
                   <VStack space="xs" className="w-full">
                     <Text
                       size="sm"
-                      className="text-typography-600 dark:text-typography-750"
+                      className="text-[#333333] font-bold tracking-wide"
                     >
                       Confirm Password
                     </Text>
@@ -361,6 +407,7 @@ export default function SignUp() {
                       loading ||
                       githubLoading ||
                       googleLoading ||
+                      appleLoading ||
                       isGoogleProcessing ||
                       !email.trim() ||
                       !fullName.trim() ||
@@ -369,13 +416,17 @@ export default function SignUp() {
                     }
                     onPress={handleSignUp}
                   >
-                    <HStack space="md" className="items-center">
+                    <HStack space="md" className="items-center justify-center">
                       {loading ? (
                         <Spinner size="small" color="white" />
                       ) : (
-                        <Icon as={UserPlus} size="md" className="text-white" />
+                        <Icon
+                          as={UserPlus}
+                          size="md"
+                          className="text-[#333333]"
+                        />
                       )}
-                      <Text size="lg" className="text-white font-semibold">
+                      <Text size="lg" className="text-[#333333] font-semibold">
                         {loading ? "Creating Account..." : "Create Account"}
                       </Text>
                     </HStack>
@@ -386,7 +437,7 @@ export default function SignUp() {
                     <Box className="flex-1 h-px bg-outline-300 dark:bg-outline-600" />
                     <Text
                       size="sm"
-                      className="px-4 text-typography-500 dark:text-typography-400"
+                      className="px-4 text-[#333333] font-semibold tracking-wide"
                     >
                       or
                     </Text>
@@ -402,15 +453,16 @@ export default function SignUp() {
                       loading ||
                       githubLoading ||
                       googleLoading ||
+                      appleLoading ||
                       isGoogleProcessing
                     }
                     onPress={handleGoogleSignUp}
                   >
-                    <HStack space="md" className="items-center">
+                    <HStack space="md" className="items-center justify-center">
                       <GoogleIcon size={20} />
                       <Text
                         size="lg"
-                        className="text-typography-600 dark:text-typography-400 font-semibold"
+                        className="text-[#333333] font-semibold tracking-wide"
                       >
                         {googleLoading || isGoogleProcessing
                           ? isGoogleProcessing
@@ -421,6 +473,39 @@ export default function SignUp() {
                     </HStack>
                   </Button>
 
+                  {/* Apple OAuth Button (iOS only) */}
+                  {Platform.OS === "ios" && (
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      className="w-full"
+                      disabled={
+                        loading ||
+                        githubLoading ||
+                        googleLoading ||
+                        appleLoading ||
+                        isGoogleProcessing
+                      }
+                      onPress={handleAppleSignUp}
+                    >
+                      <HStack space="md" className="items-center justify-center">
+                        {appleLoading ? (
+                          <Spinner size="small" />
+                        ) : (
+                          <AppleIcon size={20} color="#6B7280" />
+                        )}
+                        <Text
+                          size="lg"
+                          className="text-[#333333] font-semibold tracking-wide"
+                        >
+                          {appleLoading
+                            ? "Connecting..."
+                            : "Continue with Apple"}
+                        </Text>
+                      </HStack>
+                    </Button>
+                  )}
+
                   {/* GitHub OAuth Button */}
                   <Button
                     variant="outline"
@@ -430,20 +515,18 @@ export default function SignUp() {
                       loading ||
                       githubLoading ||
                       googleLoading ||
+                      appleLoading ||
                       isGoogleProcessing
                     }
                     onPress={handleGitHubSignUp}
                   >
-                    <HStack space="md" className="items-center">
+                    <HStack space="md" className="items-center justify-center">
                       <Icon
                         as={Github}
                         size="md"
                         className="text-typography-600 dark:text-typography-400"
                       />
-                      <Text
-                        size="lg"
-                        className="text-typography-600 dark:text-typography-400 font-semibold"
-                      >
+                      <Text size="lg" className="text-[#333333] font-semibold">
                         {githubLoading
                           ? "Connecting..."
                           : "Continue with GitHub"}
@@ -453,10 +536,7 @@ export default function SignUp() {
 
                   {/* Sign In Link */}
                   <VStack space="xs" className="items-center">
-                    <Text
-                      size="sm"
-                      className="text-typography-600 dark:text-typography-750"
-                    >
+                    <Text size="lg" className="text-[#333333]">
                       Already have an account?
                     </Text>
                     <Button
@@ -465,8 +545,8 @@ export default function SignUp() {
                       onPress={() => router.push("/sign-in")}
                     >
                       <Text
-                        size="sm"
-                        className="text-primary-500 font-semibold"
+                        size="lg"
+                        className="text-primary-500 font-bold tracking-wide"
                       >
                         Sign In
                       </Text>
@@ -474,10 +554,7 @@ export default function SignUp() {
                   </VStack>
 
                   <VStack space="xs" className="items-center">
-                    <Text
-                      size="xs"
-                      className="text-typography-500 dark:text-typography-300 text-center"
-                    >
+                    <Text size="md" className="text-[#666666] text-center">
                       By creating an account, you agree to our Terms of Service
                       and Privacy Policy
                     </Text>
@@ -488,36 +565,27 @@ export default function SignUp() {
               {/* Benefits */}
               <VStack space="md" className="w-full max-w-sm">
                 <Text
-                  size="sm"
-                  className="text-typography-600 dark:text-typography-750 text-center font-semibold"
+                  size="lg"
+                  className="text-[#333333] text-center font-semibold"
                 >
-                  Join thousands of climate scientists:
+                  Join thousands of climate enthusiasts:
                 </Text>
                 <VStack space="xs">
                   <HStack space="md" className="items-center">
                     <Box className="w-2 h-2 bg-green-500 rounded-full" />
-                    <Text
-                      size="sm"
-                      className="text-typography-600 dark:text-typography-750"
-                    >
+                    <Text size="md" className="text-[#333333]">
                       Contribute to real climate research
                     </Text>
                   </HStack>
                   <HStack space="md" className="items-center">
                     <Box className="w-2 h-2 bg-blue-500 rounded-full" />
-                    <Text
-                      size="sm"
-                      className="text-typography-600 dark:text-typography-750"
-                    >
+                    <Text size="md" className="text-[#333333]">
                       Access exclusive missions and data
                     </Text>
                   </HStack>
                   <HStack space="md" className="items-center">
                     <Box className="w-2 h-2 bg-purple-500 rounded-full" />
-                    <Text
-                      size="sm"
-                      className="text-typography-600 dark:text-typography-750"
-                    >
+                    <Text size="md" className="text-[#333333]">
                       Earn recognition for your contributions
                     </Text>
                   </HStack>
@@ -535,16 +603,10 @@ export default function SignUp() {
             <VStack space="lg" className="items-center">
               <Spinner size="large" />
               <VStack space="xs" className="items-center">
-                <Heading
-                  size="md"
-                  className="text-typography-900 dark:text-typography-950"
-                >
+                <Heading size="md" className="text-[#333333]" retro={true}>
                   Completing Sign Up
                 </Heading>
-                <Text
-                  size="sm"
-                  className="text-typography-600 dark:text-typography-750 text-center"
-                >
+                <Text size="md" className="text-[#666666] text-center">
                   Securely connecting your Google account...
                 </Text>
               </VStack>

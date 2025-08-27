@@ -353,11 +353,23 @@ const MissionSubmissionPage = () => {
 
   if (loading) {
     return (
-      <SafeAreaView style={{ flex: 1 }} className="bg-white dark:bg-background-dark">
+      <SafeAreaView
+        style={{ flex: 1 }}
+        className="bg-white dark:bg-background-dark"
+      >
         <Box className="flex-1 justify-center items-center p-6">
-          <Text className="text-typography-600 dark:text-typography-400">
-            Loading mission details...
-          </Text>
+          <Card className="p-8 border-2 border-[#333333] shadow-[4px_4px_0_#333333] bg-[#FCFCFC]">
+            <VStack space="md" className="items-center">
+              <Image
+                source={require("@/assets/icon.png")}
+                style={{ width: 48, height: 48 }}
+                resizeMode="contain"
+              />
+              <Text className="text-[#333333] font-semibold tracking-wide">
+                Loading mission submission...
+              </Text>
+            </VStack>
+          </Card>
         </Box>
       </SafeAreaView>
     );
@@ -365,11 +377,14 @@ const MissionSubmissionPage = () => {
 
   if (!mission || !progress) {
     return (
-      <SafeAreaView style={{ flex: 1 }} className="bg-white dark:bg-background-dark">
+      <SafeAreaView style={{ flex: 1 }} className="bg-[#FCFCFC]">
         <Box className="flex-1 justify-center items-center p-6">
-          <Text className="text-red-600">Mission not found or failed to load.</Text>
-          <Button onPress={() => router.back()} className="mt-4">
-            <Text className="text-white">Go Back</Text>
+          <Text retro className="text-[#333333]">Mission not found or failed to load.</Text>
+          <Button 
+            onPress={() => router.back()} 
+            className="mt-4 bg-[#98FB98] border-2 border-[#333333] shadow-[4px_4px_0_#333333]"
+          >
+            <Text className="text-[#333333] font-bold tracking-wide">Go Back</Text>
           </Button>
         </Box>
       </SafeAreaView>
@@ -381,71 +396,78 @@ const MissionSubmissionPage = () => {
   const allStepsCompleted = progress.progressPercentage === 100;
 
   return (
-    <SafeAreaView style={{ flex: 1 }} className="bg-white dark:bg-background-dark">
+    <SafeAreaView style={{ flex: 1 }} className="bg-[#FCFCFC]">
       {/* Header */}
-      <HStack
-        space="md"
-        className="items-center p-4 border-b border-gray-200 dark:border-gray-800"
-      >
-        <Button
-          variant="outline"
-          size="sm"
-          onPress={() => router.back()}
-          className="p-2"
-        >
-          <Icon as={ArrowLeft} size="md" className="text-typography-600" />
-        </Button>
-        <Heading size="xl" className="font-bold text-typography-900 dark:text-typography-950 flex-1 text-center">
+      <VStack space="lg" className="items-center p-6">
+        <Image
+          source={require("@/assets/icon.png")}
+          style={{ width: 48, height: 48 }}
+          resizeMode="contain"
+        />
+        <Heading retro size="xl" className="text-[#333333] font-bold tracking-wide text-center">
           Submit Evidence
         </Heading>
-        <Box className="w-10 h-10" />
-      </HStack>
+        
+        {/* Back Button */}
+        <Button
+          variant="solid"
+          size="sm"
+          onPress={() => router.back()}
+          className="bg-[#FCFCFC] border-2 border-[#333333] shadow-[2px_2px_0_#333333]"
+        >
+          <HStack space="sm" className="items-center">
+            <Icon as={ArrowLeft} size="sm" className="text-[#333333]" />
+            <Text className="text-[#333333] font-bold tracking-wide">Go Back</Text>
+          </HStack>
+        </Button>
+      </VStack>
 
       <ScrollView className="flex-1 p-6">
         {/* Mission Info */}
-        <VStack space="lg" className="mb-6">
-          <Card className="p-4 bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800">
-            <VStack space="md">
-              <Text className="font-semibold text-primary-900 dark:text-primary-100">
-                {mission.title}
+        <Card className="p-6 mb-6 bg-[#FCFCFC] border-2 border-[#333333] shadow-[4px_4px_0_#333333]">
+          <VStack space="md">
+            <Text retro className="font-bold text-[#333333]">
+              {mission.title}
+            </Text>
+            <HStack className="justify-between items-center">
+              <Text retro size="sm" className="text-[#333333]">
+                Progress: {progress.progressPercentage}%
               </Text>
-              <HStack className="justify-between items-center">
-                <Text size="sm" className="text-primary-700 dark:text-primary-300">
-                  Progress: {progress.progressPercentage}%
-                </Text>
-                <Text size="sm" className="text-primary-700 dark:text-primary-300">
-                  Step {Math.min(currentStepIndex + 1, guidanceSteps.length)} of {guidanceSteps.length}
-                </Text>
-              </HStack>
-              <Progress value={progress.progressPercentage} className="h-2" />
-            </VStack>
-          </Card>
-        </VStack>
+              <Text retro size="sm" className="text-[#333333]">
+                Step {Math.min(currentStepIndex + 1, guidanceSteps.length)} of {guidanceSteps.length}
+              </Text>
+            </HStack>
+            <Progress value={progress.progressPercentage} className="h-2 bg-[#E0E0E0] border-2 border-[#333333]" />
+          </VStack>
+        </Card>
 
         {allStepsCompleted ? (
-          <Card className="p-6 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+          <Card className="p-6 bg-[#98FB98] border-2 border-[#333333] shadow-[4px_4px_0_#333333]">
             <VStack space="md" className="items-center">
-              <Icon as={CheckCircle} size="xl" className="text-green-600" />
-              <Heading size="lg" className="text-green-900 dark:text-green-100 text-center">
+              <Icon as={CheckCircle} size="xl" className="text-[#333333]" />
+              <Heading retro size="lg" className="text-[#333333] text-center font-bold tracking-wide">
                 Mission Completed! 🎉
               </Heading>
-              <Text className="text-center text-green-800 dark:text-green-200">
+              <Text retro className="text-center text-[#333333]">
                 Congratulations! You've successfully completed all evidence requirements. 
                 Your submission is being reviewed and points will be awarded once approved.
               </Text>
-              <Button onPress={() => router.back()} className="bg-green-600">
-                <Text className="text-white">Return to Missions</Text>
+              <Button 
+                onPress={() => router.back()} 
+                className="bg-[#98FB98] border-2 border-[#333333] shadow-[4px_4px_0_#333333]"
+              >
+                <Text retro className="text-[#333333] font-bold">Return to Missions</Text>
               </Button>
             </VStack>
           </Card>
         ) : currentStep ? (
           <VStack space="lg">
             {/* Current Step */}
-            <Card className="p-4 border border-blue-200 dark:border-blue-800">
+            <Card className="p-4 bg-[#FFE4B5] border-2 border-[#333333] shadow-[4px_4px_0_#333333]">
               <VStack space="md">
                 <HStack space="md" className="items-start">
-                  <Box className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full items-center justify-center">
-                    <Text size="sm" className="font-bold text-blue-600 dark:text-blue-400">
+                  <Box className="w-8 h-8 bg-[#DDA0DD] border-2 border-[#333333] rounded-full items-center justify-center">
+                    <Text retro size="sm" className="font-bold text-[#333333]">
                       {currentStepIndex + 1}
                     </Text>
                   </Box>
@@ -482,9 +504,9 @@ const MissionSubmissionPage = () => {
             </Card>
 
             {/* Evidence Collection */}
-            <Card className="p-4 border border-gray-200 dark:border-gray-700">
+            <Card className="p-4 bg-[#FCFCFC] border-2 border-[#333333] shadow-[4px_4px_0_#333333]">
               <VStack space="md">
-                <Text className="font-semibold text-typography-900 dark:text-typography-950">
+                <Text retro size="lg" className="font-bold text-[#333333]">
                   Add Evidence
                 </Text>
 
@@ -492,18 +514,20 @@ const MissionSubmissionPage = () => {
                 <VStack space="md">
                   {currentStep.requiredEvidence.includes("photo") && (
                     <VStack space="xs">
-                      <Text size="sm" className="font-medium">Photo Evidence</Text>
+                      <Text retro size="sm" className="font-bold text-[#333333]">Photo Evidence</Text>
                       <Button
                         variant="outline"
                         size="sm"
                         onPress={handleSelectPhoto}
                         disabled={submitting}
-                        className="w-full"
+                        className="w-full bg-[#FCFCFC] border-2 border-[#333333] shadow-[2px_2px_0_#333333]"
                       >
-                        <HStack space="xs" className="items-center">
-                          <Icon as={Upload} size="sm" />
-                          <Text>Select Photo from Gallery</Text>
-                        </HStack>
+                        <VStack className="items-center justify-center">
+                          <HStack space="xs" className="items-center">
+                            <Icon as={Upload} size="sm" className="text-[#333333]" />
+                            <Text retro className="text-[#333333] font-bold">Select Photo from Gallery</Text>
+                          </HStack>
+                        </VStack>
                       </Button>
                     </VStack>
                   )}
@@ -584,9 +608,9 @@ const MissionSubmissionPage = () => {
                 <Button
                   onPress={handleSubmitStep}
                   disabled={evidenceItems.length === 0 || submitting}
-                  className="mt-4"
+                  className="mt-4 bg-[#98FB98] border-2 border-[#333333] shadow-[4px_4px_0_#333333]"
                 >
-                  <Text className="text-white">
+                  <Text retro className="text-[#333333] font-bold">
                     {submitting ? "Submitting..." : isLastStep ? "Complete Mission" : "Submit Step"}
                   </Text>
                 </Button>

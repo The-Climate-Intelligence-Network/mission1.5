@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { SafeAreaView, ScrollView, Pressable, RefreshControl } from "react-native";
+import { SafeAreaView, ScrollView, RefreshControl } from "react-native";
+import { router } from "expo-router";
 import { Box } from "@/components/ui/box";
 import { Text } from "@/components/ui/text";
 import { Heading } from "@/components/ui/heading";
@@ -11,9 +12,8 @@ import { Card } from "@/components/ui/card";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Divider } from "@/components/ui/divider";
-import { Pressable as UIPressable } from "@/components/ui/pressable";
-import { useLanguage, availableLanguages } from "@/components/i18n/language-context";
-import { useColorScheme } from "nativewind";
+import { Image } from "@/components/ui/image";
+import { useTheme } from "@/context/theme";
 import { useSession } from "@/context/auth";
 import {
   User,
@@ -21,37 +21,43 @@ import {
   Target,
   BarChart3,
   Settings,
-  Globe,
   Moon,
   Sun,
   LogOut,
-  Check,
-  X,
   Calendar,
   CheckCircle,
-  Play,
+  Edit,
 } from "lucide-react-native";
 import {
   getPublishedMissions,
+  getUserMissionStats,
   MissionWithStats,
 } from "@/services/missions";
+import {
+  getCurrentUserProfile,
+  getCurrentUserProfileWithAvatar,
+  Agent,
+} from "@/services/profile/profile.service";
 
 const ProfilePage = () => {
-  const { t, currentLanguage, setLanguage } = useLanguage();
-  const [showLanguageModal, setShowLanguageModal] = useState(false);
-  const { colorScheme, toggleColorScheme } = useColorScheme();
+  const { colorScheme, toggleColorScheme } = useTheme();
   const { signOut, user } = useSession();
   const [missions, setMissions] = useState<MissionWithStats[]>([]);
+  const [profile, setProfile] = useState<Agent | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    loadMissions();
+    loadData();
   }, []);
+
+  const loadData = async () => {
+    await Promise.all([loadMissions(), loadProfile()]);
+  };
 
   const loadMissions = async () => {
     try {
-      setLoading(true);
       const { data, error } = await getPublishedMissions();
 
       if (error) {
@@ -61,6 +67,18 @@ const ProfilePage = () => {
       }
     } catch (error) {
       console.error("Error loading missions:", error);
+    }
+  };
+
+  const loadProfile = async () => {
+    try {
+      const response = await getCurrentUserProfileWithAvatar();
+      if (response.success && response.data) {
+        setProfile(response.data);
+        setAvatarUrl(response.data.avatarSignedUrl || "");
+      }
+    } catch (error) {
+      console.error("Error loading profile:", error);
     } finally {
       setLoading(false);
     }
@@ -68,13 +86,15 @@ const ProfilePage = () => {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await loadMissions();
+    await loadData();
     setRefreshing(false);
   };
 
   // Calculate real user statistics from missions
   const userStats = {
-    completedMissions: missions.filter((m) => m.submission_status === "reviewed").length,
+    completedMissions: missions.filter(
+      (m) => m.submission_status === "reviewed"
+    ).length,
     ongoingMissions: missions.filter(
       (m) =>
         m.submission_status === "in_progress" ||
@@ -89,7 +109,7 @@ const ProfilePage = () => {
       .reduce((sum, m) => sum + (m.energy_awarded || 0), 0),
     dataPointsContributed: missions
       .filter((m) => m.submission_status === "reviewed")
-      .reduce((sum, m) => sum + (m.participants_count || 1), 0), // Using participants as proxy for data contribution
+      .reduce((sum, m) => sum + (m.participants_count || 1), 0),
   };
 
   // Calculate achievements based on real data
@@ -138,7 +158,7 @@ const ProfilePage = () => {
     },
   ];
 
-  const earnedAchievements = achievements.filter(a => a.earned);
+  const earnedAchievements = achievements.filter((a) => a.earned);
 
   // Calculate user level based on points
   const getUserLevel = (points: number) => {
@@ -159,154 +179,187 @@ const ProfilePage = () => {
     .map((mission) => ({
       id: mission.id,
       title: `Completed ${mission.title}`,
-      date: "Recently", // You could calculate this from actual submission dates
+      date: "Recently",
       icon: CheckCircle,
       color: "bg-green-500",
     }));
 
-  const getCurrentLanguageName = () => {
-    const languageNames = {
-      en: "English",
-      es: "Español",
-      pt: "Português",
-    };
-    return languageNames[currentLanguage] || "English";
-  };
-
-  const handleLanguageChange = async (languageCode: "en" | "es" | "pt") => {
-    await setLanguage(languageCode);
-    setShowLanguageModal(false);
-  };
-
   const stats = [
-    { label: "Missions Completed", value: userStats.completedMissions.toString(), color: "text-green-600" },
-    { label: "Missions In Progress", value: userStats.ongoingMissions.toString(), color: "text-blue-600" },
-    { label: "Saved Missions", value: userStats.savedMissions.toString(), color: "text-purple-600" },
-    { label: "Points Earned", value: userStats.totalPoints.toString(), color: "text-orange-600" },
-    { label: "Energy Collected", value: userStats.totalEnergy.toString(), color: "text-yellow-600" },
-    { label: "Data Points", value: userStats.dataPointsContributed.toString(), color: "text-blue-500" },
+    {
+      label: "Missions Completed",
+      value: userStats.completedMissions.toString(),
+      color: "text-green-600",
+    },
+    {
+      label: "Missions In Progress",
+      value: userStats.ongoingMissions.toString(),
+      color: "text-blue-600",
+    },
+    {
+      label: "Saved Missions",
+      value: userStats.savedMissions.toString(),
+      color: "text-purple-600",
+    },
+    {
+      label: "Points Earned",
+      value: userStats.totalPoints.toString(),
+      color: "text-orange-600",
+    },
+    {
+      label: "Energy Collected",
+      value: userStats.totalEnergy.toString(),
+      color: "text-yellow-600",
+    },
+    {
+      label: "Data Points",
+      value: userStats.dataPointsContributed.toString(),
+      color: "text-blue-500",
+    },
   ];
+
+  // Get display data from profile or auth user
+  const displayName =
+    profile?.full_name ||
+    user?.user_metadata?.full_name ||
+    user?.user_metadata?.name ||
+    user?.email?.split("@")[0] ||
+    "Climate Advocate";
+
+  const displayEmail = profile?.email || user?.email || "No email";
+  const displayLocation = profile?.address || user?.user_metadata?.location;
 
   return (
     <SafeAreaView
       style={{ flex: 1 }}
-      className="bg-white dark:bg-background-dark"
+      className="bg-[#FCFCFC]"
     >
-      <ScrollView 
+      <ScrollView
         className="flex-1"
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
         <Box className="p-6">
-          {/* Header */}
-          <VStack space="lg" className="mb-8">
-            <HStack space="md" className="items-center">
-              <Icon as={User} size="xl" className="text-primary-500" />
-              <VStack space="xs">
-                <Heading
-                  size="xl"
-                  className="text-typography-900 dark:text-typography-950"
-                >
-                  {t("profile")}
-                </Heading>
-                <Text
-                  size="sm"
-                  className="text-typography-600 dark:text-typography-750"
-                >
-                  Your climate action journey
-                </Text>
-              </VStack>
-            </HStack>
-          </VStack>
+          {/* Header with Logo */}
+          <HStack className="items-center justify-between mb-8">
+            <VStack space="lg">
+              <Heading retro size="2xl" className="text-[#333333] tracking-wide font-bold">
+                Profile
+              </Heading>
+              <Text retro className="text-[#333333] text-base">
+                Your climate action journey
+              </Text>
+            </VStack>
+            <Image 
+              source={require('@/assets/icon.png')}
+              style={{ width: 48, height: 48 }}
+              resizeMode="contain"
+            />
+          </HStack>
 
-          {/* Profile Info */}
-          <Card className="p-6 mb-6">
+          {/* Profile Info Card */}
+          <Card className="p-6 mb-6 bg-[#FCFCFC] border-2 border-[#333333] shadow-[4px_4px_0_#333333]">
             <VStack space="lg">
               <HStack space="lg" className="items-center">
-                <Avatar size="xl">
-                  <AvatarImage
-                    source={{
-                      uri: user?.user_metadata?.avatar_url || 
-                           user?.user_metadata?.picture ||
-                           "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
-                    }}
-                  />
-                </Avatar>
-                <VStack space="xs" className="flex-1">
-                  <Heading
+                {avatarUrl ||
+                user?.user_metadata?.avatar_url ||
+                user?.user_metadata?.picture ? (
+                  <Avatar size="xl" className="border-2 border-[#333333]">
+                    <AvatarImage
+                      source={{
+                        uri:
+                          avatarUrl ||
+                          user?.user_metadata?.avatar_url ||
+                          user?.user_metadata?.picture,
+                      }}
+                    />
+                  </Avatar>
+                ) : (
+                  <Box className="w-16 h-16 bg-[#A2D8FF] border-2 border-[#333333] rounded-full items-center justify-center">
+                    <Icon
+                      as={User}
+                      size="xl"
+                      className="text-[#333333]"
+                    />
+                  </Box>
+                )}
+                <VStack space="md" className="flex-1">
+                  <Heading retro
                     size="lg"
-                    className="text-typography-900 dark:text-typography-950"
+                    className="text-[#333333] font-bold tracking-wide"
                   >
-                    {user?.user_metadata?.full_name || 
-                     user?.user_metadata?.name || 
-                     user?.email?.split('@')[0] || 
-                     "Climate Advocate"}
+                    {displayName}
                   </Heading>
-                  <Text className="text-typography-600 dark:text-typography-750">
-                    {user?.email || "No email"}
+                  <Text retro className="text-[#333333]">
+                    {displayEmail}
                   </Text>
-                  {user?.user_metadata?.location && (
-                    <Text
+                  {displayLocation && (
+                    <Text retro
                       size="sm"
-                      className="text-typography-500 dark:text-typography-300"
+                      className="text-[#333333] opacity-80"
                     >
-                      {user.user_metadata.location}
+                      {displayLocation}
                     </Text>
                   )}
                   <HStack space="xs" className="items-center mt-2">
-                    <Badge variant="solid" action="success">
-                      <Text size="xs">Level {currentLevel.level}</Text>
+                    <Badge className="bg-[#98FB98] border border-[#333333] shadow-[2px_2px_0_#333333]">
+                      <Text retro size="xs" className="text-[#333333] font-bold">Level {currentLevel.level}</Text>
                     </Badge>
-                    <Badge variant="outline">
-                      <Text size="xs">{userStats.totalPoints} points</Text>
+                    <Badge className="bg-[#FFD700] border border-[#333333] shadow-[2px_2px_0_#333333]">
+                      <Text retro size="xs" className="text-[#333333] font-bold">{userStats.totalPoints} points</Text>
                     </Badge>
                   </HStack>
-                  <Text
+                  <Text retro
                     size="sm"
-                    className="text-primary-600 dark:text-primary-400 font-medium"
+                    className="text-[#333333] font-bold tracking-wide"
                   >
                     {currentLevel.name}
                   </Text>
                 </VStack>
               </HStack>
-              <Button variant="outline">
-                <Text>{t("editProfile")}</Text>
-              </Button>
-              <Button
-                variant="solid"
-                action="negative"
-                onPress={signOut}
-                className="w-full"
-              >
-                <HStack space="xs" className="items-center">
-                  <Icon as={LogOut} size="sm" className="text-white" />
-                  <Text className="text-white">Sign Out</Text>
-                </HStack>
-              </Button>
+              <HStack space="md" className="justify-center">
+                <Button
+                  className="bg-[#A2D8FF] border-2 border-[#333333] shadow-[4px_4px_0_#333333] flex-1"
+                  onPress={() => router.push("/profile/edit")}
+                >
+                  <HStack space="sm" className="items-center">
+                    <Icon
+                      as={Edit}
+                      size="sm"
+                      className="text-[#333333]"
+                    />
+                    <Text className="text-[#333333] font-bold tracking-wide">Edit Profile</Text>
+                  </HStack>
+                </Button>
+                <Button
+                  className="bg-[#DDA0DD] border-2 border-[#333333] shadow-[4px_4px_0_#333333] flex-1"
+                  onPress={signOut}
+                >
+                  <HStack space="sm" className="items-center">
+                    <Icon as={LogOut} size="sm" className="text-[#333333]" />
+                    <Text className="text-[#333333] font-bold tracking-wide">Sign Out</Text>
+                  </HStack>
+                </Button>
+              </HStack>
             </VStack>
           </Card>
 
-          {/* Stats */}
-          <Card className="p-6 mb-6">
+          {/* Stats Card */}
+          <Card className="p-6 mb-6 bg-[#FCFCFC] border-2 border-[#333333] shadow-[4px_4px_0_#333333]">
             <VStack space="lg">
-              <Heading
-                size="md"
-                className="text-typography-900 dark:text-typography-950"
+              <Heading retro
+                size="lg"
+                className="text-[#333333] font-bold tracking-wide"
               >
-                {t("contributions")}
+                Contributions
               </Heading>
               <VStack space="md">
                 {stats.map((stat, index) => (
                   <HStack key={index} className="justify-between items-center">
-                    <Text className="text-typography-600 dark:text-typography-750">
+                    <Text retro className="text-[#333333]">
                       {stat.label}
                     </Text>
-                    <Text
-                      className={`font-bold ${
-                        stat.color
-                      } dark:${stat.color.replace("text-", "text-")}`}
-                    >
+                    <Text retro className="text-[#333333] font-bold">
                       {stat.value}
                     </Text>
                   </HStack>
@@ -315,14 +368,14 @@ const ProfilePage = () => {
             </VStack>
           </Card>
 
-          {/* Achievements */}
-          <Card className="p-6 mb-6">
+          {/* Achievements Card */}
+          <Card className="p-6 mb-6 bg-[#FCFCFC] border-2 border-[#333333] shadow-[4px_4px_0_#333333]">
             <VStack space="lg">
-              <Heading
-                size="md"
-                className="text-typography-900 dark:text-typography-950"
+              <Heading retro
+                size="lg"
+                className="text-[#333333] font-bold tracking-wide"
               >
-                {t("achievements")}
+                Achievements
               </Heading>
               <VStack space="md">
                 {achievements.map((achievement) => (
@@ -332,42 +385,42 @@ const ProfilePage = () => {
                     className="items-center"
                   >
                     <Box
-                      className={`p-2 rounded-full ${
+                      className={`p-2 rounded-lg border-2 border-[#333333] ${
                         achievement.earned
-                          ? "bg-green-100 dark:bg-green-900/30"
-                          : "bg-gray-100 dark:bg-gray-800"
+                          ? "bg-[#98FB98]"
+                          : "bg-[#E0E0E0]"
                       }`}
                     >
                       <Icon
                         as={achievement.icon}
                         size="md"
-                        className={
-                          achievement.earned
-                            ? "text-green-600 dark:text-green-400"
-                            : "text-gray-400"
-                        }
+                        className="text-[#333333]"
                       />
                     </Box>
                     <VStack space="xs" className="flex-1">
-                      <Text
-                        className={`font-semibold ${
+                      <Text retro
+                        className={`font-bold tracking-wide ${
                           achievement.earned
-                            ? "text-typography-900 dark:text-typography-950"
-                            : "text-typography-500 dark:text-typography-500"
+                            ? "text-[#333333]"
+                            : "text-[#333333]"
                         }`}
                       >
                         {achievement.title}
                       </Text>
-                      <Text
+                      <Text retro
                         size="sm"
-                        className="text-typography-600 dark:text-typography-750"
+                        className={`${
+                          achievement.earned
+                            ? "text-[#333333]"
+                            : "text-[#333333] opacity-75"
+                        }`}
                       >
                         {achievement.description}
                       </Text>
                     </VStack>
                     {achievement.earned && (
-                      <Badge variant="solid" action="success">
-                        <Text size="xs">Earned</Text>
+                      <Badge className="bg-[#FFD700] border border-[#333333] shadow-[2px_2px_0_#333333]">
+                        <Text retro size="xs" className="text-[#333333] font-bold">Earned</Text>
                       </Badge>
                     )}
                   </HStack>
@@ -376,31 +429,33 @@ const ProfilePage = () => {
             </VStack>
           </Card>
 
-          {/* Recent Activity */}
-          <Card className="p-6 mb-6">
+          {/* Recent Activity Card */}
+          <Card className="p-6 mb-6 bg-[#FCFCFC] border-2 border-[#333333] shadow-[4px_4px_0_#333333]">
             <VStack space="lg">
-              <Heading
-                size="md"
-                className="text-typography-900 dark:text-typography-950"
+              <Heading retro
+                size="lg"
+                className="text-[#333333] font-bold tracking-wide"
               >
                 Recent Activity
               </Heading>
               {loading ? (
-                <Text className="text-typography-600 dark:text-typography-400">
+                <Text retro className="text-[#333333] opacity-80">
                   Loading activity...
                 </Text>
               ) : recentActivity.length > 0 ? (
                 <VStack space="md">
                   {recentActivity.map((activity, index) => (
                     <HStack key={index} space="md" className="items-center">
-                      <Box className={`w-2 h-2 ${activity.color} rounded-full`} />
+                      <Box
+                        className="w-3 h-3 bg-[#98FB98] border border-[#333333] rounded-full"
+                      />
                       <VStack space="xs" className="flex-1">
-                        <Text className="text-typography-900 dark:text-typography-950">
+                        <Text retro className="text-[#333333] font-bold">
                           {activity.title}
                         </Text>
-                        <Text
+                        <Text retro
                           size="sm"
-                          className="text-typography-600 dark:text-typography-750"
+                          className="text-[#333333] opacity-80"
                         >
                           {activity.date}
                         </Text>
@@ -410,136 +465,18 @@ const ProfilePage = () => {
                 </VStack>
               ) : (
                 <VStack space="md" className="items-center">
-                  <Icon as={Calendar} size="lg" className="text-gray-400" />
-                  <Text className="text-center text-gray-500">
+                  <Box className="p-4 bg-[#E0E0E0] border-2 border-[#333333] rounded-lg shadow-[2px_2px_0_#333333]">
+                    <Icon as={Calendar} size="lg" className="text-[#333333]" />
+                  </Box>
+                  <Text retro className="text-center text-[#333333]">
                     Complete missions to see your activity here
                   </Text>
                 </VStack>
               )}
             </VStack>
           </Card>
-
-          {/* Settings */}
-          <Card className="p-6">
-            <VStack space="lg">
-              <Heading
-                size="md"
-                className="text-typography-900 dark:text-typography-950"
-              >
-                {t("settings")}
-              </Heading>
-              <VStack space="md">
-                <VStack space="md">
-                  <HStack space="md" className="items-center">
-                    <Icon
-                      as={Settings}
-                      size="md"
-                      className="text-typography-500"
-                    />
-                    <Text className="text-typography-900 dark:text-typography-950">
-                      Theme
-                    </Text>
-                  </HStack>
-                  <Button
-                    variant="outline"
-                    onPress={toggleColorScheme}
-                    className="w-full"
-                  >
-                    <HStack space="xs" className="items-center">
-                      <Icon
-                        as={colorScheme === "dark" ? Sun : Moon}
-                        size="sm"
-                        className="text-typography-600 dark:text-typography-400"
-                      />
-                      <Text
-                        size="sm"
-                        className="text-typography-600 dark:text-typography-750"
-                      >
-                        {colorScheme === "dark" ? "Light Mode" : "Dark Mode"}
-                      </Text>
-                    </HStack>
-                  </Button>
-                </VStack>
-
-                <Divider className="my-2" />
-
-                <HStack className="justify-between items-center">
-                  <HStack space="md" className="items-center">
-                    <Icon
-                      as={Globe}
-                      size="md"
-                      className="text-typography-500"
-                    />
-                    <Text className="text-typography-900 dark:text-typography-950">
-                      {t("language")}
-                    </Text>
-                  </HStack>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onPress={() => setShowLanguageModal(true)}
-                  >
-                    <Text>{getCurrentLanguageName()}</Text>
-                  </Button>
-                </HStack>
-              </VStack>
-            </VStack>
-          </Card>
         </Box>
       </ScrollView>
-
-      {/* Language Settings Modal */}
-      {showLanguageModal && (
-        <Box className="absolute inset-0 bg-black/50 flex justify-center items-center z-50">
-          <Pressable className="absolute inset-0" onPress={() => setShowLanguageModal(false)} />
-          <Card className="p-6 m-4 max-w-md w-full">
-            <VStack space="lg">
-              <HStack className="justify-between items-center">
-                <Heading
-                  size="md"
-                  className="text-typography-900 dark:text-typography-950"
-                >
-                  Select Language
-                </Heading>
-                <UIPressable onPress={() => setShowLanguageModal(false)}>
-                  <Icon as={X} size="md" className="text-typography-500" />
-                </UIPressable>
-              </HStack>
-
-              <VStack space="md">
-                {availableLanguages.map((language) => (
-                  <UIPressable
-                    key={language.code}
-                    onPress={() => handleLanguageChange(language.code)}
-                    className="p-4 rounded-lg border border-outline-200 dark:border-outline-700"
-                  >
-                    <HStack className="justify-between items-center">
-                      <VStack space="xs">
-                        <Text className="font-semibold text-typography-900 dark:text-typography-950">
-                          {language.nativeName}
-                        </Text>
-                        <Text
-                          size="sm"
-                          className="text-typography-600 dark:text-typography-300"
-                        >
-                          {language.name}
-                        </Text>
-                      </VStack>
-                      {currentLanguage === language.code && (
-                        <Icon
-                          as={Check}
-                          size="md"
-                          className="text-primary-600 dark:text-primary-400"
-                        />
-                      )}
-                    </HStack>
-                  </UIPressable>
-                ))}
-              </VStack>
-            </VStack>
-          </Card>
-        </Box>
-      )}
     </SafeAreaView>
   );
 };

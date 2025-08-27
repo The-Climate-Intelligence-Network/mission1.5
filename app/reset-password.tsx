@@ -1,6 +1,6 @@
 import { router } from "expo-router";
 import React, { useState } from "react";
-import { SafeAreaView } from "react-native";
+import { SafeAreaView, Image } from "react-native";
 import { Box } from "@/components/ui/box";
 import { Text } from "@/components/ui/text";
 import { Heading } from "@/components/ui/heading";
@@ -68,20 +68,23 @@ export default function ResetPassword() {
         <Box className="flex-1 justify-center p-6">
           <VStack space="xl" className="items-center">
             {/* Header */}
-            <VStack space="lg" className="items-center mb-8">
-              <Box className="p-4 bg-green-100 dark:bg-green-900/30 rounded-full">
-                <Icon as={KeyRound} size="xl" className="text-green-500" />
-              </Box>
-              <VStack space="xs" className="items-center">
+            <VStack space="md" className="items-center mb-4">
+              <Image
+                source={require("@/assets/icon.png")}
+                style={{ width: 64, height: 64 }}
+                resizeMode="contain"
+              />
+              <VStack space="md" className="items-center">
                 <Heading
                   size="2xl"
-                  className="text-typography-900 dark:text-typography-950 text-center"
+                  className="text-[#333333] text-center font-extrabold tracking-wider"
+                  retro
                 >
                   Reset Your Password
                 </Heading>
                 <Text
                   size="lg"
-                  className="text-typography-600 dark:text-typography-750 text-center"
+                  className="text-[#333333] text-center font-semibold tracking-wide"
                 >
                   Enter your new password below
                 </Text>
@@ -90,12 +93,12 @@ export default function ResetPassword() {
 
             {/* Reset Password Card */}
             <Card className="w-full max-w-sm p-8">
-              <VStack space="lg">
+              <VStack space="lg" className="items-center">
                 {/* New Password Input */}
                 <VStack space="xs" className="w-full">
                   <Text
                     size="sm"
-                    className="text-typography-600 dark:text-typography-750"
+                    className="text-[#333333] font-bold tracking-wide"
                   >
                     New Password
                   </Text>
@@ -115,7 +118,7 @@ export default function ResetPassword() {
                 <VStack space="xs" className="w-full">
                   <Text
                     size="sm"
-                    className="text-typography-600 dark:text-typography-750"
+                    className="text-[#333333] font-bold tracking-wide"
                   >
                     Confirm New Password
                   </Text>
@@ -141,8 +144,8 @@ export default function ResetPassword() {
                   onPress={handlePasswordReset}
                 >
                   <HStack space="md" className="items-center">
-                    <Icon as={CheckCircle} size="md" className="text-white" />
-                    <Text size="lg" className="text-white font-semibold">
+                    <Icon as={CheckCircle} size="md" className="text-[#333333]" />
+                    <Text size="lg" className="text-[#333333] font-semibold">
                       {loading ? "Updating Password..." : "Update Password"}
                     </Text>
                   </HStack>
@@ -150,8 +153,8 @@ export default function ResetPassword() {
 
                 <VStack space="xs" className="items-center">
                   <Text
-                    size="xs"
-                    className="text-typography-500 dark:text-typography-300 text-center"
+                    size="md"
+                    className="text-[#666666] text-center font-medium tracking-wide"
                   >
                     Make sure your password is at least 6 characters long and
                     secure
