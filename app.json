@@ -2,7 +2,7 @@
   "expo": {
     "name": "Mission 1.5",
     "slug": "mission-1-5",
-    "version": "1.0.3",
+    "version": "1.0.5",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "com.mission15",
@@ -82,7 +82,6 @@
       "eas": {
         "projectId": "bd6cf34d-8f39-449b-80de-5b9a56ce6ee0"
       }
-    },
-    "owner": "baristatextbook"
+    }
   }
 }
