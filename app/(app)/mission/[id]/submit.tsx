@@ -11,7 +11,7 @@ import { Icon } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
+import { Progress, ProgressFilledTrack } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { InputField } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,7 +20,6 @@ import {
   ArrowLeft,
   Video,
   FileText,
-  MapPin,
   CheckCircle,
   Upload,
   X,
@@ -43,7 +42,7 @@ import {
 } from "@/services/missions/submissions";
 import * as ImagePicker from "expo-image-picker";
 import * as DocumentPicker from "expo-document-picker";
-import * as Location from "expo-location";
+import * as FileSystem from "expo-file-system";
 import { Audio } from "expo-av";
 
 const MissionSubmissionPage = () => {
@@ -104,7 +103,6 @@ const MissionSubmissionPage = () => {
 
   const requestPermissions = async () => {
     const { status: libraryStatus } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    const { status: locationStatus } = await Location.requestForegroundPermissionsAsync();
 
     if (libraryStatus !== "granted") {
       Alert.alert("Permission Required", "Photo library access is required to submit evidence.");
@@ -232,17 +230,21 @@ const MissionSubmissionPage = () => {
     try {
       setSubmitting(true);
 
-      // Convert to blob for upload
-      const response = await fetch(uri);
-      const blob = await response.blob();
-
       const currentStep = guidanceSteps[currentStepIndex];
       if (!currentStep) return;
+
+      // Read file as base64
+      const base64Data = await FileSystem.readAsStringAsync(uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      // Convert base64 to binary for upload
+      const binaryData = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
 
       const fileName = `audio_${Date.now()}.m4a`;
 
       const { data, error } = await uploadEvidenceFile(
-        blob,
+        binaryData,
         fileName,
         missionId,
         currentStep.id
@@ -274,52 +276,30 @@ const MissionSubmissionPage = () => {
     }
   };
 
-  const handleGetLocation = async () => {
-    try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert("Permission Required", "Location access is required to submit location evidence.");
-        return;
-      }
-
-      const location = await Location.getCurrentPositionAsync({});
-      const locationData = JSON.stringify({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-        accuracy: location.coords.accuracy,
-        timestamp: location.timestamp,
-      });
-
-      setEvidenceItems(prev => [
-        ...prev,
-        {
-          type: "location",
-          data: locationData,
-          metadata: {
-            accuracy: location.coords.accuracy,
-            timestamp: location.timestamp,
-          },
-        },
-      ]);
-    } catch (error) {
-      Alert.alert("Error", "Failed to get location. Please try again.");
-    }
-  };
-
   const uploadFile = async (asset: ImagePicker.ImagePickerAsset, type: "photo" | "video") => {
     try {
       setSubmitting(true);
 
-      // Convert to blob for upload
-      const response = await fetch(asset.uri);
-      const blob = await response.blob();
-
       const currentStep = guidanceSteps[currentStepIndex];
       if (!currentStep) return;
 
+      // Read file as base64
+      const base64Data = await FileSystem.readAsStringAsync(asset.uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      // Convert base64 to binary for upload
+      const binaryData = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+
+      // Determine content type
+      const fileExt = asset.uri.split('.').pop()?.toLowerCase() || (type === "video" ? "mp4" : "jpg");
+      const contentType = type === "video" 
+        ? `video/${fileExt}` 
+        : `image/${fileExt}`;
+
       const { data, error } = await uploadEvidenceFile(
-        blob,
-        asset.fileName || `${type}_${Date.now()}`,
+        binaryData,
+        asset.fileName || `${type}_${Date.now()}.${fileExt}`,
         missionId,
         currentStep.id
       );
@@ -346,6 +326,7 @@ const MissionSubmissionPage = () => {
         ]);
       }
     } catch (error) {
+      console.error("Upload error:", error);
       Alert.alert("Error", "Failed to upload file. Please try again.");
     } finally {
       setSubmitting(false);
@@ -356,15 +337,19 @@ const MissionSubmissionPage = () => {
     try {
       setSubmitting(true);
 
-      // Convert to blob for upload
-      const response = await fetch(document.uri);
-      const blob = await response.blob();
-
       const currentStep = guidanceSteps[currentStepIndex];
       if (!currentStep) return;
 
+      // Read file as base64
+      const base64Data = await FileSystem.readAsStringAsync(document.uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      // Convert base64 to binary for upload
+      const binaryData = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+
       const { data, error } = await uploadEvidenceFile(
-        blob,
+        binaryData,
         document.name,
         missionId,
         currentStep.id
@@ -390,6 +375,7 @@ const MissionSubmissionPage = () => {
         ]);
       }
     } catch (error) {
+      console.error("Upload error:", error);
       Alert.alert("Error", "Failed to upload document. Please try again.");
     } finally {
       setSubmitting(false);
@@ -449,9 +435,11 @@ const MissionSubmissionPage = () => {
 
         // Show success message
         if (currentStepIndex + 1 >= guidanceSteps.length) {
+          const pointsAwarded = mission?.points_awarded || 0;
+          const energyAwarded = mission?.energy_awarded || 0;
           Alert.alert(
             "Mission Completed! 🎉",
-            "Congratulations! You've completed all steps. Your submission is being reviewed and points will be awarded once approved.",
+            `Congratulations! You've completed all steps and earned ${pointsAwarded} points and ${energyAwarded} energy!`,
             [
               {
                 text: "OK",
@@ -506,7 +494,6 @@ const MissionSubmissionPage = () => {
       if (item.type === "text") return "Text Evidence";
       if (isAudio) return "Audio Evidence";
       if (item.type === "video") return "Video Evidence";
-      if (item.type === "location") return "Location Evidence";
       if (isDocument) return "Document Evidence";
       return "Photo Evidence";
     };
@@ -521,7 +508,6 @@ const MissionSubmissionPage = () => {
       if (item.type === "text") return FileText;
       if (isAudio) return Mic;
       if (item.type === "video") return Video;
-      if (item.type === "location") return MapPin;
       if (isDocument) return FileText;
       return Upload;
     };
@@ -646,7 +632,12 @@ const MissionSubmissionPage = () => {
                 Step {Math.min(currentStepIndex + 1, guidanceSteps.length)} of {guidanceSteps.length}
               </Text>
             </HStack>
-            <Progress value={progress.progressPercentage} className="h-2 bg-[#E0E0E0] border-2 border-[#333333]" />
+            <Progress value={progress.progressPercentage} className="h-2 bg-[#E0E0E0] border-2 border-[#333333]">
+              <ProgressFilledTrack 
+                className="bg-[#A2D8FF]" 
+                style={{ width: `${progress.progressPercentage}%` }}
+              />
+            </Progress>
           </VStack>
         </Card>
 
@@ -723,20 +714,17 @@ const MissionSubmissionPage = () => {
                 <VStack space="md">
                   {currentStep.requiredEvidence.includes("photo") && (
                     <VStack space="xs">
-                      <Text retro size="sm" className="font-bold text-[#333333]">Photo Evidence</Text>
+                      <Text size="sm" className="font-medium">Photo Evidence</Text>
                       <Button
-                        variant="outline"
                         size="sm"
                         onPress={handleSelectPhoto}
                         disabled={submitting}
-                        className="w-full bg-[#FCFCFC] border-2 border-[#333333] shadow-[2px_2px_0_#333333]"
+                        className="bg-[#A2D8FF] border-2 border-[#333333] shadow-[4px_4px_0_#333333]"
                       >
-                        <VStack className="items-center justify-center">
-                          <HStack space="xs" className="items-center">
-                            <Icon as={Upload} size="sm" className="text-[#333333]" />
-                            <Text retro className="text-[#333333] font-bold">Select Photo from Gallery</Text>
-                          </HStack>
-                        </VStack>
+                        <HStack space="xs" className="items-center">
+                          <Icon as={Upload} size="sm" className="text-[#333333]" />
+                          <Text retro className="text-[#333333] font-bold">Select Photo from Gallery</Text>
+                        </HStack>
                       </Button>
                     </VStack>
                   )}
@@ -745,15 +733,14 @@ const MissionSubmissionPage = () => {
                     <VStack space="xs">
                       <Text size="sm" className="font-medium">Video Evidence</Text>
                       <Button
-                        variant="outline"
                         size="sm"
                         onPress={handleSelectVideo}
                         disabled={submitting}
-                        className="w-full"
+                        className="bg-[#DDA0DD] border-2 border-[#333333] shadow-[4px_4px_0_#333333]"
                       >
                         <HStack space="xs" className="items-center">
-                          <Icon as={Video} size="sm" />
-                          <Text>Select Video from Gallery</Text>
+                          <Icon as={Video} size="sm" className="text-[#333333]" />
+                          <Text retro className="text-[#333333] font-bold">Select Video from Gallery</Text>
                         </HStack>
                       </Button>
                     </VStack>
@@ -762,20 +749,19 @@ const MissionSubmissionPage = () => {
                   {/* Document Picker */}
                   {currentStep.requiredEvidence.includes("document") && (
                     <VStack space="xs">
-                      <Text retro size="sm" className="font-bold text-[#333333]">Document Evidence</Text>
+                      <Text size="sm" className="font-medium">Document Evidence</Text>
                       <Button
-                        variant="outline"
                         size="sm"
                         onPress={handleSelectDocument}
                         disabled={submitting}
-                        className="w-full bg-[#FCFCFC] border-2 border-[#333333] shadow-[2px_2px_0_#333333]"
+                        className="bg-[#FFE4B5] border-2 border-[#333333] shadow-[4px_4px_0_#333333]"
                       >
                         <VStack className="items-center justify-center">
                           <HStack space="xs" className="items-center">
                             <Icon as={FileText} size="sm" className="text-[#333333]" />
                             <Text retro className="text-[#333333] font-bold">Upload Document/File</Text>
                           </HStack>
-                          <Text retro size="xs" className="text-[#666666]">(PDF, DOC, XLS, etc.)</Text>
+                          <Text size="xs" className="text-[#333333] font-semibold">(PDF, DOC, XLS, etc.)</Text>
                         </VStack>
                       </Button>
                     </VStack>
@@ -784,17 +770,16 @@ const MissionSubmissionPage = () => {
                   {/* Audio Recording */}
                   {currentStep.requiredEvidence.includes("audio") && (
                     <VStack space="xs">
-                      <Text retro size="sm" className="font-bold text-[#333333]">Audio Evidence</Text>
+                      <Text size="sm" className="font-medium">Audio Evidence</Text>
                       <Button
-                        variant="outline"
                         size="sm"
                         onPress={isRecording ? stopAudioRecording : startAudioRecording}
                         disabled={submitting}
-                        className={`w-full bg-[#FCFCFC] border-2 border-[#333333] shadow-[2px_2px_0_#333333] ${isRecording ? 'bg-red-50' : ''}`}
+                        className={`border-2 border-[#333333] shadow-[4px_4px_0_#333333] ${isRecording ? "bg-[#FF6B6B]" : "bg-[#FFA07A]"}`}
                       >
                         <HStack space="xs" className="items-center">
-                          <Icon as={isRecording ? Square : Mic} size="sm" className={isRecording ? "text-red-500" : "text-[#333333]"} />
-                          <Text retro className={isRecording ? "text-red-500 font-bold" : "text-[#333333] font-bold"}>
+                          <Icon as={isRecording ? Square : Mic} size="sm" className="text-[#333333]" />
+                          <Text retro className="text-[#333333] font-bold">
                             {isRecording ? "Stop Recording" : "Start Recording"}
                           </Text>
                         </HStack>
@@ -832,23 +817,6 @@ const MissionSubmissionPage = () => {
                           <Icon as={FileText} size="sm" />
                         </Button>
                       </HStack>
-                    </VStack>
-                  )}
-
-                  {currentStep.requiredEvidence.includes("location") && (
-                    <VStack space="xs">
-                      <Text size="sm" className="font-medium">Location Evidence</Text>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onPress={handleGetLocation}
-                        disabled={submitting}
-                      >
-                        <HStack space="xs" className="items-center">
-                          <Icon as={MapPin} size="sm" />
-                          <Text>Get Current Location</Text>
-                        </HStack>
-                      </Button>
                     </VStack>
                   )}
                 </VStack>

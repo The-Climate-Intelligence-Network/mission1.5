@@ -2,7 +2,7 @@
   "expo": {
     "name": "Mission 1.5",
     "slug": "mission-1-5",
-    "version": "1.0.6",
+    "version": "1.0.10",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "com.mission15",
@@ -38,6 +38,17 @@
     "plugins": [
       "expo-router",
       "expo-apple-authentication",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 24,
+            "compileSdkVersion": 36,
+            "targetSdkVersion": 36,
+            "buildToolsVersion": "36.0.0"
+          }
+        }
+      ],
       [
         "expo-splash-screen",
         {

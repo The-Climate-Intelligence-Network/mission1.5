@@ -15,7 +15,6 @@ import { Progress } from "@/components/ui/progress";
 import { useLanguage } from "@/components/i18n/language-context";
 import {
   Globe,
-  Trophy,
   Play,
   CheckCircle,
   Bookmark,
@@ -38,6 +37,7 @@ import {
   getUserAvailablePoints,
   Reward,
 } from "@/services/rewards";
+import { getCurrentUserProfile } from "@/services/profile/profile.service";
 
 const HomePage = () => {
   const { t } = useLanguage();
@@ -45,6 +45,8 @@ const HomePage = () => {
   const [missions, setMissions] = useState<MissionWithStats[]>([]);
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [availablePoints, setAvailablePoints] = useState<number>(0);
+  const [userPoints, setUserPoints] = useState<number>(0);
+  const [userEnergy, setUserEnergy] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -53,7 +55,26 @@ const HomePage = () => {
   }, []);
 
   const loadData = async () => {
-    await Promise.all([loadMissions(), loadRewards(), loadUserPoints()]);
+    await Promise.all([
+      loadMissions(),
+      loadRewards(),
+      loadUserPoints(),
+      loadUserBalance(),
+    ]);
+  };
+
+  const loadUserBalance = async () => {
+    try {
+      const { data: profile, error } = await getCurrentUserProfile();
+      if (error) {
+        console.error("Error loading user balance:", error);
+      } else if (profile) {
+        setUserPoints(profile.points || 0);
+        setUserEnergy(profile.energy || 0);
+      }
+    } catch (error) {
+      console.error("Error loading user balance:", error);
+    }
   };
 
   const loadMissions = async () => {
@@ -129,25 +150,15 @@ const HomePage = () => {
     .filter((m) => !m.submission_status && !m.is_bookmarked)
     .slice(0, 3); // Show top 3 available missions
 
-  // User league and points data (calculated from real data)
+  // User stats (from real agent balance and mission data)
   const userStats = {
-    currentPoints: missions
-      .filter((m) => m.submission_status === "reviewed")
-      .reduce((sum, m) => sum + (m.points_awarded || 0), 0),
-    currentLeague: "silver",
-    nextLeagueThreshold: 1000,
-    leagueColor: "#C0C0C0", // Silver color
-    leagueIcon: Trophy,
-    totalEnergy: missions
-      .filter((m) => m.submission_status === "reviewed")
-      .reduce((sum, m) => sum + (m.energy_awarded || 0), 0),
+    currentPoints: userPoints, // Use actual balance from agents table
+    totalEnergy: userEnergy, // Use actual balance from agents table
     completedMissions: missions.filter(
       (m) => m.submission_status === "reviewed"
     ).length,
     activeMissions: ongoingMissions.length,
   };
-
-  const pointsToNext = userStats.nextLeagueThreshold - userStats.currentPoints;
 
   const getStatusInfo = (mission: MissionWithStats) => {
     if (mission.submission_status === "reviewed") {
@@ -219,59 +230,56 @@ const HomePage = () => {
               </Text>
             </VStack>
 
-            {/* League Status Card */}
+            {/* Total Points & Energy Card */}
             <Card className="p-4 bg-[#FCFCFC] border-2 border-[#333333] shadow-[4px_4px_0_#333333]">
-              <HStack space="md" className="items-center">
-                <Box className="p-3 rounded-lg bg-[#98FB98] border-2 border-[#333333] shadow-[2px_2px_0_#333333]">
-                  <Icon
-                    as={userStats.leagueIcon}
-                    size="md"
-                    className="text-[#333333]"
-                  />
-                </Box>
-                <VStack space="xs" className="flex-1">
-                  <HStack space="xs" className="items-center">
-                    <Text
+              <HStack space="lg" className="items-center justify-around">
+                {/* Points Section */}
+                <VStack space="xs" className="items-center flex-1">
+                  <Box className="p-3 rounded-lg bg-[#FFD700] border-2 border-[#333333] shadow-[2px_2px_0_#333333]">
+                    <Icon
+                      as={Star}
                       size="lg"
-                      className="font-bold text-[#333333] tracking-wide"
-                      retro
-                    >
-                      Silver League
-                    </Text>
-                    <Badge
-                      variant="solid"
-                      className="bg-[#98FB98] border-2 border-[#333333] shadow-[2px_2px_0_#333333]"
-                    >
-                      <Text
-                        size="xs"
-                        className="text-[#333333] font-bold tracking-wide"
-                      >
-                        {userStats.currentPoints} {t("points")}
-                      </Text>
-                    </Badge>
-                  </HStack>
+                      className="text-[#333333]"
+                    />
+                  </Box>
                   <Text
                     size="sm"
                     className="text-[#333333] font-semibold tracking-wide"
                   >
-                    {pointsToNext > 0
-                      ? `${pointsToNext} ${t("pointsToNext")}`
-                      : "Max level reached!"}
+                    Total Points
                   </Text>
-                  <Box className="w-full h-3 bg-[#333333] border-2 border-[#333333] rounded-lg mt-1">
-                    <Box
-                      className="h-full rounded-md border border-[#333333]"
-                      style={{
-                        width: `${Math.min(
-                          (userStats.currentPoints /
-                            userStats.nextLeagueThreshold) *
-                            100,
-                          100
-                        )}%`,
-                        backgroundColor: userStats.leagueColor,
-                      }}
+                  <Text
+                    className="font-extrabold text-[#333333] text-3xl tracking-wider"
+                    retro
+                  >
+                    {userStats.currentPoints}
+                  </Text>
+                </VStack>
+
+                {/* Divider */}
+                <Box className="w-0.5 h-20 bg-[#333333]" />
+
+                {/* Energy Section */}
+                <VStack space="xs" className="items-center flex-1">
+                  <Box className="p-3 rounded-lg bg-[#FFE4B5] border-2 border-[#333333] shadow-[2px_2px_0_#333333]">
+                    <Icon
+                      as={Zap}
+                      size="lg"
+                      className="text-[#333333]"
                     />
                   </Box>
+                  <Text
+                    size="sm"
+                    className="text-[#333333] font-semibold tracking-wide"
+                  >
+                    Total Energy
+                  </Text>
+                  <Text
+                    className="font-extrabold text-[#333333] text-3xl tracking-wider"
+                    retro
+                  >
+                    {userStats.totalEnergy}
+                  </Text>
                 </VStack>
               </HStack>
             </Card>
@@ -311,19 +319,19 @@ const HomePage = () => {
                 </Text>
               </VStack>
             </Card>
-            <Card className="flex-1 p-4 bg-[#FFE4B5] border-2 border-[#333333] shadow-[4px_4px_0_#333333]">
+            <Card className="flex-1 p-4 bg-[#DDA0DD] border-2 border-[#333333] shadow-[4px_4px_0_#333333]">
               <VStack space="xs" className="items-center">
                 <Text
                   className="font-bold text-[#333333] text-2xl tracking-wider"
                   retro
                 >
-                  {userStats.totalEnergy}
+                  {savedMissions.length}
                 </Text>
                 <Text
                   size="sm"
                   className="text-[#333333] font-bold tracking-wide"
                 >
-                  Energy
+                  Saved
                 </Text>
               </VStack>
             </Card>
@@ -595,48 +603,57 @@ const HomePage = () => {
                                 {mission.description}
                               </Text>
                             </VStack>
-                            <VStack space="xs">
-                              <HStack className="justify-between">
-                                <Text
-                                  size="sm"
-                                  className="text-[#333333] font-bold tracking-wide"
-                                >
-                                  Progress
-                                </Text>
-                                <Text
-                                  size="sm"
-                                  className="text-[#333333] font-bold tracking-wide"
-                                >
-                                  {mission.submission_progress || 0}%
-                                </Text>
-                              </HStack>
-                              <Box className="w-full h-3 bg-[#333333] border-2 border-[#333333] rounded-lg">
-                                <Box
-                                  className="h-full rounded-md bg-[#A2D8FF] border border-[#333333]"
-                                  style={{
-                                    width: `${
-                                      mission.submission_progress || 0
-                                    }%`,
-                                  }}
-                                />
-                              </Box>
+                            <HStack space="xs" className="items-center">
+                              <Icon
+                                as={Building}
+                                size="sm"
+                                className="text-[#333333]"
+                              />
+                              <Text
+                                size="sm"
+                                className="text-[#333333] font-semibold tracking-wide"
+                              >
+                                {mission.organization_name}
+                              </Text>
+                            </HStack>
+                            <VStack space="md">
+                              <Button
+                                size="sm"
+                                className="bg-[#A2D8FF] border-2 border-[#333333] shadow-[2px_2px_0_#333333]"
+                                onPress={() => handleContinueMission(mission.id)}
+                              >
+                                <HStack space="xs" className="items-center">
+                                  <Icon
+                                    as={Play}
+                                    size="sm"
+                                    className="text-[#333333]"
+                                  />
+                                  <Text className="text-[#333333] font-bold tracking-wide">
+                                    Continue
+                                  </Text>
+                                </HStack>
+                              </Button>
+                              <Button
+                                variant="solid"
+                                size="sm"
+                                className="border-2 border-[#333333] shadow-[2px_2px_0_#333333] bg-[#FCFCFC]"
+                                onPress={() => handleViewMission(mission.id)}
+                              >
+                                <HStack space="xs" className="items-center">
+                                  <Icon
+                                    as={Eye}
+                                    size="sm"
+                                    className="text-[#333333]"
+                                  />
+                                  <Text
+                                    size="sm"
+                                    className="text-[#333333] font-bold tracking-wide"
+                                  >
+                                    View
+                                  </Text>
+                                </HStack>
+                              </Button>
                             </VStack>
-                            <Button
-                              size="sm"
-                              className="mt-2 bg-[#A2D8FF] border-2 border-[#333333] shadow-[4px_4px_0_#333333]"
-                              onPress={() => handleContinueMission(mission.id)}
-                            >
-                              <HStack space="xs" className="items-center">
-                                <Icon
-                                  as={Play}
-                                  size="sm"
-                                  className="text-[#333333]"
-                                />
-                                <Text className="text-[#333333] font-bold tracking-wide">
-                                  Continue
-                                </Text>
-                              </HStack>
-                            </Button>
                           </VStack>
                         </VStack>
                       </Card>
@@ -769,11 +786,27 @@ const HomePage = () => {
                               {mission.organization_name}
                             </Text>
                           </HStack>
-                          <HStack space="md">
+                          <VStack space="md">
+                            <Button
+                              size="sm"
+                              className="bg-[#A2D8FF] border-2 border-[#333333] shadow-[2px_2px_0_#333333]"
+                              onPress={() => handleStartMission(mission.id)}
+                            >
+                              <HStack space="xs" className="items-center">
+                                <Icon
+                                  as={Target}
+                                  size="sm"
+                                  className="text-[#333333]"
+                                />
+                                <Text className="text-[#333333] font-bold tracking-wide">
+                                  Start
+                                </Text>
+                              </HStack>
+                            </Button>
                             <Button
                               variant="solid"
                               size="sm"
-                              className="flex-1 border-2 border-[#333333] shadow-[2px_2px_0_#333333] bg-[#FCFCFC]"
+                              className="border-2 border-[#333333] shadow-[2px_2px_0_#333333] bg-[#FCFCFC]"
                               onPress={() => handleViewMission(mission.id)}
                             >
                               <HStack space="xs" className="items-center">
@@ -790,23 +823,7 @@ const HomePage = () => {
                                 </Text>
                               </HStack>
                             </Button>
-                            <Button
-                              size="sm"
-                              className="flex-1 bg-[#A2D8FF] border-2 border-[#333333] shadow-[2px_2px_0_#333333]"
-                              onPress={() => handleStartMission(mission.id)}
-                            >
-                              <HStack space="xs" className="items-center">
-                                <Icon
-                                  as={Target}
-                                  size="sm"
-                                  className="text-[#333333]"
-                                />
-                                <Text className="text-[#333333] font-bold tracking-wide">
-                                  Start
-                                </Text>
-                              </HStack>
-                            </Button>
-                          </HStack>
+                          </VStack>
                         </VStack>
                       </VStack>
                     </Card>
@@ -918,50 +935,57 @@ const HomePage = () => {
                               {mission.description}
                             </Text>
                           </VStack>
-                          <HStack space="md" className="items-center">
-                            <HStack space="xs" className="items-center">
-                              <Icon
-                                as={Building}
-                                size="sm"
-                                className="text-[#333333]"
-                              />
-                              <Text
-                                size="sm"
-                                className="text-[#333333] font-semibold tracking-wide"
-                              >
-                                {mission.organization_name}
-                              </Text>
-                            </HStack>
-                            <HStack space="xs" className="items-center">
-                              <Icon
-                                as={Users}
-                                size="sm"
-                                className="text-[#333333]"
-                              />
-                              <Text
-                                size="sm"
-                                className="text-[#333333] font-semibold tracking-wide"
-                              >
-                                {mission.participants_count}
-                              </Text>
-                            </HStack>
+                          <HStack space="xs" className="items-center">
+                            <Icon
+                              as={Building}
+                              size="sm"
+                              className="text-[#333333]"
+                            />
+                            <Text
+                              size="sm"
+                              className="text-[#333333] font-semibold tracking-wide"
+                            >
+                              {mission.organization_name}
+                            </Text>
                           </HStack>
-                          <Button
-                            size="sm"
-                            className="mt-2 bg-[#98FB98] border-2 border-[#333333] shadow-[4px_4px_0_#333333]"
-                            onPress={() => handleStartMission(mission.id)}
-                          >
-                            <HStack space="xs" className="items-center">
-                              <Icon
-                                as={Target}
-                                size="sm"
-                                className="text-[#333333]"
-                              />
-                              <Text className="text-[#333333] font-bold tracking-wide">
-                                Start Quest
-                              </Text>
-                            </HStack>
-                          </Button>
+                          <VStack space="md">
+                            <Button
+                              size="sm"
+                              className="bg-[#98FB98] border-2 border-[#333333] shadow-[2px_2px_0_#333333]"
+                              onPress={() => handleStartMission(mission.id)}
+                            >
+                              <HStack space="xs" className="items-center">
+                                <Icon
+                                  as={Target}
+                                  size="sm"
+                                  className="text-[#333333]"
+                                />
+                                <Text className="text-[#333333] font-bold tracking-wide">
+                                  Start Quest
+                                </Text>
+                              </HStack>
+                            </Button>
+                            <Button
+                              variant="solid"
+                              size="sm"
+                              className="border-2 border-[#333333] shadow-[2px_2px_0_#333333] bg-[#FCFCFC]"
+                              onPress={() => handleViewMission(mission.id)}
+                            >
+                              <HStack space="xs" className="items-center">
+                                <Icon
+                                  as={Eye}
+                                  size="sm"
+                                  className="text-[#333333]"
+                                />
+                                <Text
+                                  size="sm"
+                                  className="text-[#333333] font-bold tracking-wide"
+                                >
+                                  View
+                                </Text>
+                              </HStack>
+                            </Button>
+                          </VStack>
                         </VStack>
                       </VStack>
                     </Card>
