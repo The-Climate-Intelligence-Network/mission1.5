@@ -1,8 +1,8 @@
 import { Tabs } from "expo-router";
 import React from "react";
-import { Home, Target, Calendar, Users, User } from "lucide-react-native";
+import { Home, Zap, MapPin, Users, User } from "lucide-react-native";
 import { Platform } from "react-native";
-import { useColorScheme } from "nativewind";
+import { useTheme } from "@/context/theme";
 
 function TabBarIcon({
   IconComponent,
@@ -11,18 +11,22 @@ function TabBarIcon({
   IconComponent: any;
   color: string;
 }) {
-  return <IconComponent size={20} color={color} />;
+  return <IconComponent size={20} color={color} strokeWidth={2.5} />;
 }
 
 export default function TabLayout() {
-  const { colorScheme } = useColorScheme();
+  const { colorScheme } = useTheme();
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: "#059669", // green-600
-        tabBarInactiveTintColor: colorScheme === "dark" ? "#9CA3AF" : "#6B7280", // gray-400 for dark, gray-500 for light
+        tabBarActiveTintColor: "#16A34A", // darker green for better contrast
+        tabBarInactiveTintColor: "#3c3b3b", // plain black for inactive
         headerShown: false,
+        tabBarLabelStyle: {
+          fontWeight: "bold",
+          fontSize: 11,
+        },
         tabBarStyle: {
           backgroundColor: colorScheme === "dark" ? "#181719" : "#FFFFFF", // match background-dark and white
           borderTopColor: colorScheme === "dark" ? "#2D2D2D" : "#E5E7EB", // darker border for dark mode
@@ -52,24 +56,22 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
-        name="missions"
+        name="quests"
         options={{
-          title: "Missions",
+          title: "Quests",
           tabBarIcon: ({ color }) => (
-            <TabBarIcon IconComponent={Target} color={color} />
+            <TabBarIcon IconComponent={Zap} color={color} />
           ),
-          tabBarBadge: "3",
         }}
       />
 
       <Tabs.Screen
-        name="events"
+        name="map"
         options={{
-          title: "Events",
+          title: "Map",
           tabBarIcon: ({ color }) => (
-            <TabBarIcon IconComponent={Calendar} color={color} />
+            <TabBarIcon IconComponent={MapPin} color={color} />
           ),
-          tabBarBadge: "4",
         }}
       />
 
@@ -80,7 +82,6 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <TabBarIcon IconComponent={Users} color={color} />
           ),
-          tabBarBadge: "2",
         }}
       />
 

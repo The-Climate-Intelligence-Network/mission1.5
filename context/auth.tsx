@@ -17,6 +17,7 @@ import * as WebBrowser from "expo-web-browser";
 import * as Linking from "expo-linking";
 import { Platform } from "react-native";
 import { BASE_URL } from "@/lib/constants";
+import { handleAuthError } from "@/lib/supabase";
 
 // Required for web only
 WebBrowser.maybeCompleteAuthSession();
@@ -58,6 +59,7 @@ const AuthContext = createContext<{
   ) => Promise<{ error?: any; session?: Session | null }>;
   signInWithGitHub: () => Promise<{ error?: any }>;
   signInWithGoogle: () => Promise<{ error?: any }>;
+  signInWithApple: () => Promise<{ error?: any }>;
   sendMagicLink: (email: string) => Promise<{ error?: any }>;
   resetPassword: (email: string) => Promise<{ error?: any }>;
   verifyOtp: (
@@ -76,6 +78,7 @@ const AuthContext = createContext<{
   signUp: async () => ({ error: null }),
   signInWithGitHub: async () => ({ error: null }),
   signInWithGoogle: async () => ({ error: null }),
+  signInWithApple: async () => ({ error: null }),
   sendMagicLink: async () => ({ error: null }),
   resetPassword: async () => ({ error: null }),
   verifyOtp: async () => ({ error: null }),
@@ -168,6 +171,13 @@ export function SessionProvider({ children }: PropsWithChildren) {
         setIsLoading(false);
       } catch (error) {
         console.error("Auth initialization error:", error);
+        
+        // Handle corrupted refresh token
+        const handled = await handleAuthError(error);
+        if (handled) {
+          setSession(null);
+        }
+        
         setIsLoading(false);
       }
     };
@@ -338,6 +348,14 @@ export function SessionProvider({ children }: PropsWithChildren) {
     }
   };
 
+  const signInWithApple = async () => {
+    try {
+      return await oauthService.signInWithApple();
+    } catch (error) {
+      return { error };
+    }
+  };
+
   const sendMagicLink = async (email: string) => {
     const { error } = await authService.sendMagicLink({ 
       email, 
@@ -381,6 +399,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
         signUp,
         signInWithGitHub,
         signInWithGoogle,
+        signInWithApple,
         sendMagicLink,
         resetPassword,
         verifyOtp,

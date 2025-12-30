@@ -1,6 +1,6 @@
 import { router } from "expo-router";
 import React, { useState } from "react";
-import { SafeAreaView } from "react-native";
+import { SafeAreaView, Image } from "react-native";
 import { Box } from "@/components/ui/box";
 import { Text } from "@/components/ui/text";
 import { Heading } from "@/components/ui/heading";
@@ -54,46 +54,42 @@ export default function ForgotPassword() {
             {/* Back Button */}
             <HStack className="items-center mb-6">
               <Button
-                variant="link"
+                variant="solid"
                 size="sm"
                 onPress={() => router.back()}
-                className="p-2 -ml-2"
+                className="border-2 border-[#333333] shadow-[2px_2px_0_#333333] bg-[#FCFCFC] px-4 py-2"
               >
-                <Icon
-                  as={ArrowLeft}
-                  size="md"
-                  className="text-typography-600"
-                />
+                <HStack space="sm" className="items-center">
+                  <Icon as={ArrowLeft} size="sm" className="text-[#333333]" />
+                  <Text className="text-[#333333] font-bold tracking-wide">
+                    Go Back
+                  </Text>
+                </HStack>
               </Button>
-              <Text
-                size="lg"
-                className="text-typography-900 dark:text-typography-950 font-semibold ml-2"
-              >
-                Go Back
-              </Text>
             </HStack>
 
             <Box className="flex-1 justify-center">
               <VStack space="xl" className="items-center">
                 {/* Success Header */}
                 <VStack space="lg" className="items-center mb-8">
-                  <Box className="p-4 bg-green-100 dark:bg-green-900/30 rounded-full">
+                  <Box className="p-4 bg-[#98FB98] rounded-full">
                     <Icon
                       as={CheckCircle}
                       size="xl"
-                      className="text-green-500"
+                      className="text-[#333333]"
                     />
                   </Box>
                   <VStack space="xs" className="items-center">
                     <Heading
                       size="2xl"
-                      className="text-typography-900 dark:text-typography-950 text-center"
+                      className="text-[#333333] text-center font-extrabold tracking-wider"
+                      retro
                     >
                       Check Your Email
                     </Heading>
                     <Text
                       size="lg"
-                      className="text-typography-600 dark:text-typography-750 text-center"
+                      className="text-[#333333] text-center font-semibold tracking-wide"
                     >
                       We've sent you a password reset link
                     </Text>
@@ -106,13 +102,13 @@ export default function ForgotPassword() {
                     <VStack space="md" className="items-center">
                       <Text
                         size="md"
-                        className="text-typography-600 dark:text-typography-750 text-center"
+                        className="text-[#333333] text-center font-semibold tracking-wide"
                       >
                         We've sent a password reset link to:
                       </Text>
                       <Text
                         size="lg"
-                        className="text-typography-900 dark:text-typography-950 font-semibold text-center"
+                        className="text-[#333333] font-bold text-center tracking-wide"
                       >
                         {email}
                       </Text>
@@ -120,8 +116,8 @@ export default function ForgotPassword() {
 
                     <VStack space="md" className="w-full">
                       <Text
-                        size="sm"
-                        className="text-typography-600 dark:text-typography-750 text-center"
+                        size="md"
+                        className="text-[#333333] text-center font-semibold tracking-wide"
                       >
                         Click the link in your email to reset your password. If
                         you don't see the email, check your spam folder.
@@ -137,7 +133,10 @@ export default function ForgotPassword() {
                         className="w-full"
                         onPress={() => router.push("/sign-in")}
                       >
-                        <Text size="lg" className="text-white font-semibold">
+                        <Text
+                          size="lg"
+                          className="text-[#333333] font-semibold"
+                        >
                           Back to Sign In
                         </Text>
                       </Button>
@@ -153,7 +152,7 @@ export default function ForgotPassword() {
                       >
                         <Text
                           size="md"
-                          className="text-primary-500 font-semibold"
+                          className="text-primary-500 font-bold tracking-wide"
                         >
                           Try Different Email
                         </Text>
@@ -179,38 +178,43 @@ export default function ForgotPassword() {
           {/* Back Button */}
           <HStack className="items-center mb-6">
             <Button
-              variant="link"
+              variant="solid"
               size="sm"
               onPress={() => router.back()}
-              className="p-2 -ml-2"
+              className="border-2 border-[#333333] shadow-[2px_2px_0_#333333] bg-[#FCFCFC] px-4 py-2"
             >
-              <Icon as={ArrowLeft} size="md" className="text-typography-600" />
+              <HStack space="xs" className="items-center">
+                <Icon as={ArrowLeft} size="sm" className="text-[#333333]" />
+                <Text
+                  size="md"
+                  className="text-[#333333] font-bold tracking-wide"
+                >
+                  Go Back
+                </Text>
+              </HStack>
             </Button>
-            <Text
-              size="lg"
-              className="text-typography-900 dark:text-typography-950 font-semibold ml-2"
-            >
-              Go Back
-            </Text>
           </HStack>
 
           <Box className="flex-1 justify-center">
             <VStack space="xl" className="items-center">
               {/* Header */}
-              <VStack space="lg" className="items-center mb-8">
-                <Box className="p-4 bg-orange-100 dark:bg-orange-900/30 rounded-full">
-                  <Icon as={KeyRound} size="xl" className="text-orange-500" />
-                </Box>
-                <VStack space="xs" className="items-center">
+              <VStack space="md" className="items-center mb-4">
+                <Image
+                  source={require("@/assets/icon.png")}
+                  style={{ width: 64, height: 64 }}
+                  resizeMode="contain"
+                />
+                <VStack space="md" className="items-center">
                   <Heading
                     size="2xl"
-                    className="text-typography-900 dark:text-typography-950 text-center"
+                    className="text-[#333333] text-center font-extrabold tracking-wider"
+                    retro
                   >
                     Forgot Password?
                   </Heading>
                   <Text
                     size="lg"
-                    className="text-typography-600 dark:text-typography-750 text-center"
+                    className="text-[#333333] text-center font-semibold tracking-wide"
                   >
                     No worries, we'll help you reset it
                   </Text>
@@ -218,17 +222,18 @@ export default function ForgotPassword() {
               </VStack>
               {/* Reset Password Card */}
               <Card className="w-full max-w-sm p-8">
-                <VStack space="lg">
+                <VStack space="lg" className="items-center">
                   <VStack space="md" className="items-center">
                     <Heading
                       size="lg"
-                      className="text-typography-900 dark:text-typography-950"
+                      className="text-[#333333] font-extrabold tracking-wider"
+                      retro
                     >
                       Reset Your Password
                     </Heading>
                     <Text
-                      size="sm"
-                      className="text-typography-600 dark:text-typography-750 text-center"
+                      size="md"
+                      className="text-[#333333] text-center font-semibold tracking-wide"
                     >
                       Enter your email address and we'll send you a link to
                       reset your password
@@ -239,7 +244,7 @@ export default function ForgotPassword() {
                   <VStack space="xs" className="w-full">
                     <Text
                       size="sm"
-                      className="text-typography-600 dark:text-typography-750"
+                      className="text-[#333333] font-bold tracking-wide"
                     >
                       Email Address
                     </Text>
@@ -264,9 +269,13 @@ export default function ForgotPassword() {
                     disabled={loading}
                     onPress={handleResetPassword}
                   >
-                    <HStack space="md" className="items-center">
-                      <Icon as={KeyRound} size="md" className="text-white" />
-                      <Text size="lg" className="text-white font-semibold">
+                    <HStack space="md" className="items-center justify-center">
+                      <Icon
+                        as={KeyRound}
+                        size="md"
+                        className="text-[#333333]"
+                      />
+                      <Text size="lg" className="text-[#333333] font-semibold">
                         {loading ? "Sending Reset Link..." : "Send Reset Link"}
                       </Text>
                     </HStack>
@@ -275,8 +284,8 @@ export default function ForgotPassword() {
                   {/* Sign In Link */}
                   <VStack space="xs" className="items-center">
                     <Text
-                      size="sm"
-                      className="text-typography-600 dark:text-typography-750"
+                      size="md"
+                      className="text-[#333333] font-semibold tracking-wide"
                     >
                       Remember your password?
                     </Text>
@@ -286,8 +295,8 @@ export default function ForgotPassword() {
                       onPress={() => router.push("/sign-in")}
                     >
                       <Text
-                        size="sm"
-                        className="text-primary-500 font-semibold"
+                        size="md"
+                        className="text-primary-500 font-bold tracking-wide"
                       >
                         Back to Sign In
                       </Text>
@@ -299,14 +308,14 @@ export default function ForgotPassword() {
               <VStack space="md" className="w-full max-w-sm">
                 <VStack space="xs">
                   <Text
-                    size="sm"
-                    className="text-typography-600 dark:text-typography-750 text-center font-semibold"
+                    size="md"
+                    className="text-[#333333] text-center font-bold tracking-wide"
                   >
                     Need help?
                   </Text>
                   <Text
-                    size="sm"
-                    className="text-typography-600 dark:text-typography-750 text-center"
+                    size="md"
+                    className="text-[#333333] text-center font-semibold tracking-wide"
                   >
                     Contact our support team if you continue to experience
                     issues with your account.

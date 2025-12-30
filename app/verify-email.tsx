@@ -5,6 +5,7 @@ import {
   TextInput,
   Keyboard,
   InteractionManager,
+  Image,
 } from "react-native";
 import { Box } from "@/components/ui/box";
 import { Text } from "@/components/ui/text";
@@ -171,44 +172,46 @@ export default function VerifyEmail() {
           {/* Back Button */}
           <HStack className="items-center mb-6">
             <Button
-              variant="link"
+              variant="solid"
               size="sm"
               onPress={() => router.back()}
-              className="p-2 -ml-2"
+              className="border-2 border-[#333333] shadow-[2px_2px_0_#333333] bg-[#FCFCFC] px-4 py-2"
             >
-              <Icon as={ArrowLeft} size="md" className="text-typography-600" />
+              <HStack space="sm" className="items-center">
+                <Icon as={ArrowLeft} size="sm" className="text-[#333333]" />
+                <Text className="text-[#333333] font-bold tracking-wide">
+                  Go Back
+                </Text>
+              </HStack>
             </Button>
-            <Text
-              size="lg"
-              className="text-typography-900 dark:text-typography-950 font-semibold ml-2"
-            >
-              Go Back
-            </Text>
           </HStack>
 
           <Box className="flex-1 justify-center">
             <VStack space="xl" className="items-center">
               {/* Header */}
-              <VStack space="lg" className="items-center mb-8">
-                <Box className="p-4 bg-primary-100 dark:bg-primary-900/30 rounded-full">
-                  <Icon as={Mail} size="xl" className="text-primary-500" />
-                </Box>
-                <VStack space="xs" className="items-center">
+              <VStack space="md" className="items-center mb-4">
+                <Image
+                  source={require("@/assets/icon.png")}
+                  style={{ width: 64, height: 64 }}
+                  resizeMode="contain"
+                />
+                <VStack space="md" className="items-center">
                   <Heading
                     size="2xl"
-                    className="text-typography-900 dark:text-typography-950 text-center"
+                    className="text-[#333333] text-center font-extrabold tracking-wider"
+                    retro
                   >
                     Verify Your Email
                   </Heading>
                   <Text
                     size="lg"
-                    className="text-typography-600 dark:text-typography-750 text-center"
+                    className="text-[#333333] text-center font-semibold tracking-wide"
                   >
                     We've sent a 6-digit code to
                   </Text>
                   <Text
                     size="lg"
-                    className="text-primary-500 font-semibold text-center"
+                    className="text-primary-500 font-bold text-center tracking-wide"
                   >
                     {email}
                   </Text>
@@ -217,17 +220,18 @@ export default function VerifyEmail() {
 
               {/* Verification Card */}
               <Card className="w-full max-w-sm p-8">
-                <VStack space="lg">
+                <VStack space="lg" className="items-center">
                   <VStack space="md" className="items-center">
                     <Heading
-                      size="lg"
-                      className="text-typography-900 dark:text-typography-950"
+                      size="md"
+                      className="text-[#333333] font-extrabold tracking-wider text-center"
+                      retro
                     >
                       Enter Verification Code
                     </Heading>
                     <Text
-                      size="sm"
-                      className="text-typography-600 dark:text-typography-750 text-center"
+                      size="md"
+                      className="text-[#333333] text-center font-semibold tracking-wide"
                     >
                       Enter the 6-digit code sent to your email, or click the
                       verification link in your email to activate your account
@@ -240,7 +244,7 @@ export default function VerifyEmail() {
                     {code.map((digit, index) => (
                       <Box
                         key={index}
-                        className="w-12 h-12 border border-outline-300 dark:border-outline-600 rounded-lg bg-background-50 dark:bg-background-900"
+                        className="w-12 h-12 border-2 border-[#333333] shadow-[2px_2px_0_#333333] rounded-lg bg-[#FCFCFC]"
                       >
                         <TextInput
                           ref={(ref) => {
@@ -264,7 +268,7 @@ export default function VerifyEmail() {
                             flex: 1,
                             fontSize: 18,
                             fontWeight: "600",
-                            color: "#000", // You might want to adjust this for dark mode
+                            color: "#333333", // Retro color for the digit text
                           }}
                           className="text-typography-900 dark:text-typography-50"
                         />
@@ -286,7 +290,7 @@ export default function VerifyEmail() {
                     }
                     onPress={handleVerify}
                   >
-                    <Text size="lg" className="text-white font-semibold">
+                    <Text size="lg" className="text-[#333333] font-semibold">
                       {loading ? "Verifying..." : "Verify Email"}
                     </Text>
                   </Button>
@@ -294,8 +298,8 @@ export default function VerifyEmail() {
                   {/* Resend Code */}
                   <VStack space="xs" className="items-center">
                     <Text
-                      size="sm"
-                      className="text-typography-600 dark:text-typography-750"
+                      size="md"
+                      className="text-[#333333] font-semibold tracking-wide"
                     >
                       Didn't receive the code?
                     </Text>
@@ -306,8 +310,8 @@ export default function VerifyEmail() {
                       onPress={handleResendCode}
                     >
                       <Text
-                        size="sm"
-                        className="text-primary-500 font-semibold"
+                        size="md"
+                        className="text-primary-500 font-bold tracking-wide"
                       >
                         {resendLoading ? "Sending..." : "Resend Code"}
                       </Text>
@@ -317,8 +321,8 @@ export default function VerifyEmail() {
                   {/* Alternative option */}
                   <VStack space="xs" className="items-center">
                     <Text
-                      size="sm"
-                      className="text-typography-600 dark:text-typography-750"
+                      size="md"
+                      className="text-[#333333] font-semibold tracking-wide"
                     >
                       Already clicked the email link?
                     </Text>
@@ -328,8 +332,8 @@ export default function VerifyEmail() {
                       onPress={() => router.push("/sign-in")}
                     >
                       <Text
-                        size="sm"
-                        className="text-primary-500 font-semibold"
+                        size="md"
+                        className="text-primary-500 font-bold tracking-wide"
                       >
                         Go to Sign In
                       </Text>
@@ -341,8 +345,8 @@ export default function VerifyEmail() {
               {/* Help Text */}
               <VStack space="xs" className="w-full max-w-sm">
                 <Text
-                  size="xs"
-                  className="text-typography-500 dark:text-typography-300 text-center"
+                  size="md"
+                  className="text-[#666666] text-center font-medium tracking-wide"
                 >
                   Check your spam folder if you don't see the email
                 </Text>

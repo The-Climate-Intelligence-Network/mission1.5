@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ScrollView, Image } from "react-native";
+import { ScrollView, RefreshControl, Image } from "react-native";
+import { useRouter } from "expo-router";
 import { Box } from "@/components/ui/box";
 import { Text } from "@/components/ui/text";
 import { Heading } from "@/components/ui/heading";
@@ -10,473 +11,1067 @@ import { Icon } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { useLanguage } from "@/components/i18n/language-context";
-import { Globe, Thermometer, Users, Trophy, Leaf } from "lucide-react-native";
+import {
+  Globe,
+  Play,
+  CheckCircle,
+  Bookmark,
+  Target,
+  Zap,
+  Award,
+  Users,
+  Building,
+  Eye,
+  Gift,
+  Star,
+} from "lucide-react-native";
+import {
+  getPublishedMissions,
+  getMissionThumbnailUrl,
+  MissionWithStats,
+} from "@/services/missions";
+import {
+  getActiveRewards,
+  getUserAvailablePoints,
+  Reward,
+} from "@/services/rewards";
+import { getCurrentUserProfile } from "@/services/profile/profile.service";
 
 const HomePage = () => {
   const { t } = useLanguage();
+  const router = useRouter();
+  const [missions, setMissions] = useState<MissionWithStats[]>([]);
+  const [rewards, setRewards] = useState<Reward[]>([]);
+  const [availablePoints, setAvailablePoints] = useState<number>(0);
+  const [userPoints, setUserPoints] = useState<number>(0);
+  const [userEnergy, setUserEnergy] = useState<number>(0);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  // User league and points data (this would come from a store/context in a real app)
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    await Promise.all([
+      loadMissions(),
+      loadRewards(),
+      loadUserPoints(),
+      loadUserBalance(),
+    ]);
+  };
+
+  const loadUserBalance = async () => {
+    try {
+      const { data: profile, error } = await getCurrentUserProfile();
+      if (error) {
+        console.error("Error loading user balance:", error);
+      } else if (profile) {
+        setUserPoints(profile.points || 0);
+        setUserEnergy(profile.energy || 0);
+      }
+    } catch (error) {
+      console.error("Error loading user balance:", error);
+    }
+  };
+
+  const loadMissions = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await getPublishedMissions();
+
+      if (error) {
+        console.error("Error loading missions:", error);
+      } else if (data) {
+        // Load thumbnail URLs for missions that have them
+        const missionsWithThumbnails = await Promise.all(
+          data.map(async (mission) => {
+            if (mission.thumbnail_path) {
+              const thumbnailUrl = await getMissionThumbnailUrl(
+                mission.thumbnail_path
+              );
+              return { ...mission, thumbnailUrl };
+            }
+            return mission;
+          })
+        );
+        setMissions(missionsWithThumbnails);
+      }
+    } catch (error) {
+      console.error("Error loading missions:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadRewards = async () => {
+    try {
+      const { data, error } = await getActiveRewards();
+      if (error) {
+        console.error("Error loading rewards:", error);
+      } else if (data) {
+        setRewards(data.slice(0, 5)); // Show top 5 rewards
+      }
+    } catch (error) {
+      console.error("Error loading rewards:", error);
+    }
+  };
+
+  const loadUserPoints = async () => {
+    try {
+      const { data, error } = await getUserAvailablePoints();
+      if (error) {
+        console.error("Error loading user points:", error);
+      } else if (data !== null) {
+        setAvailablePoints(data);
+      }
+    } catch (error) {
+      console.error("Error loading user points:", error);
+    }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadData();
+    setRefreshing(false);
+  };
+
+  // Filter missions for different sections
+  const ongoingMissions = missions.filter(
+    (m) =>
+      m.submission_status === "in_progress" || m.submission_status === "started"
+  );
+
+  const savedMissions = missions.filter((m) => m.is_bookmarked);
+
+  const availableMissions = missions
+    .filter((m) => !m.submission_status && !m.is_bookmarked)
+    .slice(0, 3); // Show top 3 available missions
+
+  // User stats (from real agent balance and mission data)
   const userStats = {
-    currentPoints: 850,
-    currentLeague: "silver",
-    nextLeagueThreshold: 1000,
-    leagueColor: "#C0C0C0", // Silver color
-    leagueIcon: Trophy,
+    currentPoints: userPoints, // Use actual balance from agents table
+    totalEnergy: userEnergy, // Use actual balance from agents table
+    completedMissions: missions.filter(
+      (m) => m.submission_status === "reviewed"
+    ).length,
+    activeMissions: ongoingMissions.length,
   };
 
-  const pointsToNext = userStats.nextLeagueThreshold - userStats.currentPoints;
-
-  // Featured missions data
-  const featuredMissions = [
-    {
-      id: 1,
-      title: "Urban Heat Island Mapping",
-      description:
-        "Help map temperature variations in your city to identify heat hotspots",
-      image:
-        "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=300&h=200&fit=crop",
-      points: 150,
-      type: "task",
-      difficulty: "intermediate",
-      icon: Thermometer,
-    },
-    {
-      id: 2,
-      title: "Community Climate Workshop",
-      description: "Join our virtual workshop on climate adaptation strategies",
-      image:
-        "https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=300&h=200&fit=crop",
-      points: 100,
-      type: "event",
-      difficulty: "beginner",
-      icon: Users,
-    },
-    {
-      id: 3,
-      title: "Biodiversity Survey",
-      description:
-        "Document local flora and fauna to track climate impact on ecosystems",
-      image:
-        "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=300&h=200&fit=crop",
-      points: 200,
-      type: "task",
-      difficulty: "advanced",
-      icon: Leaf,
-    },
-  ];
-
-  // Campaigns data
-  const campaigns = [
-    {
-      id: 1,
-      title: "Save the Amazon",
-      description:
-        "Join the fight against deforestation in the Amazon rainforest",
-      image:
-        "https://images.unsplash.com/photo-1564760055775-d63b17a55c44?w=400&h=250&fit=crop",
-      points: 300,
-      participants: 1250,
-      difficulty: "intermediate",
-    },
-    {
-      id: 2,
-      title: "Ocean Cleanup Initiative",
-      description: "Help monitor and clean up ocean plastic pollution",
-      image:
-        "https://images.unsplash.com/photo-1583212292454-1fe6229603b7?w=400&h=250&fit=crop",
-      points: 250,
-      participants: 890,
-      difficulty: "beginner",
-    },
-  ];
-
-  // Rewards data
-  const rewards = [
-    {
-      id: 1,
-      title: "EcoShop Discount",
-      description: "Sustainable products for your home",
-      logo: "🌱",
-      discount: "20%",
-      points: 500,
-    },
-    {
-      id: 2,
-      title: "Green Energy Credit",
-      description: "Renewable energy for your home",
-      logo: "⚡",
-      discount: "15%",
-      points: 750,
-    },
-    {
-      id: 3,
-      title: "Carbon Offset",
-      description: "Offset your carbon footprint",
-      logo: "🌍",
-      discount: "25%",
-      points: 400,
-    },
-  ];
-
-  const getLeagueInfo = (league: string) => {
-    const leagues: Record<string, { name: string; color: string; icon: any }> =
-      {
-        bronze: { name: t("bronzeLeague"), color: "#CD7F32", icon: Trophy },
-        silver: { name: t("silverLeague"), color: "#C0C0C0", icon: Trophy },
-        gold: { name: t("goldLeague"), color: "#FFD700", icon: Trophy },
-        platinum: { name: t("platinumLeague"), color: "#E5E4E2", icon: Trophy },
-        diamond: { name: t("diamondLeague"), color: "#B9F2FF", icon: Trophy },
+  const getStatusInfo = (mission: MissionWithStats) => {
+    if (mission.submission_status === "reviewed") {
+      return { text: "Completed", color: "text-green-600", icon: CheckCircle };
+    } else if (
+      mission.submission_status === "in_progress" ||
+      mission.submission_status === "started"
+    ) {
+      return {
+        text: `${mission.submission_progress || 0}% Complete`,
+        color: "text-blue-600",
+        icon: Play,
       };
-    return leagues[league] || leagues.bronze;
+    } else if (mission.is_bookmarked) {
+      return {
+        text: "Saved",
+        color: "text-purple-600",
+        icon: Bookmark,
+      };
+    } else {
+      return { text: "Available", color: "text-green-600", icon: Target };
+    }
   };
 
-  const getDifficultyColor = (difficulty: string) => {
-    const colors: Record<string, string> = {
-      beginner:
-        "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300",
-      intermediate:
-        "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300",
-      advanced:
-        "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300",
-      expert: "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300",
-    };
-    return colors[difficulty] || colors.beginner;
+  const handleViewMission = (missionId: string) => {
+    router.push(`/mission/${missionId}/`);
   };
 
-  const leagueInfo = getLeagueInfo(userStats.currentLeague);
+  const handleStartMission = (missionId: string) => {
+    router.push(`/mission/${missionId}/submit`);
+  };
+
+  const handleContinueMission = (missionId: string) => {
+    router.push(`/mission/${missionId}/submit`);
+  };
 
   return (
     <SafeAreaView
       style={{ flex: 1 }}
       className="bg-white dark:bg-background-dark"
     >
-      <ScrollView className="flex-1">
+      <ScrollView
+        className="flex-1"
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         <Box className="p-6">
           {/* Header with League Status */}
           <VStack space="lg" className="mb-8">
-            <HStack space="lg" className="items-center">
-              <Icon as={Globe} size="xl" className="text-primary-500" />
-              <VStack space="xs" className="flex-1">
-                <Heading
-                  size="xl"
-                  className="text-typography-900 dark:text-typography-950"
-                >
-                  {t("climateIntel")}
-                </Heading>
-                <Text
-                  size="sm"
-                  className="text-typography-600 dark:text-typography-750"
-                >
-                  {t("empoweringClimateAction")}
-                </Text>
-              </VStack>
-            </HStack>
+            <VStack space="md" className="items-center">
+              <Image
+                source={require("@/assets/icon.png")}
+                style={{ width: 64, height: 64 }}
+                resizeMode="contain"
+              />
+              <Heading
+                size="xl"
+                className="text-[#333333] font-extrabold tracking-wider"
+                retro
+              >
+                Mission 1.5
+              </Heading>
+              <Text
+                size="lg"
+                className="text-[#333333] text-center font-semibold tracking-wide"
+              >
+                Empowering climate action
+              </Text>
+            </VStack>
 
-            {/* League Status Card */}
-            <Card className="p-4 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 border border-gray-200 dark:border-gray-800">
-              <HStack space="md" className="items-center">
-                <Box
-                  className="p-3 rounded-full"
-                  style={{ backgroundColor: `${leagueInfo.color}20` }}
-                >
-                  <Icon
-                    as={leagueInfo.icon}
-                    size="md"
-                    style={{ color: leagueInfo.color }}
-                  />
-                </Box>
-                <VStack space="xs" className="flex-1">
-                  <HStack space="xs" className="items-center">
-                    <Text
+            {/* Total Points & Energy Card */}
+            <Card className="p-4 bg-[#FCFCFC] border-2 border-[#333333] shadow-[4px_4px_0_#333333]">
+              <HStack space="lg" className="items-center justify-around">
+                {/* Points Section */}
+                <VStack space="xs" className="items-center flex-1">
+                  <Box className="p-3 rounded-lg bg-[#FFD700] border-2 border-[#333333] shadow-[2px_2px_0_#333333]">
+                    <Icon
+                      as={Star}
                       size="lg"
-                      className="font-bold text-typography-900 dark:text-typography-950"
-                    >
-                      {leagueInfo.name}
-                    </Text>
-                    <Badge variant="solid" className="bg-primary-500">
-                      <Text size="xs" className="text-white">
-                        {userStats.currentPoints} {t("points")}
-                      </Text>
-                    </Badge>
-                  </HStack>
-                  <Text
-                    size="sm"
-                    className="text-typography-600 dark:text-typography-750"
-                  >
-                    {pointsToNext} {t("pointsToNext")}
-                  </Text>
-                  <Box className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full mt-1">
-                    <Box
-                      className="h-full rounded-full"
-                      style={{
-                        width: `${
-                          (userStats.currentPoints /
-                            userStats.nextLeagueThreshold) *
-                          100
-                        }%`,
-                        backgroundColor: leagueInfo.color,
-                      }}
+                      className="text-[#333333]"
                     />
                   </Box>
+                  <Text
+                    size="sm"
+                    className="text-[#333333] font-semibold tracking-wide"
+                  >
+                    Total Points
+                  </Text>
+                  <Text
+                    className="font-extrabold text-[#333333] text-3xl tracking-wider"
+                    retro
+                  >
+                    {userStats.currentPoints}
+                  </Text>
+                </VStack>
+
+                {/* Divider */}
+                <Box className="w-0.5 h-20 bg-[#333333]" />
+
+                {/* Energy Section */}
+                <VStack space="xs" className="items-center flex-1">
+                  <Box className="p-3 rounded-lg bg-[#FFE4B5] border-2 border-[#333333] shadow-[2px_2px_0_#333333]">
+                    <Icon
+                      as={Zap}
+                      size="lg"
+                      className="text-[#333333]"
+                    />
+                  </Box>
+                  <Text
+                    size="sm"
+                    className="text-[#333333] font-semibold tracking-wide"
+                  >
+                    Total Energy
+                  </Text>
+                  <Text
+                    className="font-extrabold text-[#333333] text-3xl tracking-wider"
+                    retro
+                  >
+                    {userStats.totalEnergy}
+                  </Text>
                 </VStack>
               </HStack>
             </Card>
           </VStack>
 
-          {/* Featured Missions */}
-          <VStack space="lg" className="mb-8">
-            <HStack className="justify-between items-center">
-              <Heading
-                size="lg"
-                className="text-typography-900 dark:text-typography-950"
-              >
-                {t("featuredMissions")}
-              </Heading>
-              <Button variant="link" size="sm">
-                <Text size="sm" className="text-primary-500">
-                  {t("viewAllMissions")}
+          {/* Quick Stats */}
+          <HStack space="md" className="mb-8">
+            <Card className="flex-1 p-4 bg-[#98FB98] border-2 border-[#333333] shadow-[4px_4px_0_#333333]">
+              <VStack space="xs" className="items-center">
+                <Text
+                  className="font-bold text-[#333333] text-2xl tracking-wider"
+                  retro
+                >
+                  {userStats.completedMissions}
                 </Text>
-              </Button>
-            </HStack>
+                <Text
+                  size="sm"
+                  className="text-[#333333] font-bold tracking-wide"
+                >
+                  Completed
+                </Text>
+              </VStack>
+            </Card>
+            <Card className="flex-1 p-4 bg-[#A2D8FF] border-2 border-[#333333] shadow-[4px_4px_0_#333333]">
+              <VStack space="xs" className="items-center">
+                <Text
+                  className="font-bold text-[#333333] text-2xl tracking-wider"
+                  retro
+                >
+                  {userStats.activeMissions}
+                </Text>
+                <Text
+                  size="sm"
+                  className="text-[#333333] font-bold tracking-wide"
+                >
+                  Active
+                </Text>
+              </VStack>
+            </Card>
+            <Card className="flex-1 p-4 bg-[#DDA0DD] border-2 border-[#333333] shadow-[4px_4px_0_#333333]">
+              <VStack space="xs" className="items-center">
+                <Text
+                  className="font-bold text-[#333333] text-2xl tracking-wider"
+                  retro
+                >
+                  {savedMissions.length}
+                </Text>
+                <Text
+                  size="sm"
+                  className="text-[#333333] font-bold tracking-wide"
+                >
+                  Saved
+                </Text>
+              </VStack>
+            </Card>
+          </HStack>
 
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              <HStack space="lg">
-                {featuredMissions.map((mission) => (
-                  <Card
-                    key={mission.id}
-                    className="w-72 overflow-hidden border border-gray-200 dark:border-gray-800"
-                  >
-                    <Box className="relative">
-                      <Image
-                        source={{ uri: mission.image }}
-                        className="w-full h-32"
-                        style={{ resizeMode: "cover" }}
-                      />
-                      <Badge
-                        variant="solid"
-                        className="absolute top-2 right-2 bg-primary-500"
-                      >
-                        <Text size="xs" className="text-white">
-                          {mission.points} pts
-                        </Text>
-                      </Badge>
-                    </Box>
-                    <VStack space="md" className="p-4">
-                      <HStack space="xs" className="items-center">
-                        <Badge
-                          variant="outline"
-                          className={
-                            mission.type === "event"
-                              ? "border-blue-500"
-                              : "border-green-500"
-                          }
-                        >
-                          <Text
-                            size="xs"
-                            className={
-                              mission.type === "event"
-                                ? "text-blue-600 dark:text-blue-400"
-                                : "text-green-600 dark:text-green-400"
-                            }
-                          >
-                            {t(mission.type)}
-                          </Text>
-                        </Badge>
-                        <Badge
-                          variant="outline"
-                          className={getDifficultyColor(mission.difficulty)}
-                        >
-                          <Text size="xs">{t(mission.difficulty)}</Text>
-                        </Badge>
-                      </HStack>
-                      <VStack space="xs">
-                        <Text
-                          className="font-semibold text-typography-900 dark:text-typography-950"
-                          numberOfLines={2}
-                        >
-                          {mission.title}
-                        </Text>
-                        <Text
-                          size="sm"
-                          className="text-typography-600 dark:text-typography-750"
-                          numberOfLines={3}
-                        >
-                          {mission.description}
-                        </Text>
-                      </VStack>
-                      <Button size="sm" className="mt-2">
-                        <Text className="text-white">{t("joinMission")}</Text>
-                      </Button>
-                    </VStack>
-                  </Card>
-                ))}
-              </HStack>
-            </ScrollView>
-          </VStack>
-
-          {/* Campaigns */}
-          <VStack space="lg" className="mb-8">
-            <VStack space="xs">
+          {/* Available Rewards */}
+          {rewards.length > 0 && (
+            <VStack space="lg" className="mb-8">
               <HStack className="justify-between items-center">
                 <Heading
                   size="lg"
-                  className="text-typography-900 dark:text-typography-950"
+                  className="text-[#333333] font-extrabold tracking-wider"
+                  retro
                 >
-                  {t("campaigns")}
+                  Redeem Rewards
                 </Heading>
-                <Button variant="link" size="sm">
-                  <Text size="sm" className="text-primary-500">
-                    {t("viewAllCampaigns")}
-                  </Text>
-                </Button>
+                <Badge className="bg-[#DDA0DD] border-2 border-[#333333] shadow-[2px_2px_0_#333333]">
+                  <HStack space="xs" className="items-center">
+                    <Icon as={Star} size="xs" className="text-[#333333]" />
+                    <Text size="sm" className="text-[#333333] font-bold">
+                      {availablePoints} pts
+                    </Text>
+                  </HStack>
+                </Badge>
               </HStack>
-            </VStack>
 
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              <HStack space="lg">
-                {campaigns.map((campaign) => (
-                  <Card
-                    key={campaign.id}
-                    className="w-80 h-48 overflow-hidden relative border border-gray-200 dark:border-gray-800"
-                  >
-                    <Box className="absolute inset-0">
-                      <Image
-                        source={{ uri: campaign.image }}
-                        className="w-full h-full"
-                        style={{ resizeMode: "cover" }}
-                      />
-                      <Box className="absolute inset-0 bg-black/60" />
-                    </Box>
-                    <Box className="absolute bottom-0 left-0 right-0 p-4">
-                      <VStack space="md">
-                        <HStack space="xs" className="items-center">
-                          <Badge variant="solid" className="bg-white/90">
-                            <Text size="xs" className="text-gray-900">
-                              {campaign.points} pts
-                            </Text>
-                          </Badge>
-                          <Badge
-                            variant="solid"
-                            className={getDifficultyColor(campaign.difficulty)}
-                          >
-                            <Text size="xs">{t(campaign.difficulty)}</Text>
-                          </Badge>
-                        </HStack>
-                        <VStack space="xs">
-                          <Text
-                            className="font-bold text-white"
-                            numberOfLines={1}
-                          >
-                            {campaign.title}
-                          </Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <HStack space="lg">
+                  {rewards.map((reward) => {
+                    const canAfford = availablePoints >= reward.points_cost;
+                    const isLimitedAndOutOfStock =
+                      reward.availability === "limited" &&
+                      reward.quantity_available !== null &&
+                      reward.quantity_available <= 0;
+
+                    return (
+                      <Card
+                        key={reward.id}
+                        className="w-72 overflow-hidden border-2 border-[#333333] shadow-[4px_4px_0_#333333] bg-[#FCFCFC]"
+                      >
+                        <VStack space="md" className="p-4">
+                          <HStack space="md" className="items-start">
+                            <Box className="p-3 rounded-lg bg-[#DDA0DD] border-2 border-[#333333] shadow-[2px_2px_0_#333333]">
+                              <Icon
+                                as={Gift}
+                                size="md"
+                                className="text-[#333333]"
+                              />
+                            </Box>
+                            <VStack space="xs" className="flex-1">
+                              <Text
+                                className="font-bold text-[#333333] tracking-wide"
+                                numberOfLines={2}
+                                retro
+                              >
+                                {reward.title}
+                              </Text>
+                              <Badge className="bg-[#FFE4B5] border-2 border-[#333333] shadow-[2px_2px_0_#333333] self-start">
+                                <Text
+                                  size="xs"
+                                  className="text-[#333333] font-bold tracking-wide"
+                                >
+                                  {reward.type.replace("-", " ").toUpperCase()}
+                                </Text>
+                              </Badge>
+                            </VStack>
+                          </HStack>
+
                           <Text
                             size="sm"
-                            className="text-white/90"
-                            numberOfLines={2}
+                            className="text-[#333333] font-semibold tracking-wide"
+                            numberOfLines={3}
                           >
-                            {campaign.description}
+                            {reward.description}
                           </Text>
-                          <Text size="xs" className="text-white/80">
-                            {campaign.participants} participants
-                          </Text>
-                        </VStack>
-                        <Button
-                          size="sm"
-                          variant="solid"
-                          className="bg-white/20 border-white/40"
-                        >
-                          <Text className="text-white">
-                            {t("joinCampaign")}
-                          </Text>
-                        </Button>
-                      </VStack>
-                    </Box>
-                  </Card>
-                ))}
-              </HStack>
-            </ScrollView>
-          </VStack>
 
-          {/* Redeem Points */}
-          <VStack space="lg">
-            <VStack space="xs">
+                          <HStack className="justify-between items-center">
+                            <VStack space="xs">
+                              <Text
+                                size="xs"
+                                className="text-[#333333] font-semibold tracking-wide"
+                              >
+                                Points Cost
+                              </Text>
+                              <HStack space="xs" className="items-center">
+                                <Icon
+                                  as={Star}
+                                  size="sm"
+                                  className="text-[#333333]"
+                                />
+                                <Text
+                                  className="font-bold text-[#333333] text-lg tracking-wider"
+                                  retro
+                                >
+                                  {reward.points_cost}
+                                </Text>
+                              </HStack>
+                            </VStack>
+                            <VStack space="xs" className="items-end">
+                              <Text
+                                size="xs"
+                                className="text-[#333333] font-semibold tracking-wide"
+                              >
+                                Value
+                              </Text>
+                              <Text
+                                size="sm"
+                                className="font-bold text-[#333333] tracking-wide"
+                              >
+                                {reward.value}
+                              </Text>
+                            </VStack>
+                          </HStack>
+
+                          {reward.availability === "limited" &&
+                            reward.quantity_available !== null && (
+                              <HStack space="xs" className="items-center">
+                                <Icon
+                                  as={Users}
+                                  size="sm"
+                                  className="text-[#333333]"
+                                />
+                                <Text
+                                  size="sm"
+                                  className="text-[#333333] font-semibold tracking-wide"
+                                >
+                                  {reward.quantity_available} left
+                                </Text>
+                              </HStack>
+                            )}
+
+                          <Button
+                            size="sm"
+                            className={`mt-2 border-2 border-[#333333] shadow-[4px_4px_0_#333333] ${
+                              !canAfford || isLimitedAndOutOfStock
+                                ? "bg-[#E0E0E0]"
+                                : "bg-[#DDA0DD]"
+                            }`}
+                            onPress={() =>
+                              router.push(`/rewards/${reward.id}/`)
+                            }
+                            disabled={!canAfford || isLimitedAndOutOfStock}
+                          >
+                            <HStack space="xs" className="items-center">
+                              <Icon
+                                as={Gift}
+                                size="sm"
+                                className="text-[#333333]"
+                              />
+                              <Text className="text-[#333333] font-bold tracking-wide">
+                                {isLimitedAndOutOfStock
+                                  ? "Out of Stock"
+                                  : !canAfford
+                                  ? "Not Enough Points"
+                                  : "Redeem"}
+                              </Text>
+                            </HStack>
+                          </Button>
+                        </VStack>
+                      </Card>
+                    );
+                  })}
+                </HStack>
+              </ScrollView>
+            </VStack>
+          )}
+
+          {/* Ongoing Quests */}
+          {ongoingMissions.length > 0 && (
+            <VStack space="lg" className="mb-8">
               <HStack className="justify-between items-center">
                 <Heading
                   size="lg"
-                  className="text-typography-900 dark:text-typography-950"
+                  className="text-[#333333] font-extrabold tracking-wider"
+                  retro
                 >
-                  {t("redeemPoints")}
+                  Continue Your Quests
                 </Heading>
-                <Button variant="link" size="sm">
-                  <Text size="sm" className="text-primary-500">
-                    {t("viewAllOffers")}
+                <Button
+                  variant="link"
+                  size="sm"
+                  onPress={() => router.push("/quests")}
+                >
+                  <Text
+                    size="sm"
+                    className="text-[#333333] font-bold tracking-wide"
+                  >
+                    View All
                   </Text>
                 </Button>
               </HStack>
-            </VStack>
 
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              <HStack space="md">
-                {rewards.map((reward) => (
-                  <Card
-                    key={reward.id}
-                    className="w-48 p-4 border border-gray-200 dark:border-gray-800"
-                  >
-                    <VStack space="md" className="items-center">
-                      <Text className="text-3xl">{reward.logo}</Text>
-                      <VStack space="xs" className="items-center">
-                        <Badge variant="solid" className="bg-green-500">
-                          <Text size="xs" className="text-white">
-                            {reward.discount} {t("discount")}
-                          </Text>
-                        </Badge>
-                        <Badge variant="outline">
-                          <Text
-                            size="xs"
-                            className="text-typography-600 dark:text-typography-750"
-                          >
-                            {reward.points} pts
-                          </Text>
-                        </Badge>
-                      </VStack>
-                      <VStack space="xs" className="items-center">
-                        <Text
-                          className="font-semibold text-typography-900 dark:text-typography-950 text-center"
-                          numberOfLines={2}
-                        >
-                          {reward.title}
-                        </Text>
-                        <Text
-                          size="sm"
-                          className="text-typography-600 dark:text-typography-750 text-center"
-                          numberOfLines={2}
-                        >
-                          {reward.description}
-                        </Text>
-                      </VStack>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="w-full"
-                        disabled={userStats.currentPoints < reward.points}
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <HStack space="lg">
+                  {ongoingMissions.slice(0, 5).map((mission) => {
+                    const statusInfo = getStatusInfo(mission);
+                    return (
+                      <Card
+                        key={mission.id}
+                        className="w-72 overflow-hidden border-2 border-[#333333] shadow-[4px_4px_0_#333333] bg-[#FCFCFC]"
                       >
-                        <Text
-                          className={
-                            userStats.currentPoints >= reward.points
-                              ? "text-primary-500"
-                              : "text-gray-400"
-                          }
-                        >
-                          Redeem
-                        </Text>
-                      </Button>
-                    </VStack>
-                  </Card>
-                ))}
+                        <VStack space="md">
+                          {(mission as any).thumbnailUrl && (
+                            <Box className="relative">
+                              <Image
+                                source={{ uri: (mission as any).thumbnailUrl }}
+                                className="w-full h-32"
+                                style={{ resizeMode: "cover" }}
+                              />
+                              <Badge
+                                variant="solid"
+                                className="absolute top-2 right-2 bg-[#98FB98] border-2 border-[#333333] shadow-[2px_2px_0_#333333]"
+                              >
+                                <Text
+                                  size="xs"
+                                  className="text-[#333333] font-bold tracking-wide"
+                                >
+                                  {mission.submission_progress || 0}% Complete
+                                </Text>
+                              </Badge>
+                            </Box>
+                          )}
+                          <VStack space="md" className="p-4">
+                            <HStack space="xs" className="items-center">
+                              <Badge className="bg-[#98FB98] border-2 border-[#333333] shadow-[2px_2px_0_#333333]">
+                                <HStack space="xs" className="items-center">
+                                  <Icon
+                                    as={Award}
+                                    size="xs"
+                                    className="text-[#333333]"
+                                  />
+                                  <Text
+                                    size="xs"
+                                    className="text-[#333333] font-bold tracking-wide"
+                                  >
+                                    +{mission.points_awarded} pts
+                                  </Text>
+                                </HStack>
+                              </Badge>
+                              <Badge className="bg-[#FFE4B5] border-2 border-[#333333] shadow-[2px_2px_0_#333333]">
+                                <HStack space="xs" className="items-center">
+                                  <Icon
+                                    as={Zap}
+                                    size="xs"
+                                    className="text-[#333333]"
+                                  />
+                                  <Text
+                                    size="xs"
+                                    className="text-[#333333] font-bold tracking-wide"
+                                  >
+                                    +{mission.energy_awarded} ⚡
+                                  </Text>
+                                </HStack>
+                              </Badge>
+                            </HStack>
+                            <VStack space="xs">
+                              <Text
+                                className="font-bold text-[#333333] tracking-wide"
+                                numberOfLines={2}
+                                retro
+                              >
+                                {mission.title}
+                              </Text>
+                              <Text
+                                size="sm"
+                                className="text-[#333333] font-semibold tracking-wide"
+                                numberOfLines={3}
+                              >
+                                {mission.description}
+                              </Text>
+                            </VStack>
+                            <HStack space="xs" className="items-center">
+                              <Icon
+                                as={Building}
+                                size="sm"
+                                className="text-[#333333]"
+                              />
+                              <Text
+                                size="sm"
+                                className="text-[#333333] font-semibold tracking-wide"
+                              >
+                                {mission.organization_name}
+                              </Text>
+                            </HStack>
+                            <VStack space="md">
+                              <Button
+                                size="sm"
+                                className="bg-[#A2D8FF] border-2 border-[#333333] shadow-[2px_2px_0_#333333]"
+                                onPress={() => handleContinueMission(mission.id)}
+                              >
+                                <HStack space="xs" className="items-center">
+                                  <Icon
+                                    as={Play}
+                                    size="sm"
+                                    className="text-[#333333]"
+                                  />
+                                  <Text className="text-[#333333] font-bold tracking-wide">
+                                    Continue
+                                  </Text>
+                                </HStack>
+                              </Button>
+                              <Button
+                                variant="solid"
+                                size="sm"
+                                className="border-2 border-[#333333] shadow-[2px_2px_0_#333333] bg-[#FCFCFC]"
+                                onPress={() => handleViewMission(mission.id)}
+                              >
+                                <HStack space="xs" className="items-center">
+                                  <Icon
+                                    as={Eye}
+                                    size="sm"
+                                    className="text-[#333333]"
+                                  />
+                                  <Text
+                                    size="sm"
+                                    className="text-[#333333] font-bold tracking-wide"
+                                  >
+                                    View
+                                  </Text>
+                                </HStack>
+                              </Button>
+                            </VStack>
+                          </VStack>
+                        </VStack>
+                      </Card>
+                    );
+                  })}
+                </HStack>
+              </ScrollView>
+            </VStack>
+          )}
+
+          {/* Saved Quests */}
+          {savedMissions.length > 0 && (
+            <VStack space="lg" className="mb-8">
+              <HStack className="justify-between items-center">
+                <Heading
+                  size="lg"
+                  className="text-[#333333] font-extrabold tracking-wider"
+                  retro
+                >
+                  Saved Quests
+                </Heading>
+                <Button
+                  variant="link"
+                  size="sm"
+                  onPress={() => router.push("/quests")}
+                >
+                  <Text
+                    size="sm"
+                    className="text-[#333333] font-bold tracking-wide"
+                  >
+                    View All
+                  </Text>
+                </Button>
               </HStack>
-            </ScrollView>
-          </VStack>
+
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <HStack space="lg">
+                  {savedMissions.slice(0, 5).map((mission) => (
+                    <Card
+                      key={mission.id}
+                      className="w-72 overflow-hidden border-2 border-[#333333] shadow-[4px_4px_0_#333333] bg-[#FCFCFC]"
+                    >
+                      <VStack space="md">
+                        {(mission as any).thumbnailUrl && (
+                          <Box className="relative">
+                            <Image
+                              source={{ uri: (mission as any).thumbnailUrl }}
+                              className="w-full h-32"
+                              style={{ resizeMode: "cover" }}
+                            />
+                            <Badge
+                              variant="solid"
+                              className="absolute top-2 right-2 bg-[#DDA0DD] border-2 border-[#333333] shadow-[2px_2px_0_#333333]"
+                            >
+                              <HStack space="xs" className="items-center">
+                                <Icon
+                                  as={Bookmark}
+                                  size="xs"
+                                  className="text-[#333333]"
+                                />
+                                <Text
+                                  size="xs"
+                                  className="text-[#333333] font-bold tracking-wide"
+                                >
+                                  Saved
+                                </Text>
+                              </HStack>
+                            </Badge>
+                          </Box>
+                        )}
+                        <VStack space="md" className="p-4">
+                          <HStack space="xs" className="items-center">
+                            <Badge className="bg-[#98FB98] border-2 border-[#333333] shadow-[2px_2px_0_#333333]">
+                              <HStack space="xs" className="items-center">
+                                <Icon
+                                  as={Award}
+                                  size="xs"
+                                  className="text-[#333333]"
+                                />
+                                <Text
+                                  size="xs"
+                                  className="text-[#333333] font-bold tracking-wide"
+                                >
+                                  +{mission.points_awarded} pts
+                                </Text>
+                              </HStack>
+                            </Badge>
+                            <Badge className="bg-[#FFE4B5] border-2 border-[#333333] shadow-[2px_2px_0_#333333]">
+                              <HStack space="xs" className="items-center">
+                                <Icon
+                                  as={Zap}
+                                  size="xs"
+                                  className="text-[#333333]"
+                                />
+                                <Text
+                                  size="xs"
+                                  className="text-[#333333] font-bold tracking-wide"
+                                >
+                                  +{mission.energy_awarded} ⚡
+                                </Text>
+                              </HStack>
+                            </Badge>
+                          </HStack>
+                          <VStack space="xs">
+                            <Text
+                              className="font-bold text-[#333333] tracking-wide"
+                              numberOfLines={2}
+                              retro
+                            >
+                              {mission.title}
+                            </Text>
+                            <Text
+                              size="sm"
+                              className="text-[#333333] font-semibold tracking-wide"
+                              numberOfLines={3}
+                            >
+                              {mission.description}
+                            </Text>
+                          </VStack>
+                          <HStack space="xs" className="items-center">
+                            <Icon
+                              as={Building}
+                              size="sm"
+                              className="text-[#333333]"
+                            />
+                            <Text
+                              size="sm"
+                              className="text-[#333333] font-semibold tracking-wide"
+                            >
+                              {mission.organization_name}
+                            </Text>
+                          </HStack>
+                          <VStack space="md">
+                            <Button
+                              size="sm"
+                              className="bg-[#A2D8FF] border-2 border-[#333333] shadow-[2px_2px_0_#333333]"
+                              onPress={() => handleStartMission(mission.id)}
+                            >
+                              <HStack space="xs" className="items-center">
+                                <Icon
+                                  as={Target}
+                                  size="sm"
+                                  className="text-[#333333]"
+                                />
+                                <Text className="text-[#333333] font-bold tracking-wide">
+                                  Start
+                                </Text>
+                              </HStack>
+                            </Button>
+                            <Button
+                              variant="solid"
+                              size="sm"
+                              className="border-2 border-[#333333] shadow-[2px_2px_0_#333333] bg-[#FCFCFC]"
+                              onPress={() => handleViewMission(mission.id)}
+                            >
+                              <HStack space="xs" className="items-center">
+                                <Icon
+                                  as={Eye}
+                                  size="sm"
+                                  className="text-[#333333]"
+                                />
+                                <Text
+                                  size="sm"
+                                  className="text-[#333333] font-bold tracking-wide"
+                                >
+                                  View
+                                </Text>
+                              </HStack>
+                            </Button>
+                          </VStack>
+                        </VStack>
+                      </VStack>
+                    </Card>
+                  ))}
+                </HStack>
+              </ScrollView>
+            </VStack>
+          )}
+
+          {/* Available Quests */}
+          {availableMissions.length > 0 && (
+            <VStack space="lg" className="mb-8">
+              <HStack className="justify-between items-center">
+                <Heading
+                  size="lg"
+                  className="text-[#333333] font-extrabold tracking-wider"
+                  retro
+                >
+                  Discover New Quests
+                </Heading>
+                <Button
+                  variant="link"
+                  size="sm"
+                  onPress={() => router.push("/quests")}
+                >
+                  <Text
+                    size="sm"
+                    className="text-[#333333] font-bold tracking-wide"
+                  >
+                    View All
+                  </Text>
+                </Button>
+              </HStack>
+
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <HStack space="lg">
+                  {availableMissions.map((mission) => (
+                    <Card
+                      key={mission.id}
+                      className="w-72 overflow-hidden border-2 border-[#333333] shadow-[4px_4px_0_#333333] bg-[#FCFCFC]"
+                    >
+                      <VStack space="md">
+                        {(mission as any).thumbnailUrl && (
+                          <Box className="relative">
+                            <Image
+                              source={{ uri: (mission as any).thumbnailUrl }}
+                              className="w-full h-32"
+                              style={{ resizeMode: "cover" }}
+                            />
+                            <Badge
+                              variant="solid"
+                              className="absolute top-2 right-2 bg-[#FFD700] border-2 border-[#333333] shadow-[2px_2px_0_#333333]"
+                            >
+                              <Text
+                                size="xs"
+                                className="text-[#333333] font-bold tracking-wide"
+                              >
+                                +{mission.points_awarded} pts
+                              </Text>
+                            </Badge>
+                          </Box>
+                        )}
+                        <VStack space="md" className="p-4">
+                          <HStack space="xs" className="items-center">
+                            <Badge className="bg-[#98FB98] border-2 border-[#333333] shadow-[2px_2px_0_#333333]">
+                              <HStack space="xs" className="items-center">
+                                <Icon
+                                  as={Award}
+                                  size="xs"
+                                  className="text-[#333333]"
+                                />
+                                <Text
+                                  size="xs"
+                                  className="text-[#333333] font-bold tracking-wide"
+                                >
+                                  +{mission.points_awarded} pts
+                                </Text>
+                              </HStack>
+                            </Badge>
+                            <Badge className="bg-[#FFE4B5] border-2 border-[#333333] shadow-[2px_2px_0_#333333]">
+                              <HStack space="xs" className="items-center">
+                                <Icon
+                                  as={Zap}
+                                  size="xs"
+                                  className="text-[#333333]"
+                                />
+                                <Text
+                                  size="xs"
+                                  className="text-[#333333] font-bold tracking-wide"
+                                >
+                                  +{mission.energy_awarded} ⚡
+                                </Text>
+                              </HStack>
+                            </Badge>
+                          </HStack>
+                          <VStack space="xs">
+                            <Text
+                              className="font-bold text-[#333333] tracking-wide"
+                              numberOfLines={2}
+                              retro
+                            >
+                              {mission.title}
+                            </Text>
+                            <Text
+                              size="sm"
+                              className="text-[#333333] font-semibold tracking-wide"
+                              numberOfLines={3}
+                            >
+                              {mission.description}
+                            </Text>
+                          </VStack>
+                          <HStack space="xs" className="items-center">
+                            <Icon
+                              as={Building}
+                              size="sm"
+                              className="text-[#333333]"
+                            />
+                            <Text
+                              size="sm"
+                              className="text-[#333333] font-semibold tracking-wide"
+                            >
+                              {mission.organization_name}
+                            </Text>
+                          </HStack>
+                          <VStack space="md">
+                            <Button
+                              size="sm"
+                              className="bg-[#98FB98] border-2 border-[#333333] shadow-[2px_2px_0_#333333]"
+                              onPress={() => handleStartMission(mission.id)}
+                            >
+                              <HStack space="xs" className="items-center">
+                                <Icon
+                                  as={Target}
+                                  size="sm"
+                                  className="text-[#333333]"
+                                />
+                                <Text className="text-[#333333] font-bold tracking-wide">
+                                  Start Quest
+                                </Text>
+                              </HStack>
+                            </Button>
+                            <Button
+                              variant="solid"
+                              size="sm"
+                              className="border-2 border-[#333333] shadow-[2px_2px_0_#333333] bg-[#FCFCFC]"
+                              onPress={() => handleViewMission(mission.id)}
+                            >
+                              <HStack space="xs" className="items-center">
+                                <Icon
+                                  as={Eye}
+                                  size="sm"
+                                  className="text-[#333333]"
+                                />
+                                <Text
+                                  size="sm"
+                                  className="text-[#333333] font-bold tracking-wide"
+                                >
+                                  View
+                                </Text>
+                              </HStack>
+                            </Button>
+                          </VStack>
+                        </VStack>
+                      </VStack>
+                    </Card>
+                  ))}
+                </HStack>
+              </ScrollView>
+            </VStack>
+          )}
+
+          {/* Loading State */}
+          {loading && (
+            <Card className="p-8 items-center border-2 border-[#333333] shadow-[4px_4px_0_#333333] bg-[#FCFCFC]">
+              <VStack space="md" className="items-center">
+                <Image
+                  source={require("@/assets/icon.png")}
+                  style={{ width: 48, height: 48 }}
+                  resizeMode="contain"
+                />
+                <Text className="text-center text-[#333333] font-semibold tracking-wide">
+                  Loading your quests...
+                </Text>
+              </VStack>
+            </Card>
+          )}
+
+          {/* No quests message */}
+          {!loading && missions.length === 0 && (
+            <Card className="p-8 items-center border-2 border-[#333333] shadow-[4px_4px_0_#333333] bg-[#FCFCFC]">
+              <VStack space="md" className="items-center">
+                <Icon as={Target} size="xl" className="text-[#333333]" />
+                <Text className="text-center text-[#333333] font-semibold tracking-wide">
+                  No quests available at the moment.
+                </Text>
+                <Button
+                  size="sm"
+                  variant="solid"
+                  className="border-2 border-[#333333] shadow-[2px_2px_0_#333333] bg-[#FCFCFC]"
+                  onPress={() => router.push("/quests")}
+                >
+                  <Text className="text-[#333333] font-bold tracking-wide">
+                    Explore Quests
+                  </Text>
+                </Button>
+              </VStack>
+            </Card>
+          )}
+
+          {/* Empty states for each section */}
+          {!loading &&
+            missions.length > 0 &&
+            ongoingMissions.length === 0 &&
+            savedMissions.length === 0 && (
+              <VStack space="lg" className="mb-8">
+                <Heading
+                  size="lg"
+                  className="text-[#333333] font-extrabold tracking-wider"
+                  retro
+                >
+                  Get Started
+                </Heading>
+                <Card className="p-6 bg-[#FCFCFC] border-2 border-[#333333] shadow-[4px_4px_0_#333333]">
+                  <VStack space="md" className="items-center">
+                    <Icon as={Target} size="xl" className="text-[#333333]" />
+                    <Text
+                      className="text-center text-[#333333] font-bold tracking-wide"
+                      retro
+                    >
+                      Start your climate action journey!
+                    </Text>
+                    <Text className="text-center text-[#333333] font-semibold tracking-wide">
+                      Browse available quests and start making a positive impact
+                      on our planet.
+                    </Text>
+                    <Button
+                      size="sm"
+                      className="bg-[#98FB98] border-2 border-[#333333] shadow-[4px_4px_0_#333333]"
+                      onPress={() => router.push("/quests")}
+                    >
+                      <Text className="text-[#333333] font-bold tracking-wide">
+                        Explore Quests
+                      </Text>
+                    </Button>
+                  </VStack>
+                </Card>
+              </VStack>
+            )}
         </Box>
       </ScrollView>
     </SafeAreaView>

@@ -1,6 +1,7 @@
 import { Platform } from "react-native";
 import * as WebBrowser from "expo-web-browser";
 import * as QueryParams from "expo-auth-session/build/QueryParams";
+import * as AppleAuthentication from "expo-apple-authentication";
 import { supabase } from "@/lib/supabase";
 import { authService } from "./auth.service";
 import { BASE_URL } from "@/lib/constants";
@@ -49,6 +50,88 @@ export class OAuthService {
       OAuthService.instance = new OAuthService();
     }
     return OAuthService.instance;
+  }
+
+  /**
+   * Sign in with Apple (iOS only)
+   */
+  async signInWithApple(): Promise<OAuthResponse> {
+    try {
+      // Check if Apple Sign In is available
+      if (Platform.OS !== "ios") {
+        return { error: new Error("Apple Sign In is only available on iOS") };
+      }
+
+      const isAvailable = await AppleAuthentication.isAvailableAsync();
+      if (!isAvailable) {
+        return { error: new Error("Apple Sign In is not available on this device") };
+      }
+
+      console.log("🍎 Starting Apple Sign In...");
+
+      // Request Apple Sign In
+      const credential = await AppleAuthentication.signInAsync({
+        requestedScopes: [
+          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+          AppleAuthentication.AppleAuthenticationScope.EMAIL,
+        ],
+      });
+
+      console.log("🍎 Apple credential received:", {
+        hasIdentityToken: !!credential.identityToken,
+        hasUser: !!credential.user,
+        user: credential.user,
+        email: credential.email,
+        fullName: credential.fullName,
+      });
+
+      if (credential.identityToken) {
+        console.log("🍎 Attempting to sign in with identity token...");
+        
+        const { data, error } = await supabase.auth.signInWithIdToken({
+          provider: "apple",
+          token: credential.identityToken,
+        });
+
+        if (error) {
+          console.error("🍎 Supabase signInWithIdToken error:", error);
+          console.error("🍎 Error details:", {
+            message: error.message,
+            name: error.name,
+            stack: error.stack,
+          });
+          
+          // Return a more descriptive error
+          return { 
+            error: new Error(`Apple Sign In failed: ${error.message}. Please ensure Apple provider is configured in Supabase dashboard.`) 
+          };
+        }
+
+        console.log("🍎 Apple Sign In successful!", data.session?.user?.email);
+        return { error: null };
+      } else {
+        console.error("🍎 No identity token received from Apple");
+        return { error: new Error("No identity token received from Apple") };
+      }
+    } catch (error: any) {
+      console.error("🍎 Apple Sign In error:", error);
+      
+      // Handle specific Apple Sign In errors
+      if (error.code === "ERR_REQUEST_CANCELED") {
+        console.log("🍎 Apple Sign In was cancelled by user");
+        return { error: new Error("Apple Sign In was cancelled") };
+      }
+      
+      // Log full error details for debugging
+      console.error("🍎 Full error details:", {
+        code: error.code,
+        message: error.message,
+        name: error.name,
+        stack: error.stack,
+      });
+      
+      return { error: error as Error };
+    }
   }
 
   /**
@@ -296,7 +379,7 @@ export class OAuthService {
       return window.location.origin;
     }
     // For mobile, you would use your deep link URL
-    return "com.climateintelligencedemo://";
+    return "com.mission15://";
   }
 }
 
