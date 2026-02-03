@@ -183,7 +183,7 @@ const MappedHeading = memo(
   )
 );
 
-const Heading = memo(
+const EcoHeading = memo(
   forwardRef<React.ComponentRef<typeof H1>, IHeadingProps>(function Heading(
     { className, size = 'lg', as: AsComp, ...props },
     ref
@@ -225,6 +225,9 @@ const Heading = memo(
   })
 );
 
+EcoHeading.displayName = 'EcoHeading';
+
+const Heading = EcoHeading;
 Heading.displayName = 'Heading';
 
-export { Heading };
+export { Heading, EcoHeading };

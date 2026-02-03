@@ -6,6 +6,7 @@ import { ToastProvider } from '@gluestack-ui/toast';
 import { setFlushStyles } from '@gluestack-ui/nativewind-utils/flush';
 import { script } from './script';
 import { ModeType } from './types';
+import { UIModeProvider } from '../state/uiMode';
 
 const variableStyleTagId = 'nativewind-style';
 const createStyle = (styleTagId: string) => {
@@ -87,9 +88,11 @@ export function GluestackUIProvider({
           __html: `(${script.toString()})('${mode}')`,
         }}
       />
-      <OverlayProvider>
-        <ToastProvider>{props.children}</ToastProvider>
-      </OverlayProvider>
+      <UIModeProvider>
+        <OverlayProvider>
+          <ToastProvider>{props.children}</ToastProvider>
+        </OverlayProvider>
+      </UIModeProvider>
     </>
   );
 }

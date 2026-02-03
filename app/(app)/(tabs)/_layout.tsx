@@ -16,6 +16,7 @@ function TabBarIcon({
 
 export default function TabLayout() {
   const { colorScheme } = useTheme();
+  const isDark = (colorScheme as "light" | "dark" | undefined) === "dark";
 
   return (
     <Tabs
@@ -28,8 +29,8 @@ export default function TabLayout() {
           fontSize: 11,
         },
         tabBarStyle: {
-          backgroundColor: colorScheme === "dark" ? "#181719" : "#FFFFFF", // match background-dark and white
-          borderTopColor: colorScheme === "dark" ? "#2D2D2D" : "#E5E7EB", // darker border for dark mode
+          backgroundColor: isDark ? "#181719" : "#FFFFFF", // match background-dark and white
+          borderTopColor: isDark ? "#2D2D2D" : "#E5E7EB", // darker border for dark mode
           borderTopWidth: 1,
           ...Platform.select({
             ios: {

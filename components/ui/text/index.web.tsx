@@ -16,6 +16,7 @@ const Text = React.forwardRef<React.ComponentRef<'span'>, ITextProps>(
       sub,
       italic,
       highlight,
+      retro,
       ...props
     }: { className?: string } & ITextProps,
     ref
@@ -31,6 +32,7 @@ const Text = React.forwardRef<React.ComponentRef<'span'>, ITextProps>(
           sub,
           italic,
           highlight,
+          retro,
           class: className,
         })}
         {...props}
@@ -40,6 +42,9 @@ const Text = React.forwardRef<React.ComponentRef<'span'>, ITextProps>(
   }
 );
 
+const EcoText = Text;
+EcoText.displayName = 'EcoText';
+
 Text.displayName = 'Text';
 
-export { Text };
+export { Text, EcoText };

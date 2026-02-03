@@ -7,4 +7,11 @@ const baseStyle = isWeb
 
 export const boxStyle = tva({
   base: baseStyle,
+  variants: {
+    variant: {
+      surface: "bg-surface border-2 border-ink rounded-lg",
+      outline: "bg-transparent border-2 border-ink rounded-lg",
+      plain: "bg-transparent border-0",
+    },
+  },
 });

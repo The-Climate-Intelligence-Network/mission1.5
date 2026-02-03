@@ -6,7 +6,7 @@ const baseStyle = isWeb
   : '';
 
 export const textStyle = tva({
-  base: `text-[#333333] font-semibold tracking-wide ${baseStyle}`,
+  base: `text-ink font-body tracking-normal leading-normal ${baseStyle}`,
 
   variants: {
     isTruncated: {
@@ -41,10 +41,10 @@ export const textStyle = tva({
       true: 'italic',
     },
     highlight: {
-      true: 'bg-[#FFD966] border-2 border-[#333333] px-2 py-1 shadow-[2px_2px_0_#333333]',
+      true: 'bg-energy border-2 border-ink px-2 py-1',
     },
     retro: {
-      true: 'uppercase font-bold tracking-wider text-[#333333] web:text-shadow-none ios:shadow-opacity-0 android:text-shadow-radius-0',
+      true: 'uppercase font-bold tracking-widest text-ink web:text-shadow-none ios:shadow-opacity-0 android:text-shadow-radius-0',
     },
   },
 });

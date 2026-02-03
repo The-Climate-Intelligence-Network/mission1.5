@@ -7,9 +7,9 @@ import { Heading } from "@/components/ui/heading";
 import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
 import { Icon } from "@/components/ui/icon";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonIcon, ButtonText } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Input, InputField, InputIcon } from "@/components/ui/input";
+import { Input, InputField, InputIcon, InputSlot } from "@/components/ui/input";
 import { ScrollView } from "@/components/ui/scroll-view";
 import { Spinner } from "@/components/ui/spinner";
 import { useAppToast } from "@/lib/toast-utils";
@@ -189,67 +189,65 @@ export default function SignIn() {
   }
 
   return (
-    <SafeAreaView
-      style={{ flex: 1 }}
-      className="bg-white dark:bg-background-dark"
-    >
+    <SafeAreaView style={{ flex: 1 }} className="bg-surface">
+      <Box className="absolute inset-0">
+        <Box className="h-48 bg-atmosphere-0" />
+        <Box className="flex-1 bg-atmosphere-1" />
+        <Box className="h-40 bg-atmosphere-2" />
+        <Box className="absolute -top-10 -right-12 h-40 w-40 rounded-full bg-digital/20" />
+        <Box className="absolute top-36 -left-16 h-32 w-32 rounded-full bg-energy/25" />
+      </Box>
+
       <ScrollView className="flex-1" contentContainerStyle={{ flexGrow: 1 }}>
-        <Box className="flex-1 justify-center p-6">
-          <VStack space="lg" className="items-center">
-            <VStack space="lg" className="items-center mb-4">
+        <Box className="flex-1 justify-center px-6 py-10">
+          <VStack space="xl" className="items-center">
+            <VStack space="md" className="items-center">
               <Image
                 source={require("@/assets/icon.png")}
-                style={{ width: 64, height: 64 }}
+                style={{ width: 72, height: 72 }}
                 resizeMode="contain"
               />
-              <VStack space="md" className="items-center">
-                <Heading
-                  size="2xl"
-                  className="text-[#333333] text-center font-extrabold tracking-wider"
-                  retro
-                >
-                  Welcome Back
+              <VStack space="sm" className="items-center">
+                <Box className="px-3 py-1 border-2 border-ink rounded-full bg-surface">
+                  <Text size="xs" className="text-ink font-bold tracking-[2px]">
+                    ECO-TERMINAL ACCESS
+                  </Text>
+                </Box>
+                <Heading size="2xl" className="text-ink text-center font-extrabold tracking-[3px]">
+                  WELCOME BACK
                 </Heading>
-                <Text
-                  size="lg"
-                  className="text-[#333333] text-center font-semibold tracking-wide"
-                >
-                  Sign in to continue your climate action journey
+                <Text size="sm" className="text-ink/80 text-center font-medium">
+                  Continue your climate action journey. Secure access, fast sync, no noise.
                 </Text>
               </VStack>
             </VStack>
 
             {/* Sign In Card */}
-            <Card className="w-full max-w-sm p-8">
-              <VStack space="lg" className="items-center">
-                <VStack space="md" className="items-center">
-                  <Heading
-                    size="lg"
-                    className="text-[#333333] font-extrabold tracking-wider"
-                    retro
-                  >
-                    Mission 1.5
+            <Card className="w-full max-w-sm p-7">
+              <VStack space="lg">
+                <VStack space="xs" className="items-start">
+                  <Text size="xs" className="text-ink/70 uppercase tracking-[2px]">
+                    Mission 1.5 Node
+                  </Text>
+                  <Heading size="lg" className="text-ink font-extrabold tracking-[2px]">
+                    Command Console
                   </Heading>
-                  <Text
-                    size="sm"
-                    className="text-[#333333] text-center font-semibold tracking-wide"
-                  >
-                    Join thousands of climate scientists and environmental
-                    enthusiasts making a difference
+                  <Text size="sm" className="text-ink/80">
+                    Sign in to sync missions, evidence, and field notes.
                   </Text>
                 </VStack>
 
                 {/* Email Input */}
-                <VStack space="xs" className="w-full">
-                  <Text
-                    size="sm"
-                    className="text-[#333333] font-bold tracking-wide"
-                  >
+                <VStack space="xs">
+                  <Text size="xs" className="text-ink uppercase tracking-[2px]">
                     Email
                   </Text>
-                  <Input className="w-full">
-                    <InputIcon as={Mail} className="ml-3" />
+                  <Input className="w-full" size="md">
+                    <InputSlot className="pl-3">
+                      <InputIcon as={Mail} />
+                    </InputSlot>
                     <InputField
+                      className="pr-3"
                       placeholder="email@address.com"
                       value={email}
                       onChangeText={setEmail}
@@ -260,16 +258,16 @@ export default function SignIn() {
                 </VStack>
 
                 {/* Password Input */}
-                <VStack space="xs" className="w-full">
-                  <Text
-                    size="sm"
-                    className="text-[#333333] font-bold tracking-wide"
-                  >
+                <VStack space="xs">
+                  <Text size="xs" className="text-ink uppercase tracking-[2px]">
                     Password
                   </Text>
-                  <Input className="w-full">
-                    <InputIcon as={Lock} className="ml-3" />
+                  <Input className="w-full" size="md">
+                    <InputSlot className="pl-3">
+                      <InputIcon as={Lock} />
+                    </InputSlot>
                     <InputField
+                      className="pr-3"
                       placeholder="Password"
                       value={password}
                       onChangeText={setPassword}
@@ -295,28 +293,25 @@ export default function SignIn() {
                   }
                   onPress={handleSignIn}
                 >
-                  <HStack space="md" className="items-center justify-center">
+                  <HStack space="md" className="w-full items-center justify-center">
                     {loading ? (
-                      <Spinner size="small" color="white" />
+                      <Spinner size="small" />
                     ) : (
-                      <Icon as={LogIn} size="md" className="text-[#333333]" />
+                      <ButtonIcon as={LogIn} size="md" />
                     )}
-                    <Text size="lg" className="text-[#333333] font-semibold">
+                    <ButtonText size="lg" className="normal-case tracking-normal">
                       {loading ? "Signing In..." : "Sign In"}
-                    </Text>
+                    </ButtonText>
                   </HStack>
                 </Button>
 
                 {/* Divider */}
                 <HStack className="items-center w-full">
-                  <Box className="flex-1 h-px bg-outline-300 dark:bg-outline-600" />
-                  <Text
-                    size="sm"
-                    className="px-4 text-[#333333] font-semibold tracking-wide"
-                  >
-                    or
+                  <Box className="flex-1 h-px bg-ink/20" />
+                  <Text size="xs" className="px-3 text-ink/70 uppercase tracking-[2px]">
+                    or continue with
                   </Text>
-                  <Box className="flex-1 h-px bg-outline-300 dark:bg-outline-600" />
+                  <Box className="flex-1 h-px bg-ink/20" />
                 </HStack>
 
                 {/* Google OAuth Button */}
@@ -333,18 +328,15 @@ export default function SignIn() {
                   }
                   onPress={handleGoogleSignIn}
                 >
-                  <HStack space="md" className="items-center justify-center">
+                  <HStack space="md" className="w-full items-center justify-center">
                     <GoogleIcon size={20} />
-                    <Text
-                      size="lg"
-                      className="text-[#333333] font-semibold tracking-wide"
-                    >
+                    <ButtonText size="lg" className="normal-case tracking-normal">
                       {googleLoading || isGoogleProcessing
                         ? isGoogleProcessing
                           ? "Processing..."
                           : "Connecting..."
                         : "Continue with Google"}
-                    </Text>
+                    </ButtonText>
                   </HStack>
                 </Button>
 
@@ -363,18 +355,15 @@ export default function SignIn() {
                     }
                     onPress={handleAppleSignIn}
                   >
-                    <HStack space="md" className="items-center justify-center">
+                    <HStack space="md" className="w-full items-center justify-center">
                       {appleLoading ? (
                         <Spinner size="small" />
                       ) : (
                         <AppleIcon size={20} color="#6B7280" />
                       )}
-                      <Text
-                        size="lg"
-                        className="text-[#333333] font-semibold tracking-wide"
-                      >
+                      <ButtonText size="lg" className="normal-case tracking-normal">
                         {appleLoading ? "Connecting..." : "Continue with Apple"}
-                      </Text>
+                      </ButtonText>
                     </HStack>
                   </Button>
                 )}
@@ -389,129 +378,82 @@ export default function SignIn() {
                   }
                   onPress={handleGitHubSignIn}
                 >
-                  <HStack space="md" className="items-center justify-center">
-                    <Icon
-                      as={Github}
-                      size="md"
-                      className="text-typography-600 dark:text-typography-400"
-                    />
-                    <Text
-                      size="lg"
-                      className="text-[#333333] font-semibold tracking-wide"
-                    >
+                  <HStack space="md" className="w-full items-center justify-center">
+                    <ButtonIcon as={Github} size="md" />
+                    <ButtonText size="lg" className="normal-case tracking-normal">
                       {githubLoading ? "Connecting..." : "Continue with GitHub"}
-                    </Text>
+                    </ButtonText>
                   </HStack>
                 </Button>
 
                 {/* Forgot Password Link */}
-                <Button
-                  variant="link"
-                  size="sm"
-                  onPress={() => router.push("/forgot-password")}
-                >
-                  <Text
-                    size="md"
-                    className="text-primary-500 font-bold tracking-wide"
-                  >
+                <Button variant="link" size="sm" onPress={() => router.push("/forgot-password")}>
+                  <ButtonText size="md" className="normal-case tracking-normal">
                     Forgot Password?
-                  </Text>
+                  </ButtonText>
                 </Button>
 
                 {/* Sign Up Link */}
                 <VStack space="xs" className="items-center">
-                  <Text
-                    size="md"
-                    className="text-[#333333] font-semibold tracking-wide"
-                  >
+                  <Text size="sm" className="text-ink/80 font-medium">
                     Don't have an account?
                   </Text>
-                  <Button
-                    variant="link"
-                    size="sm"
-                    onPress={() => router.push("/sign-up")}
-                  >
-                    <Text
-                      size="md"
-                      className="text-primary-500 font-bold tracking-wide"
-                    >
+                  <Button variant="link" size="sm" onPress={() => router.push("/sign-up")}>
+                    <ButtonText size="md" className="normal-case tracking-normal">
                       Create Account
-                    </Text>
+                    </ButtonText>
                   </Button>
                 </VStack>
 
-                <VStack space="xs" className="items-center">
-                  <Text
-                    size="sm"
-                    className="text-[#333333] text-center font-medium tracking-wide"
-                  >
-                    By signing in, you agree to our Terms of Service and Privacy
-                    Policy
-                  </Text>
-                </VStack>
+                <Text size="xs" className="text-ink/60 text-center">
+                  By signing in, you agree to our Terms of Service and Privacy Policy.
+                </Text>
               </VStack>
             </Card>
 
             {/* Features */}
-            <VStack space="md" className="w-full max-w-sm">
-              <Text
-                size="sm"
-                className="text-[#333333] text-center font-bold tracking-wide"
-              >
-                What you'll get:
-              </Text>
-              <VStack space="xs">
-                <HStack space="md" className="items-center">
-                  <Box className="w-2 h-2 bg-green-500 rounded-full" />
-                  <Text
-                    size="sm"
-                    className="text-[#333333] font-semibold tracking-wide"
-                  >
-                    Access to climate missions and data collection
-                  </Text>
-                </HStack>
-                <HStack space="md" className="items-center">
-                  <Box className="w-2 h-2 bg-blue-500 rounded-full" />
-                  <Text
-                    size="sm"
-                    className="text-[#333333] font-semibold tracking-wide"
-                  >
-                    Connect with a global community of researchers
-                  </Text>
-                </HStack>
-                <HStack space="md" className="items-center">
-                  <Box className="w-2 h-2 bg-purple-500 rounded-full" />
-                  <Text
-                    size="sm"
-                    className="text-[#333333] font-semibold tracking-wide"
-                  >
-                    Track your environmental impact and achievements
-                  </Text>
-                </HStack>
+            <Card className="w-full max-w-sm p-6">
+              <VStack space="sm">
+                <Text size="xs" className="text-ink/70 uppercase tracking-[2px]">
+                  What you unlock
+                </Text>
+                <VStack space="xs">
+                  <HStack space="md" className="items-center">
+                    <Box className="w-2.5 h-2.5 bg-digital rounded-full border-2 border-ink" />
+                    <Text size="sm" className="text-ink font-medium">
+                      Access verified climate missions and field data kits
+                    </Text>
+                  </HStack>
+                  <HStack space="md" className="items-center">
+                    <Box className="w-2.5 h-2.5 bg-sky rounded-full border-2 border-ink" />
+                    <Text size="sm" className="text-ink font-medium">
+                      Coordinate with a global research community
+                    </Text>
+                  </HStack>
+                  <HStack space="md" className="items-center">
+                    <Box className="w-2.5 h-2.5 bg-energy rounded-full border-2 border-ink" />
+                    <Text size="sm" className="text-ink font-medium">
+                      Track impact, rewards, and verified outcomes
+                    </Text>
+                  </HStack>
+                </VStack>
               </VStack>
-            </VStack>
+            </Card>
           </VStack>
         </Box>
       </ScrollView>
 
       {/* Google Processing Overlay */}
       {isGoogleProcessing && (
-        <Box className="absolute inset-0 bg-black/50 flex-1 justify-center items-center">
+        <Box className="absolute inset-0 bg-ink/60 flex-1 justify-center items-center">
           <Card className="p-8 m-6">
             <VStack space="lg" className="items-center">
               <Spinner size="large" />
               <VStack space="xs" className="items-center">
-                <Heading
-                  size="md"
-                  className="text-[#333333] font-extrabold tracking-wider"
-                  retro
-                >
+                <Heading size="md" className="text-ink font-extrabold tracking-[2px]">
                   Completing Sign In
                 </Heading>
-                <Text
-                  size="sm"
-                  className="text-[#333333] text-center font-semibold tracking-wide"
-                >
+                <Text size="sm" className="text-ink/80 text-center">
                   Securely connecting your Google account...
                 </Text>
               </VStack>

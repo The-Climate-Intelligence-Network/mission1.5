@@ -5,7 +5,7 @@ const baseStyle = isWeb
   : '';
 
 export const headingStyle = tva({
-  base: `text-[#333333] font-extrabold tracking-wider web:text-shadow-none ios:shadow-opacity-0 android:text-shadow-radius-0 my-0 ${baseStyle}`,
+  base: `text-ink font-heading uppercase tracking-widest leading-tight web:text-shadow-none ios:shadow-opacity-0 android:text-shadow-radius-0 my-0 ${baseStyle}`,
   variants: {
     isTruncated: {
       true: 'truncate',
@@ -26,10 +26,10 @@ export const headingStyle = tva({
       true: 'italic',
     },
     highlight: {
-      true: 'bg-[#FFD966] border-2 border-[#333333] px-3 py-2 shadow-[3px_3px_0_#333333]',
+      true: 'bg-energy border-2 border-ink px-3 py-2',
     },
     retro: {
-      true: 'text-[#333333] border-2 border-[#333333] bg-[#98FB98] px-4 py-2 shadow-[3px_3px_0_#333333] uppercase font-extrabold tracking-widest',
+      true: 'text-ink border-2 border-ink bg-digital px-4 py-2 uppercase font-bold tracking-widest',
     },
     size: {
       '5xl': 'text-6xl',

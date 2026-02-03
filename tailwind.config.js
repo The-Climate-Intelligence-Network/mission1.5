@@ -14,6 +14,20 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        ink: "rgb(var(--color-ink)/<alpha-value>)",
+        surface: "rgb(var(--color-surface)/<alpha-value>)",
+        action: "rgb(var(--color-action)/<alpha-value>)",
+        actionDark: "rgb(var(--color-action-dark)/<alpha-value>)",
+        digital: "rgb(var(--color-digital)/<alpha-value>)",
+        digitalDark: "rgb(var(--color-digital-dark)/<alpha-value>)",
+        energy: "rgb(var(--color-energy)/<alpha-value>)",
+        data: "rgb(var(--color-data)/<alpha-value>)",
+        sky: "rgb(var(--color-sky)/<alpha-value>)",
+        atmosphere: {
+          0: "rgb(var(--color-atmosphere-0)/<alpha-value>)",
+          1: "rgb(var(--color-atmosphere-1)/<alpha-value>)",
+          2: "rgb(var(--color-atmosphere-2)/<alpha-value>)",
+        },
         primary: {
           0: "rgb(var(--color-primary-0)/<alpha-value>)",
           50: "rgb(var(--color-primary-50)/<alpha-value>)",
@@ -170,9 +184,17 @@ module.exports = {
         },
       },
       fontFamily: {
-        heading: undefined,
-        body: undefined,
-        mono: undefined,
+        heading: [
+          "SpaceGrotesk_700Bold",
+          "SpaceGrotesk_600SemiBold",
+          "SpaceGrotesk_500Medium",
+          "SpaceGrotesk_400Regular",
+          "Space Grotesk",
+          "system-ui",
+          "sans-serif",
+        ],
+        body: ["SpaceMono", "Space Mono", "ui-monospace", "monospace"],
+        mono: ["SpaceMono", "Space Mono", "ui-monospace", "monospace"],
         roboto: ["Roboto", "sans-serif"],
       },
       fontWeight: {

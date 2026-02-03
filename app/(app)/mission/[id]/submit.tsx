@@ -11,7 +11,7 @@ import { Icon } from "@/components/ui/icon";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Progress, ProgressFilledTrack } from "@/components/ui/progress";
+import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { InputField } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -235,7 +235,7 @@ const MissionSubmissionPage = () => {
 
       // Read file as base64
       const base64Data = await FileSystem.readAsStringAsync(uri, {
-        encoding: FileSystem.EncodingType.Base64,
+        encoding: "base64",
       });
 
       // Convert base64 to binary for upload
@@ -285,7 +285,7 @@ const MissionSubmissionPage = () => {
 
       // Read file as base64
       const base64Data = await FileSystem.readAsStringAsync(asset.uri, {
-        encoding: FileSystem.EncodingType.Base64,
+        encoding: "base64",
       });
 
       // Convert base64 to binary for upload
@@ -342,7 +342,7 @@ const MissionSubmissionPage = () => {
 
       // Read file as base64
       const base64Data = await FileSystem.readAsStringAsync(document.uri, {
-        encoding: FileSystem.EncodingType.Base64,
+        encoding: "base64",
       });
 
       // Convert base64 to binary for upload
@@ -632,12 +632,11 @@ const MissionSubmissionPage = () => {
                 Step {Math.min(currentStepIndex + 1, guidanceSteps.length)} of {guidanceSteps.length}
               </Text>
             </HStack>
-            <Progress value={progress.progressPercentage} className="h-2 bg-[#E0E0E0] border-2 border-[#333333]">
-              <ProgressFilledTrack 
-                className="bg-[#A2D8FF]" 
-                style={{ width: `${progress.progressPercentage}%` }}
-              />
-            </Progress>
+            <Progress
+              value={progress.progressPercentage}
+              size="sm"
+              className="w-full"
+            />
           </VStack>
         </Card>
 

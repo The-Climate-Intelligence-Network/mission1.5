@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import { createInput } from '@gluestack-ui/input';
-import { View, Pressable, TextInput } from 'react-native';
+import { Pressable, TextInput } from 'react-native';
 import { tva } from '@gluestack-ui/nativewind-utils/tva';
 import {
   withStyleContext,
@@ -10,11 +10,45 @@ import {
 import { cssInterop } from 'nativewind';
 import type { VariantProps } from '@gluestack-ui/nativewind-utils';
 import { PrimitiveIcon, UIIcon } from '@gluestack-ui/icon';
+import { HardShadowFrame } from '../primitives/HardShadowFrame';
+import { radius } from '../tokens/radius';
+import { hardShadows } from '../tokens/shadows';
 
 const SCOPE = 'INPUT';
 
+type InputRootProps = React.ComponentPropsWithoutRef<typeof HardShadowFrame> & {
+  context?: { variant?: string };
+};
+
+const InputRoot = withStyleContext(
+  React.forwardRef<React.ComponentRef<typeof HardShadowFrame>, InputRootProps>(
+    function InputRoot({ className, context, ...props }, ref) {
+      const variant = context?.variant ?? 'outline';
+      const isUnderlined = variant === 'underlined';
+      const isRounded = variant === 'rounded';
+      const radiusValue = isUnderlined
+        ? 0
+        : isRounded
+          ? radius.pill
+          : radius.controlMd;
+
+      return (
+        <HardShadowFrame
+          ref={ref}
+          className={className}
+          radius={radiusValue}
+          shadowSize={isUnderlined ? 0 : hardShadows.sm.offset}
+          borderWidth={undefined}
+          {...props}
+        />
+      );
+    }
+  ),
+  SCOPE
+);
+
 const UIInput = createInput({
-  Root: withStyleContext(View, SCOPE),
+  Root: InputRoot,
   Icon: UIIcon,
   Slot: Pressable,
   Input: TextInput,
@@ -34,7 +68,7 @@ cssInterop(PrimitiveIcon, {
 });
 
 const inputStyle = tva({
-  base: 'border-[#333333] border-2 bg-[#FCFCFC] flex-row overflow-hidden content-center shadow-[2px_2px_0_#333333] data-[hover=true]:border-[#333333] data-[hover=true]:shadow-[3px_3px_0_#333333] data-[focus=true]:border-[#333333] data-[focus=true]:shadow-[3px_3px_0_#333333] data-[focus=true]:hover:border-[#333333] data-[disabled=true]:opacity-40 data-[disabled=true]:hover:border-[#333333] items-center',
+  base: 'border-2 border-ink bg-surface flex-row overflow-hidden content-center items-center data-[hover=true]:border-ink data-[focus=true]:border-digitalDark data-[focus=true]:hover:border-digitalDark data-[disabled=true]:opacity-40 data-[invalid=true]:border-actionDark data-[invalid=true]:data-[focus=true]:border-actionDark',
 
   variants: {
     size: {
@@ -46,19 +80,17 @@ const inputStyle = tva({
 
     variant: {
       underlined:
-        'rounded-none border-b-2 border-[#333333] shadow-none data-[invalid=true]:border-b-2 data-[invalid=true]:border-[#D9534F] data-[invalid=true]:hover:border-[#D9534F] data-[invalid=true]:data-[focus=true]:border-[#D9534F] data-[invalid=true]:data-[focus=true]:hover:border-[#D9534F] data-[invalid=true]:data-[disabled=true]:hover:border-[#D9534F]',
+        'rounded-none border-b-2 border-x-0 border-t-0 data-[focus=true]:web:ring-0 data-[invalid=true]:web:ring-0',
 
-      outline:
-        'rounded-lg border-2 border-[#333333] shadow-[2px_2px_0_#333333] data-[invalid=true]:border-[#D9534F] data-[invalid=true]:shadow-[2px_2px_0_#D9534F] data-[invalid=true]:hover:border-[#D9534F] data-[invalid=true]:data-[focus=true]:border-[#D9534F] data-[invalid=true]:data-[focus=true]:hover:border-[#D9534F] data-[invalid=true]:data-[disabled=true]:hover:border-[#D9534F] data-[focus=true]:web:ring-0 data-[invalid=true]:web:ring-0',
+      outline: 'rounded-[10px] data-[focus=true]:web:ring-0',
 
-      rounded:
-        'rounded-full border-2 border-[#333333] shadow-[2px_2px_0_#333333] data-[invalid=true]:border-[#D9534F] data-[invalid=true]:shadow-[2px_2px_0_#D9534F] data-[invalid=true]:hover:border-[#D9534F] data-[invalid=true]:data-[focus=true]:border-[#D9534F] data-[invalid=true]:data-[focus=true]:hover:border-[#D9534F] data-[invalid=true]:data-[disabled=true]:hover:border-[#D9534F] data-[focus=true]:web:ring-0 data-[invalid=true]:web:ring-0',
+      rounded: 'rounded-full data-[focus=true]:web:ring-0',
     },
   },
 });
 
 const inputIconStyle = tva({
-  base: 'justify-center items-center text-[#333333] fill-none',
+  base: 'justify-center items-center text-ink fill-none',
   parentVariants: {
     size: {
       '2xs': 'h-3 w-3',
@@ -76,7 +108,7 @@ const inputSlotStyle = tva({
 });
 
 const inputFieldStyle = tva({
-  base: 'flex-1 text-[#333333] font-semibold py-0 px-3 placeholder:text-[#666666] h-full ios:leading-[0px] web:cursor-text web:data-[disabled=true]:cursor-not-allowed',
+  base: 'flex-1 text-ink font-body py-0 px-3 placeholder:text-ink/60 h-full ios:leading-[0px] web:cursor-text web:data-[disabled=true]:cursor-not-allowed',
 
   parentVariants: {
     variant: {

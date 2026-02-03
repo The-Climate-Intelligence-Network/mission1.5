@@ -1,169 +1,127 @@
-'use client';
-import React from 'react';
-import { createProgress } from '@gluestack-ui/progress';
-import { View } from 'react-native';
-import { tva } from '@gluestack-ui/nativewind-utils/tva';
-import {
-  withStyleContext,
-  useStyleContext,
-} from '@gluestack-ui/nativewind-utils/withStyleContext';
-import { cssInterop } from 'nativewind';
-import type { VariantProps } from '@gluestack-ui/nativewind-utils';
+"use client";
+import React from "react";
+import { LayoutChangeEvent, View } from "react-native";
+import type { VariantProps } from "@gluestack-ui/nativewind-utils";
+import { tva } from "@gluestack-ui/nativewind-utils/tva";
+import { colors } from "../tokens/colors";
 
-const SCOPE = 'PROGRESS';
-export const UIProgress = createProgress({
-  Root: withStyleContext(View, SCOPE),
-  FilledTrack: View,
-});
-
-cssInterop(UIProgress, { className: 'style' });
-cssInterop(UIProgress.FilledTrack, { className: 'style' });
+const sizeToPx = {
+  xs: 6,
+  sm: 8,
+  md: 10,
+  lg: 12,
+  xl: 14,
+  "2xl": 16,
+} as const;
 
 const progressStyle = tva({
-  base: 'bg-background-300 rounded-full w-full',
+  base: "border-2 border-ink bg-surface overflow-hidden",
   variants: {
     orientation: {
-      horizontal: 'w-full',
-      vertical: 'h-full',
-    },
-    size: {
-      'xs': 'h-1',
-      'sm': 'h-2',
-      'md': 'h-3',
-      'lg': 'h-4',
-      'xl': 'h-5',
-      '2xl': 'h-6',
+      horizontal: "w-full",
+      vertical: "h-full",
     },
   },
-  compoundVariants: [
-    {
-      orientation: 'vertical',
-      size: 'xs',
-      class: 'h-full w-1 justify-end',
-    },
-    {
-      orientation: 'vertical',
-      size: 'sm',
-      class: 'h-full w-2 justify-end',
-    },
-    {
-      orientation: 'vertical',
-      size: 'md',
-      class: 'h-full w-3 justify-end',
-    },
-    {
-      orientation: 'vertical',
-      size: 'lg',
-      class: 'h-full w-4 justify-end',
-    },
-
-    {
-      orientation: 'vertical',
-      size: 'xl',
-      class: 'h-full w-5 justify-end',
-    },
-    {
-      orientation: 'vertical',
-      size: '2xl',
-      class: 'h-full w-6 justify-end',
-    },
-  ],
 });
 
-const progressFilledTrackStyle = tva({
-  base: 'bg-primary-500 rounded-full',
-  parentVariants: {
-    orientation: {
-      horizontal: 'w-full',
-      vertical: 'h-full',
-    },
-    size: {
-      'xs': 'h-1',
-      'sm': 'h-2',
-      'md': 'h-3',
-      'lg': 'h-4',
-      'xl': 'h-5',
-      '2xl': 'h-6',
-    },
-  },
-  parentCompoundVariants: [
-    {
-      orientation: 'vertical',
-      size: 'xs',
-      class: 'h-full w-1',
-    },
-    {
-      orientation: 'vertical',
-      size: 'sm',
-      class: 'h-full w-2',
-    },
-    {
-      orientation: 'vertical',
-      size: 'md',
-      class: 'h-full w-3',
-    },
-    {
-      orientation: 'vertical',
-      size: 'lg',
-      class: 'h-full w-4',
-    },
+type ProgressSize = keyof typeof sizeToPx;
 
+type SegmentedProgressProps = VariantProps<typeof progressStyle> & {
+  value?: number;
+  min?: number;
+  max?: number;
+  segments?: number;
+  size?: ProgressSize;
+  className?: string;
+};
+
+const SegmentedProgress = React.forwardRef<View, SegmentedProgressProps>(
+  function SegmentedProgress(
     {
-      orientation: 'vertical',
-      size: 'xl',
-      class: 'h-full w-5',
+      value = 0,
+      min = 0,
+      max = 100,
+      segments,
+      size = "md",
+      orientation = "horizontal",
+      className,
+      ...props
     },
-    {
-      orientation: 'vertical',
-      size: '2xl',
-      class: 'h-full w-6',
-    },
-  ],
-});
+    ref
+  ) {
+    const [trackLength, setTrackLength] = React.useState(0);
+    const maxSegments = Math.max(1, Math.min(12, segments ?? 12));
+    const minSegmentSize = 6;
+    const gap = 2;
 
-type IProgressProps = VariantProps<typeof progressStyle> &
-  React.ComponentProps<typeof UIProgress>;
-type IProgressFilledTrackProps = VariantProps<typeof progressFilledTrackStyle> &
-  React.ComponentProps<typeof UIProgress.FilledTrack>;
+    const handleLayout = (event: LayoutChangeEvent) => {
+      const { width, height } = event.nativeEvent.layout;
+      setTrackLength(orientation === "horizontal" ? width : height);
+    };
 
-const Progress = React.forwardRef<
-  React.ComponentRef<typeof UIProgress>,
-  IProgressProps
->(function Progress(
-  { className, size = 'md', orientation = 'horizontal', ...props },
-  ref
-) {
-  return (
-    <UIProgress
-      ref={ref}
-      {...props}
-      className={progressStyle({ size, orientation, class: className })}
-      context={{ size, orientation }}
-      orientation={orientation}
-    />
-  );
-});
+    const autoSegments =
+      trackLength > 0
+        ? Math.max(
+            1,
+            Math.min(
+              maxSegments,
+              Math.floor((trackLength + gap) / (minSegmentSize + gap))
+            )
+          )
+        : maxSegments;
 
-const ProgressFilledTrack = React.forwardRef<
-  React.ComponentRef<typeof UIProgress.FilledTrack>,
-  IProgressFilledTrackProps
->(function ProgressFilledTrack({ className, ...props }, ref) {
-  const { size: parentSize, orientation: parentOrientation } =
-    useStyleContext(SCOPE);
+    const segmentCount = segments ?? autoSegments;
+    const progressRatio =
+      max <= min ? 0 : Math.max(0, Math.min(1, (value - min) / (max - min)));
+    const filledSegments = Math.round(progressRatio * segmentCount);
 
-  return (
-    <UIProgress.FilledTrack
-      ref={ref}
-      className={progressFilledTrackStyle({
-        parentVariants: {
-          size: parentSize,
-          orientation: parentOrientation,
-        },
-        class: className,
-      })}
-      {...props}
-    />
-  );
-});
+    const thickness = sizeToPx[size] ?? sizeToPx.md;
+    const trackStyle =
+      orientation === "horizontal"
+        ? { height: thickness }
+        : { width: thickness };
+
+    return (
+      <View
+        ref={ref}
+        {...props}
+        onLayout={handleLayout}
+        className={progressStyle({ orientation, class: className })}
+        style={trackStyle}
+      >
+        <View
+          className={
+            orientation === "horizontal" ? "flex-row gap-1" : "flex-col gap-1"
+          }
+          style={{ flex: 1 }}
+        >
+          {Array.from({ length: segmentCount }).map((_, index) => {
+            const isFilled = index < filledSegments;
+            return (
+              <View
+                // eslint-disable-next-line react/no-array-index-key
+                key={`${segmentCount}-${index}`}
+                style={{
+                  flex: 1,
+                  minWidth: orientation === "horizontal" ? minSegmentSize : undefined,
+                  minHeight: orientation === "vertical" ? minSegmentSize : undefined,
+                  borderRadius: 3,
+                  backgroundColor: isFilled ? colors.digital : colors.surface,
+                }}
+              />
+            );
+          })}
+        </View>
+      </View>
+    );
+  }
+);
+
+const Progress = SegmentedProgress;
+
+const ProgressFilledTrack = () => null;
+
+Progress.displayName = "Progress";
+ProgressFilledTrack.displayName = "ProgressFilledTrack";
 
 export { Progress, ProgressFilledTrack };

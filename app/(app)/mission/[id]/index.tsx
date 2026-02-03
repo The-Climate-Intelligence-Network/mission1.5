@@ -151,13 +151,13 @@ const MissionDetailsPage = () => {
     ) {
       return {
         text: `${mission.submission_progress}% Complete`,
-        color: "text-blue-600",
+        color: "text-sky",
         icon: Play,
       };
     } else if (mission.is_bookmarked) {
-      return { text: "Saved", color: "text-purple-600", icon: BookmarkCheck };
+      return { text: "Saved", color: "text-action", icon: BookmarkCheck };
     } else {
-      return { text: "Available", color: "text-green-600", icon: Target };
+      return { text: "Available", color: "text-data", icon: Target };
     }
   };
 
@@ -165,17 +165,17 @@ const MissionDetailsPage = () => {
     return (
       <SafeAreaView
         style={{ flex: 1 }}
-        className="bg-white dark:bg-background-dark"
+        className="bg-surface"
       >
-        <Box className="flex-1 justify-center items-center p-6">
-          <Card className="p-8 border-2 border-[#333333] shadow-[4px_4px_0_#333333] bg-[#FCFCFC]">
+        <Box variant="plain" className="flex-1 justify-center items-center p-6">
+          <Card className="p-8">
             <VStack space="md" className="items-center">
               <Image
                 source={require("@/assets/icon.png")}
                 style={{ width: 48, height: 48 }}
                 resizeMode="contain"
               />
-              <Text className="text-[#333333] font-semibold tracking-wide">
+              <Text className="font-semibold tracking-wide">
                 Loading mission details...
               </Text>
             </VStack>
@@ -189,18 +189,18 @@ const MissionDetailsPage = () => {
     return (
       <SafeAreaView
         style={{ flex: 1 }}
-        className="bg-[#FCFCFC]"
+        className="bg-surface"
       >
-        <Box className="flex-1 justify-center items-center p-6">
+        <Box variant="plain" className="flex-1 justify-center items-center p-6">
           <VStack space="md" className="items-center">
-            <Text retro className="text-[#333333]">
+            <Text retro>
               {error || "Mission not found"}
             </Text>
             <Button 
               onPress={() => router.back()}
-              className="bg-[#98FB98] border-2 border-[#333333] shadow-[4px_4px_0_#333333]"
+              action="primary"
             >
-              <Text className="text-[#333333] font-bold tracking-wide">Go Back</Text>
+              <Text className="font-bold tracking-wide">Go Back</Text>
             </Button>
           </VStack>
         </Box>
@@ -213,7 +213,7 @@ const MissionDetailsPage = () => {
   return (
     <SafeAreaView
       style={{ flex: 1 }}
-      className="bg-[#FCFCFC]"
+      className="bg-surface"
     >
       <ScrollView className="flex-1">
         {/* Header */}
@@ -223,7 +223,7 @@ const MissionDetailsPage = () => {
             style={{ width: 48, height: 48 }}
             resizeMode="contain"
           />
-          <Heading retro size="xl" className="text-[#333333] font-bold tracking-wide text-center">
+          <Heading size="xl" className="text-center">
             Mission Details
           </Heading>
           
@@ -232,22 +232,22 @@ const MissionDetailsPage = () => {
             variant="solid"
             size="sm"
             onPress={() => router.back()}
-            className="bg-[#FCFCFC] border-2 border-[#333333] shadow-[2px_2px_0_#333333]"
+            className="bg-surface border-2 border-ink "
           >
             <HStack space="sm" className="items-center">
-              <Icon as={ArrowLeft} size="sm" className="text-[#333333]" />
-              <Text className="text-[#333333] font-bold tracking-wide">Go Back</Text>
+              <Icon as={ArrowLeft} size="sm" className="text-ink" />
+              <Text className="text-ink font-bold tracking-wide">Go Back</Text>
             </HStack>
           </Button>
         </VStack>
 
-        <Box className="p-6">
+        <Box variant="plain" className="p-6">
           {/* Mission Header */}
-          <Card className="p-6 mb-6 bg-[#FCFCFC] border-2 border-[#333333] shadow-[4px_4px_0_#333333]">
+          <Card className="p-6 mb-6">
             <VStack space="lg">
               {/* Thumbnail */}
               {thumbnailUrl && (
-                <Box className="w-full h-48 rounded-lg overflow-hidden border-2 border-[#333333]">
+                <Box variant="plain" className="w-full h-48 rounded-lg overflow-hidden border-2 border-ink">
                   <Image
                     source={{ uri: thumbnailUrl }}
                     className="w-full h-full"
@@ -261,7 +261,7 @@ const MissionDetailsPage = () => {
                 <VStack space="xs">
                   <Heading retro
                     size="xl"
-                    className="text-[#333333] font-bold tracking-wide"
+                    className="text-ink font-bold tracking-wide"
                   >
                     {mission.title}
                   </Heading>
@@ -269,9 +269,9 @@ const MissionDetailsPage = () => {
                     <Icon
                       as={statusInfo.icon}
                       size="sm"
-                      className="text-[#333333]"
+                      className="text-ink"
                     />
-                    <Text retro size="sm" className="text-[#333333]">
+                    <Text retro size="sm" className="text-ink">
                       {statusInfo.text}
                     </Text>
                   </HStack>
@@ -279,7 +279,7 @@ const MissionDetailsPage = () => {
 
                 <Text retro
                   size="md"
-                  className="text-[#333333]"
+                  className="text-ink"
                 >
                   {mission.description}
                 </Text>
@@ -287,19 +287,19 @@ const MissionDetailsPage = () => {
                 {/* Mission Info */}
                 <VStack space="xs">
                   <HStack space="xs" className="items-center">
-                    <Icon as={Building} size="sm" className="text-[#333333]" />
+                    <Icon as={Building} size="sm" className="text-ink" />
                     <Text retro
                       size="sm"
-                      className="text-[#333333]"
+                      className="text-ink"
                     >
                       {mission.organization_name}
                     </Text>
                   </HStack>
                   <HStack space="xs" className="items-center">
-                    <Icon as={Users} size="sm" className="text-[#333333]" />
+                    <Icon as={Users} size="sm" className="text-ink" />
                     <Text retro
                       size="sm"
-                      className="text-[#333333]"
+                      className="text-ink"
                     >
                       {mission.participants_count} participants
                     </Text>
@@ -307,19 +307,19 @@ const MissionDetailsPage = () => {
 
                   <HStack space="md" className="items-center">
                     <HStack space="xs" className="items-center">
-                      <Icon as={Award} size="sm" className="text-[#333333]" />
+                      <Icon as={Award} size="sm" className="text-ink" />
                       <Text retro
                         size="sm"
-                        className="text-[#333333]"
+                        className="text-ink"
                       >
                         {mission.points_awarded} points
                       </Text>
                     </HStack>
                     <HStack space="xs" className="items-center">
-                      <Icon as={Zap} size="sm" className="text-[#333333]" />
+                      <Icon as={Zap} size="sm" className="text-ink" />
                       <Text retro
                         size="sm"
-                        className="text-[#333333]"
+                        className="text-ink"
                       >
                         {mission.energy_awarded} energy
                       </Text>
@@ -331,19 +331,22 @@ const MissionDetailsPage = () => {
               {/* Action Buttons */}
               <HStack space="md">
                 <Button
-                  variant="solid"
                   size="sm"
                   onPress={handleBookmarkToggle}
                   disabled={actionLoading === "bookmark"}
-                  className="flex-1 bg-[#FCFCFC] border-2 border-[#333333] shadow-[4px_4px_0_#333333]"
+                  action="secondary"
+                  variant="outline"
+                  className="flex-1"
                 >
                   <HStack space="sm" className="items-center">
                     <Icon
                       as={mission.is_bookmarked ? BookmarkCheck : Bookmark}
                       size="sm"
-                      className="text-[#333333]"
+                      className="text-ink"
                     />
-                    <Text className="text-[#333333] font-bold tracking-wide">{mission.is_bookmarked ? "Saved" : "Save"}</Text>
+                    <Text className="font-bold tracking-wide">
+                      {mission.is_bookmarked ? "Saved" : "Save"}
+                    </Text>
                   </HStack>
                 </Button>
 
@@ -351,13 +354,14 @@ const MissionDetailsPage = () => {
                   <Button
                     variant="solid"
                     size="sm"
-                    className="flex-1 bg-[#98FB98] border-2 border-[#333333] shadow-[4px_4px_0_#333333]"
+                    action="positive"
+                    className="flex-1"
                     disabled
                   >
                     <VStack className="items-center justify-center">
                       <HStack space="xs" className="items-center">
-                        <Icon as={CheckCircle} size="sm" className="text-[#333333]" />
-                        <Text retro className="text-[#333333] font-bold">Completed</Text>
+                        <Icon as={CheckCircle} size="sm" className="text-ink" />
+                        <Text retro className="font-bold">Completed</Text>
                       </HStack>
                     </VStack>
                   </Button>
@@ -366,11 +370,12 @@ const MissionDetailsPage = () => {
                     variant="solid"
                     size="sm"
                     onPress={() => router.push(`/mission/${mission.id}/submit`)}
-                    className="flex-1 bg-[#A2D8FF] border-2 border-[#333333] shadow-[4px_4px_0_#333333]"
+                    action="primary"
+                    className="flex-1"
                   >
                     <HStack space="sm" className="items-center">
-                      <Icon as={Play} size="sm" className="text-[#333333]" />
-                      <Text className="text-[#333333] font-bold tracking-wide">
+                      <Icon as={Play} size="sm" className="text-ink" />
+                      <Text className="font-bold tracking-wide">
                         {mission.submission_status === "completed" ? "Review" : "Continue"}
                       </Text>
                     </HStack>
@@ -381,12 +386,13 @@ const MissionDetailsPage = () => {
                     size="sm"
                     onPress={handleStartMission}
                     disabled={actionLoading === "start"}
-                    className="flex-1 bg-[#98FB98] border-2 border-[#333333] shadow-[4px_4px_0_#333333]"
+                    action="positive"
+                    className="flex-1"
                   >
                     <VStack className="items-center justify-center">
                       <HStack space="xs" className="items-center">
-                        <Icon as={Target} size="sm" className="text-[#333333]" />
-                        <Text retro className="text-[#333333] font-bold">Start Mission</Text>
+                        <Icon as={Target} size="sm" className="text-ink" />
+                        <Text retro className="font-bold">Start Mission</Text>
                       </HStack>
                     </VStack>
                   </Button>
@@ -397,37 +403,32 @@ const MissionDetailsPage = () => {
 
           {/* Instructions */}
           {instructions.length > 0 && (
-            <Card className="p-6 mb-6 bg-[#FCFCFC] border-2 border-[#333333] shadow-[4px_4px_0_#333333]">
+            <Card className="p-6 mb-6">
               <VStack space="lg">
-                <Heading retro
-                  size="lg"
-                  className="text-[#333333] font-bold tracking-wide"
-                >
-                  📋 Instructions
-                </Heading>
+                <Heading size="lg">Instructions</Heading>
 
                 <VStack space="md">
                   {instructions.map((instruction, index) => (
                     <Card
                       key={instruction.id}
-                      className="p-4 bg-[#FCFCFC] border-2 border-[#333333] shadow-[2px_2px_0_#333333]"
+                      className="p-4"
                     >
                       <HStack space="md" className="items-start">
-                        <Box className="w-8 h-8 bg-[#98FB98] border-2 border-[#333333] rounded-full items-center justify-center">
+                        <Box className="w-8 h-8 bg-digital border-2 border-ink rounded-full items-center justify-center">
                           <Text retro
                             size="sm"
-                            className="font-bold text-[#333333]"
+                            className="font-bold text-ink"
                           >
                             {index + 1}
                           </Text>
                         </Box>
                         <VStack space="xs" className="flex-1">
-                          <Text retro className="font-bold text-[#333333]">
+                          <Text retro className="font-bold text-ink">
                             {instruction.title}
                           </Text>
                           <Text retro
                             size="sm"
-                            className="text-[#333333]"
+                            className="text-ink"
                           >
                             {instruction.description}
                           </Text>
@@ -442,11 +443,11 @@ const MissionDetailsPage = () => {
 
           {/* Guidance Steps */}
           {guidanceSteps.length > 0 && (
-            <Card className="p-6 mb-6 bg-[#FCFCFC] border-2 border-[#333333] shadow-[4px_4px_0_#333333]">
+            <Card className="p-6 mb-6">
               <VStack space="lg">
                 <Heading retro
                   size="lg"
-                  className="text-[#333333] font-bold tracking-wide"
+                  className="text-ink font-bold tracking-wide"
                 >
                   🎯 Evidence Requirements
                 </Heading>
@@ -455,25 +456,25 @@ const MissionDetailsPage = () => {
                   {guidanceSteps.map((step, index) => (
                     <Card
                       key={step.id}
-                      className="p-4 bg-[#FFE4B5] border-2 border-[#333333] shadow-[2px_2px_0_#333333]"
+                      className="p-4 bg-energy border-2 border-ink "
                     >
                       <VStack space="md">
                         <HStack space="md" className="items-start">
-                          <Box className="w-8 h-8 bg-[#DDA0DD] border-2 border-[#333333] rounded-full items-center justify-center">
+                          <Box className="w-8 h-8 bg-action border-2 border-ink rounded-full items-center justify-center">
                             <Text retro
                               size="sm"
-                              className="font-bold text-[#333333]"
+                              className="font-bold text-ink"
                             >
                               {index + 1}
                             </Text>
                           </Box>
                           <VStack space="xs" className="flex-1">
-                            <Text retro className="font-bold text-[#333333]">
+                            <Text retro className="font-bold text-ink">
                               {step.title}
                             </Text>
                             <Text retro
                               size="sm"
-                              className="text-[#333333]"
+                              className="text-ink"
                             >
                               {step.description}
                             </Text>
@@ -484,7 +485,7 @@ const MissionDetailsPage = () => {
                           <VStack space="xs">
                             <Text retro
                               size="sm"
-                              className="font-bold text-[#333333]"
+                              className="font-bold text-ink"
                             >
                               Required Evidence:
                             </Text>
@@ -492,11 +493,11 @@ const MissionDetailsPage = () => {
                               {step.requiredEvidence.map((evidence, idx) => (
                                 <Badge
                                   key={idx}
-                                  className="bg-[#98FB98] border border-[#333333] shadow-[1px_1px_0_#333333]"
+                                  className="bg-digital border border-ink "
                                 >
                                   <Text retro
                                     size="xs"
-                                    className="text-[#333333] font-bold"
+                                    className="text-ink font-bold"
                                   >
                                     {evidence}
                                   </Text>
@@ -514,20 +515,20 @@ const MissionDetailsPage = () => {
           )}
 
           {/* Additional Info */}
-          <Card className="p-6 bg-[#98FB98] border-2 border-[#333333] shadow-[4px_4px_0_#333333]">
+          <Card className="p-6 bg-digital border-2 border-ink ">
             <VStack space="md" className="items-center">
-              <Text retro className="font-bold text-[#333333] text-center text-lg">
+              <Text retro className="font-bold text-ink text-center text-lg">
                 � Ready to make an impact?
               </Text>
               <Text retro
                 size="sm"
-                className="text-[#333333] text-center"
+                className="text-ink text-center"
               >
                 Follow the instructions above and submit your evidence to complete this mission and earn awesome rewards! 
               </Text>
               <Text retro
                 size="xs"
-                className="text-[#333333] text-center opacity-80"
+                className="text-ink text-center opacity-80"
               >
                 Every action counts in our fight against climate change! 🌍
               </Text>
@@ -540,3 +541,5 @@ const MissionDetailsPage = () => {
 };
 
 export default MissionDetailsPage;
+
+

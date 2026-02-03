@@ -186,7 +186,7 @@ export const uploadAvatar = async (
     // Read file as base64
     console.log('Reading file:', imageUri);
     const base64Data = await FileSystem.readAsStringAsync(imageUri, {
-      encoding: FileSystem.EncodingType.Base64,
+      encoding: "base64",
     });
     
     console.log('Base64 data length:', base64Data.length);

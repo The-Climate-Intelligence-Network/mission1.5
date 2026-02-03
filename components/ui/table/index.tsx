@@ -35,13 +35,13 @@ type ITableProps = React.ComponentProps<typeof ExpoTable>;
 type ITableHeaderProps = React.ComponentProps<typeof ExpoTHead>;
 type ITableBodyProps = React.ComponentProps<typeof ExpoTBody>;
 type ITableFooterProps = React.ComponentProps<typeof ExpoTFoot>;
-type ITableHeadProps = React.ComponentProps<typeof View | typeof Text> & {
-  useRNView?: boolean;
-};
+type ITableHeadProps =
+  | ({ useRNView?: true } & React.ComponentProps<typeof View>)
+  | ({ useRNView?: false } & React.ComponentProps<typeof Text>);
 type ITableRowProps = React.ComponentProps<typeof ExpoTR>;
-type ITableDataProps = React.ComponentProps<typeof View | typeof Text> & {
-  useRNView?: boolean;
-};
+type ITableDataProps =
+  | ({ useRNView?: true } & React.ComponentProps<typeof View>)
+  | ({ useRNView?: false } & React.ComponentProps<typeof Text>);
 type ITableCaptionProps = React.ComponentProps<typeof ExpoTCaption>;
 
 const Table = React.forwardRef<
@@ -115,26 +115,27 @@ const TableFooter = React.forwardRef<
 });
 
 const TableHead = React.forwardRef<
-  React.ComponentRef<typeof View | typeof Text>,
+  React.ComponentRef<typeof View> | React.ComponentRef<typeof Text>,
   ITableHeadProps
 >(function TableHead({ useRNView = false, className, ...props }, ref) {
   if (useRNView) {
+    const viewProps = props as React.ComponentProps<typeof View>;
     return (
       <View
-        ref={ref}
+        ref={ref as React.Ref<React.ComponentRef<typeof View>>}
         className={tableHeadStyle({ class: className })}
-        {...props}
-      />
-    );
-  } else {
-    return (
-      <Text
-        ref={ref}
-        className={tableHeadStyle({ class: className })}
-        {...props}
+        {...viewProps}
       />
     );
   }
+  const textProps = props as React.ComponentProps<typeof Text>;
+  return (
+    <Text
+      ref={ref as React.Ref<React.ComponentRef<typeof Text>>}
+      className={tableHeadStyle({ class: className })}
+      {...textProps}
+    />
+  );
 });
 
 const TableRow = React.forwardRef<
@@ -159,26 +160,27 @@ const TableRow = React.forwardRef<
 });
 
 const TableData = React.forwardRef<
-  React.ComponentRef<typeof View | typeof Text>,
+  React.ComponentRef<typeof View> | React.ComponentRef<typeof Text>,
   ITableDataProps
 >(function TableData({ useRNView = false, className, ...props }, ref) {
   if (useRNView) {
+    const viewProps = props as React.ComponentProps<typeof View>;
     return (
       <View
-        ref={ref}
+        ref={ref as React.Ref<React.ComponentRef<typeof View>>}
         className={tableDataStyle({ class: className })}
-        {...props}
-      />
-    );
-  } else {
-    return (
-      <Text
-        ref={ref}
-        className={tableDataStyle({ class: className })}
-        {...props}
+        {...viewProps}
       />
     );
   }
+  const textProps = props as React.ComponentProps<typeof Text>;
+  return (
+    <Text
+      ref={ref as React.Ref<React.ComponentRef<typeof Text>>}
+      className={tableDataStyle({ class: className })}
+      {...textProps}
+    />
+  );
 });
 
 const TableCaption = React.forwardRef<
