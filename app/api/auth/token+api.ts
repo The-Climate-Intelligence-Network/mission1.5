@@ -2,7 +2,7 @@ import {
   GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET,
   GOOGLE_REDIRECT_URI,
-} from "@/lib/constants";
+} from "@/src/core/config/constants";
 import { createClient } from "@supabase/supabase-js";
 
 // Create a Supabase client for server-side operations

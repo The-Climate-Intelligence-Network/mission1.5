@@ -1,19 +1,19 @@
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { SafeAreaView, Image } from "react-native";
-import { Box } from "@/components/ui/box";
-import { Text } from "@/components/ui/text";
-import { Heading } from "@/components/ui/heading";
-import { VStack } from "@/components/ui/vstack";
-import { HStack } from "@/components/ui/hstack";
-import { Icon } from "@/components/ui/icon";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Input, InputField, InputIcon } from "@/components/ui/input";
-import { ScrollView } from "@/components/ui/scroll-view";
+import { Box } from "@/src/ui/box";
+import { Text } from "@/src/ui/text";
+import { Heading } from "@/src/ui/heading";
+import { VStack } from "@/src/ui/vstack";
+import { HStack } from "@/src/ui/hstack";
+import { Icon } from "@/src/ui/icon";
+import { Button } from "@/src/ui/button";
+import { Card } from "@/src/ui/card";
+import { Input, InputField, InputIcon } from "@/src/ui/input";
+import { ScrollView } from "@/src/ui/scroll-view";
 import { KeyRound, Lock, CheckCircle } from "lucide-react-native";
-import { authService } from "@/services";
-import { useAppToast } from "@/lib/toast-utils";
+import { authService } from "@/src/features/auth/logic";
+import { useAppToast } from "@/src/core/utils/toast";
 
 export default function ResetPassword() {
   const [password, setPassword] = useState("");
@@ -66,46 +66,70 @@ export default function ResetPassword() {
     >
       <ScrollView className="flex-1" contentContainerStyle={{ flexGrow: 1 }}>
         <Box className="flex-1 justify-center p-6">
-          <VStack space="xl" className="items-center">
+          <VStack space="xl" className="items-start">
             {/* Header */}
-            <VStack space="md" className="items-center mb-4">
+            <VStack space="md" className="items-start mb-4">
               <Image
                 source={require("@/assets/icon.png")}
                 style={{ width: 64, height: 64 }}
                 resizeMode="contain"
               />
-              <VStack space="md" className="items-center">
+              <VStack space="xs" className="items-start">
+                <Box className="px-3 py-1 border-2 border-ink bg-surface shadow-retro-hard-sm">
+                  <Text size="xs" className="text-data font-bold tracking-[2px] uppercase">
+                    Credential Reset Protocol
+                  </Text>
+                </Box>
                 <Heading
                   size="2xl"
-                  className="text-[#333333] text-center font-extrabold tracking-wider"
+                  className="text-ink font-extrabold tracking-[2px] uppercase"
                   retro
                 >
-                  Reset Your Password
+                  Reset Control Key
                 </Heading>
                 <Text
-                  size="lg"
-                  className="text-[#333333] text-center font-semibold tracking-wide"
+                  size="md"
+                  className="text-ink/80 font-medium"
                 >
-                  Enter your new password below
+                  Establish a new synchronization key for your terminal node.
                 </Text>
               </VStack>
             </VStack>
 
             {/* Reset Password Card */}
-            <Card className="w-full max-w-sm p-8">
-              <VStack space="lg" className="items-center">
+            <Card className="w-full max-w-sm p-7">
+              <VStack space="lg">
+                <VStack space="xs">
+                  <Text size="xs" className="text-ink/70 uppercase tracking-[2px]">
+                    Security Override
+                  </Text>
+                  <Heading
+                    size="lg"
+                    className="text-ink font-extrabold tracking-[2px]"
+                    retro
+                  >
+                    New Sequence
+                  </Heading>
+                  <Text
+                    size="sm"
+                    className="text-ink/80 font-medium"
+                  >
+                    Define a secure access sequence to restore terminal connectivity.
+                  </Text>
+                </VStack>
+
                 {/* New Password Input */}
                 <VStack space="xs" className="w-full">
                   <Text
                     size="sm"
-                    className="text-[#333333] font-bold tracking-wide"
+                    className="text-ink font-bold tracking-wide"
                   >
-                    New Password
+                    New Sequence
                   </Text>
                   <Input className="w-full">
                     <InputIcon as={Lock} className="ml-3" />
                     <InputField
-                      placeholder="Enter new password"
+                      placeholder="Define sequence"
                       value={password}
                       onChangeText={setPassword}
                       secureTextEntry={true}
@@ -118,14 +142,14 @@ export default function ResetPassword() {
                 <VStack space="xs" className="w-full">
                   <Text
                     size="sm"
-                    className="text-[#333333] font-bold tracking-wide"
+                    className="text-ink font-bold tracking-wide"
                   >
-                    Confirm New Password
+                    Confirm Sequence
                   </Text>
                   <Input className="w-full">
                     <InputIcon as={Lock} className="ml-3" />
                     <InputField
-                      placeholder="Confirm new password"
+                      placeholder="Re-enter sequence"
                       value={confirmPassword}
                       onChangeText={setConfirmPassword}
                       secureTextEntry={true}
@@ -143,23 +167,17 @@ export default function ResetPassword() {
                   disabled={loading}
                   onPress={handlePasswordReset}
                 >
-                  <HStack space="md" className="items-center">
-                    <Icon as={CheckCircle} size="md" className="text-[#333333]" />
-                    <Text size="lg" className="text-[#333333] font-semibold">
-                      {loading ? "Updating Password..." : "Update Password"}
+                  <HStack space="md" className="items-center justify-center">
+                    <CheckCircle size={20} color="#333333" />
+                    <Text size="lg" className="text-ink font-bold uppercase tracking-widest">
+                      {loading ? "Updating..." : "Commit Sequence"}
                     </Text>
                   </HStack>
                 </Button>
 
-                <VStack space="xs" className="items-center">
-                  <Text
-                    size="md"
-                    className="text-[#666666] text-center font-medium tracking-wide"
-                  >
-                    Make sure your password is at least 6 characters long and
-                    secure
-                  </Text>
-                </VStack>
+                <Text size="xs" className="text-ink/60 font-medium italic">
+                  Ensure your sequence is complex and stored securely in your physical log.
+                </Text>
               </VStack>
             </Card>
           </VStack>

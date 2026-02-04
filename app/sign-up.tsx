@@ -6,17 +6,17 @@ import {
   Platform,
   Image,
 } from "react-native";
-import { Box } from "@/components/ui/box";
-import { Text } from "@/components/ui/text";
-import { Heading } from "@/components/ui/heading";
-import { VStack } from "@/components/ui/vstack";
-import { HStack } from "@/components/ui/hstack";
-import { Icon } from "@/components/ui/icon";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Input, InputField, InputIcon } from "@/components/ui/input";
-import { ScrollView } from "@/components/ui/scroll-view";
-import { Spinner } from "@/components/ui/spinner";
+import { Box } from "@/src/ui/box";
+import { Text } from "@/src/ui/text";
+import { Heading } from "@/src/ui/heading";
+import { VStack } from "@/src/ui/vstack";
+import { HStack } from "@/src/ui/hstack";
+import { Icon } from "@/src/ui/icon";
+import { Button, ButtonText } from "@/src/ui/button";
+import { Card } from "@/src/ui/card";
+import { Input, InputField, InputIcon } from "@/src/ui/input";
+import { ScrollView } from "@/src/ui/scroll-view";
+import { Spinner } from "@/src/ui/spinner";
 import {
   UserPlus,
   Mail,
@@ -25,8 +25,8 @@ import {
   User,
   Github,
 } from "lucide-react-native";
-import { useSession } from "@/context/auth";
-import { useAppToast } from "@/lib/toast-utils";
+import { useSession } from "@/src/core/auth/AuthProvider";
+import { useAppToast } from "@/src/core/utils/toast";
 import { GoogleIcon } from "@/assets/ico/google-icon";
 import { AppleIcon } from "@/assets/ico/apple-icon";
 
@@ -261,48 +261,55 @@ export default function SignUp() {
           </HStack>
 
           <Box className="flex-1 justify-center">
-            <VStack space="md" className="items-center">
+            <VStack space="xl" className="items-start">
               {/* Header */}
-              <VStack space="md" className="items-center mb-2">
+              <VStack space="md" className="items-start mb-2">
                 <Image
                   source={require("@/assets/icon.png")}
                   style={{ width: 64, height: 64 }}
                   resizeMode="contain"
                 />
-                <VStack space="md" className="items-center">
+                <VStack space="xs" className="items-start">
+                  <Box className="px-3 py-1 border-2 border-ink bg-surface shadow-retro-hard-sm">
+                    <Text size="xs" className="text-data font-bold tracking-[2px] uppercase">
+                      New Identity Protocol
+                    </Text>
+                  </Box>
                   <Heading
                     size="2xl"
-                    className="text-[#333333] text-center font-extrabold tracking-wider"
+                    className="text-ink font-extrabold tracking-[2px] uppercase"
                     retro
                   >
                     Join the Network
                   </Heading>
                   <Text
-                    size="lg"
-                    className="text-[#333333] text-center font-semibold tracking-wide"
+                    size="md"
+                    className="text-ink/80 font-medium"
                   >
-                    Start making a difference in climate research
+                    Initialize your node to start the climate synchronization.
                   </Text>
                 </VStack>
               </VStack>
 
               {/* Sign Up Card */}
-              <Card className="w-full max-w-sm p-8">
-                <VStack space="lg" className="items-center">
-                  <VStack space="md" className="items-center">
+              <Card className="w-full max-w-sm p-7">
+                <VStack space="lg">
+                  <VStack space="xs">
+                    <Text size="xs" className="text-ink/70 uppercase tracking-[2px]">
+                      Mission 1.5 Node
+                    </Text>
                     <Heading
                       size="lg"
-                      className="text-[#333333] font-extrabold tracking-wider"
+                      className="text-ink font-extrabold tracking-[2px]"
                       retro
                     >
-                      Mission 1.5
+                      Command Console
                     </Heading>
                     <Text
                       size="sm"
-                      className="text-[#333333] text-center font-semibold tracking-wide"
+                      className="text-ink/80 font-medium"
                     >
-                      Create your account to start contributing to climate
-                      science
+                      Secure your access to the climate science field hub.
                     </Text>
                   </VStack>
 
@@ -535,62 +542,58 @@ export default function SignUp() {
                   </Button>
 
                   {/* Sign In Link */}
-                  <VStack space="xs" className="items-center">
-                    <Text size="lg" className="text-[#333333]">
-                      Already have an account?
-                    </Text>
-                    <Button
-                      variant="link"
-                      size="sm"
-                      onPress={() => router.push("/sign-in")}
-                    >
-                      <Text
-                        size="lg"
-                        className="text-primary-500 font-bold tracking-wide"
-                      >
-                        Sign In
+                  <VStack space="md" className="items-start pt-2">
+                    <VStack space="xs">
+                      <Text size="sm" className="text-ink/60 font-bold uppercase tracking-widest">
+                        Already Synchronized?
                       </Text>
-                    </Button>
-                  </VStack>
+                      <Button
+                        variant="outline"
+                        action="secondary"
+                        className="w-full"
+                        onPress={() => router.push("/sign-in")}
+                      >
+                        <ButtonText size="md" className="font-bold uppercase tracking-widest">
+                          Sign In to Terminal
+                        </ButtonText>
+                      </Button>
+                    </VStack>
 
-                  <VStack space="xs" className="items-center">
-                    <Text size="md" className="text-[#666666] text-center">
-                      By creating an account, you agree to our Terms of Service
-                      and Privacy Policy
+                    <Text size="xs" className="text-ink/60 font-medium italic">
+                      Initialization creates a permanent bond with our Terms of Service and Privacy Protocols.
                     </Text>
                   </VStack>
                 </VStack>
               </Card>
 
               {/* Benefits */}
-              <VStack space="md" className="w-full max-w-sm">
-                <Text
-                  size="lg"
-                  className="text-[#333333] text-center font-semibold"
-                >
-                  Join thousands of climate enthusiasts:
-                </Text>
-                <VStack space="xs">
-                  <HStack space="md" className="items-center">
-                    <Box className="w-2 h-2 bg-green-500 rounded-full" />
-                    <Text size="md" className="text-[#333333]">
-                      Contribute to real climate research
-                    </Text>
-                  </HStack>
-                  <HStack space="md" className="items-center">
-                    <Box className="w-2 h-2 bg-blue-500 rounded-full" />
-                    <Text size="md" className="text-[#333333]">
-                      Access exclusive missions and data
-                    </Text>
-                  </HStack>
-                  <HStack space="md" className="items-center">
-                    <Box className="w-2 h-2 bg-purple-500 rounded-full" />
-                    <Text size="md" className="text-[#333333]">
-                      Earn recognition for your contributions
-                    </Text>
-                  </HStack>
+              <Card variant="secondary" className="w-full border-2 p-6">
+                <VStack space="md">
+                  <Text size="xs" className="text-ink font-bold tracking-widest uppercase">
+                    Active Node Benefits
+                  </Text>
+                  <VStack space="sm">
+                    <HStack space="md" className="items-start">
+                      <Box className="w-5 h-5 bg-digital border-2 border-ink items-center justify-center">
+                        <Text size="xs" className="font-bold">1</Text>
+                      </Box>
+                      <Text size="sm" className="text-ink/80 flex-1">Contribute to real climate research datasets</Text>
+                    </HStack>
+                    <HStack space="md" className="items-start">
+                      <Box className="w-5 h-5 bg-energy border-2 border-ink items-center justify-center">
+                        <Text size="xs" className="font-bold">2</Text>
+                      </Box>
+                      <Text size="sm" className="text-ink/80 flex-1">Access exclusive missions and field kits</Text>
+                    </HStack>
+                    <HStack space="md" className="items-start">
+                      <Box className="w-5 h-5 bg-sky border-2 border-ink items-center justify-center">
+                        <Text size="xs" className="font-bold">3</Text>
+                      </Box>
+                      <Text size="sm" className="text-ink/80 flex-1">Earn status and energy within the network</Text>
+                    </HStack>
+                  </VStack>
                 </VStack>
-              </VStack>
+              </Card>
             </VStack>
           </Box>
         </Box>

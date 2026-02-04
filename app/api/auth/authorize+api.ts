@@ -4,7 +4,7 @@ import {
   APP_SCHEME,
   GOOGLE_AUTH_URL,
   GOOGLE_REDIRECT_URI,
-} from "@/lib/constants";
+} from "@/src/core/config/constants";
 
 export async function GET(request: Request) {
   if (!GOOGLE_CLIENT_ID) {

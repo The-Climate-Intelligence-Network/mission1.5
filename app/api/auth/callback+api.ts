@@ -1,4 +1,4 @@
-import { BASE_URL, APP_SCHEME } from "@/lib/constants";
+import { BASE_URL, APP_SCHEME } from "@/src/core/config/constants";
 
 export async function GET(request: Request) {
   const incomingParams = new URLSearchParams(request.url.split("?")[1]);
@@ -17,7 +17,7 @@ export async function GET(request: Request) {
 
   return Response.redirect(
     (platform === "web" ? BASE_URL : APP_SCHEME) +
-      "?" +
-      outgoingParams.toString()
+    "?" +
+    outgoingParams.toString()
   );
 }

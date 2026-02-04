@@ -7,18 +7,18 @@ import {
   InteractionManager,
   Image,
 } from "react-native";
-import { Box } from "@/components/ui/box";
-import { Text } from "@/components/ui/text";
-import { Heading } from "@/components/ui/heading";
-import { VStack } from "@/components/ui/vstack";
-import { HStack } from "@/components/ui/hstack";
-import { Icon } from "@/components/ui/icon";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { ScrollView } from "@/components/ui/scroll-view";
+import { Box } from "@/src/ui/box";
+import { Text } from "@/src/ui/text";
+import { Heading } from "@/src/ui/heading";
+import { VStack } from "@/src/ui/vstack";
+import { HStack } from "@/src/ui/hstack";
+import { Icon } from "@/src/ui/icon";
+import { Button, ButtonText } from "@/src/ui/button";
+import { Card } from "@/src/ui/card";
+import { ScrollView } from "@/src/ui/scroll-view";
 import { Mail, ArrowLeft } from "lucide-react-native";
-import { useSession } from "@/context/auth";
-import { useAppToast } from "@/lib/toast-utils";
+import { useSession } from "@/src/core/auth/AuthProvider";
+import { useAppToast } from "@/src/core/utils/toast";
 
 export default function VerifyEmail() {
   const { email } = useLocalSearchParams<{ email: string }>();
@@ -187,55 +187,63 @@ export default function VerifyEmail() {
           </HStack>
 
           <Box className="flex-1 justify-center">
-            <VStack space="xl" className="items-center">
+            <VStack space="xl" className="items-start">
               {/* Header */}
-              <VStack space="md" className="items-center mb-4">
+              <VStack space="md" className="items-start mb-4">
                 <Image
                   source={require("@/assets/icon.png")}
                   style={{ width: 64, height: 64 }}
                   resizeMode="contain"
                 />
-                <VStack space="md" className="items-center">
+                <VStack space="xs" className="items-start">
+                  <Box className="px-3 py-1 border-2 border-ink bg-surface shadow-retro-hard-sm">
+                    <Text size="xs" className="text-data font-bold tracking-[2px] uppercase">
+                      Identity Validation Protocol
+                    </Text>
+                  </Box>
                   <Heading
                     size="2xl"
-                    className="text-[#333333] text-center font-extrabold tracking-wider"
+                    className="text-ink font-extrabold tracking-[2px] uppercase"
                     retro
                   >
-                    Verify Your Email
+                    Verify Control Node
                   </Heading>
-                  <Text
-                    size="lg"
-                    className="text-[#333333] text-center font-semibold tracking-wide"
-                  >
-                    We've sent a 6-digit code to
-                  </Text>
-                  <Text
-                    size="lg"
-                    className="text-primary-500 font-bold text-center tracking-wide"
-                  >
-                    {email}
-                  </Text>
+                  <VStack space="xs" className="items-start">
+                    <Text
+                      size="md"
+                      className="text-ink/80 font-medium"
+                    >
+                      A 6-digit synchronization code has been dispatched to:
+                    </Text>
+                    <Text
+                      size="lg"
+                      className="text-energy font-bold tracking-wide"
+                    >
+                      {email}
+                    </Text>
+                  </VStack>
                 </VStack>
               </VStack>
 
               {/* Verification Card */}
-              <Card className="w-full max-w-sm p-8">
-                <VStack space="lg" className="items-center">
-                  <VStack space="md" className="items-center">
+              <Card className="w-full max-w-sm p-7">
+                <VStack space="lg">
+                  <VStack space="xs">
+                    <Text size="xs" className="text-ink/70 uppercase tracking-[2px]">
+                      Session Security
+                    </Text>
                     <Heading
-                      size="md"
-                      className="text-[#333333] font-extrabold tracking-wider text-center"
+                      size="lg"
+                      className="text-ink font-extrabold tracking-[2px]"
                       retro
                     >
-                      Enter Verification Code
+                      Enter Sequence
                     </Heading>
                     <Text
-                      size="md"
-                      className="text-[#333333] text-center font-semibold tracking-wide"
+                      size="sm"
+                      className="text-ink/80 font-medium"
                     >
-                      Enter the 6-digit code sent to your email, or click the
-                      verification link in your email to activate your account
-                      instantly.
+                      Enter the synchronization code or utilize the direct activation link in your terminal mailbox.
                     </Text>
                   </VStack>
 
@@ -296,48 +304,39 @@ export default function VerifyEmail() {
                   </Button>
 
                   {/* Resend Code */}
-                  <VStack space="xs" className="items-center">
-                    <Text
-                      size="md"
-                      className="text-[#333333] font-semibold tracking-wide"
-                    >
-                      Didn't receive the code?
-                    </Text>
-                    <Button
-                      variant="link"
-                      size="sm"
-                      disabled={loading || resendLoading}
-                      onPress={handleResendCode}
-                    >
-                      <Text
-                        size="md"
-                        className="text-primary-500 font-bold tracking-wide"
-                      >
-                        {resendLoading ? "Sending..." : "Resend Code"}
+                  <VStack space="md" className="items-start pt-2">
+                    <VStack space="xs">
+                      <Text size="sm" className="text-ink/60 font-bold uppercase tracking-widest">
+                        No Transmission?
                       </Text>
-                    </Button>
-                  </VStack>
+                      <Button
+                        variant="outline"
+                        action="secondary"
+                        size="md"
+                        disabled={loading || resendLoading}
+                        onPress={handleResendCode}
+                      >
+                        <ButtonText size="md" className="font-bold uppercase tracking-widest">
+                          {resendLoading ? "Resending..." : "New Transmission"}
+                        </ButtonText>
+                      </Button>
+                    </VStack>
 
-                  {/* Alternative option */}
-                  <VStack space="xs" className="items-center">
-                    <Text
-                      size="md"
-                      className="text-[#333333] font-semibold tracking-wide"
-                    >
-                      Already clicked the email link?
-                    </Text>
-                    <Button
-                      variant="link"
-                      size="sm"
-                      onPress={() => router.push("/sign-in")}
-                    >
-                      <Text
-                        size="md"
-                        className="text-primary-500 font-bold tracking-wide"
-                      >
-                        Go to Sign In
+                    <VStack space="xs">
+                      <Text size="sm" className="text-ink/60 font-bold uppercase tracking-widest">
+                        Activation Link Used?
                       </Text>
-                    </Button>
+                      <Button
+                        variant="link"
+                        size="sm"
+                        onPress={() => router.push("/sign-in")}
+                        className="p-0"
+                      >
+                        <Text size="md" className="text-ink font-bold tracking-wide">
+                          Proceed to Sign In
+                        </Text>
+                      </Button>
+                    </VStack>
                   </VStack>
                 </VStack>
               </Card>

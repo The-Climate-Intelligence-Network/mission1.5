@@ -1,7 +1,7 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useFonts } from "expo-font";
 import { useEffect } from "react";
-import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
+import { GluestackUIProvider } from "@/src/ui/gluestack-ui-provider";
 import { Stack } from "expo-router";
 import {
   Inter_400Regular,
@@ -19,8 +19,8 @@ import {
 import { LanguageProvider } from "@/components/i18n/language-context";
 
 import "../global.css";
-import { SessionProvider, useSession } from "@/context/auth";
-import { ThemeProvider } from "@/context/theme";
+import { SessionProvider, useSession } from "@/src/core/auth/AuthProvider";
+import { ThemeProvider } from "@/src/core/theme/ThemeProvider";
 import { SplashScreenController } from "@/components/splash-controller";
 
 export {

@@ -2,7 +2,8 @@ import { Tabs } from "expo-router";
 import React from "react";
 import { Home, Zap, MapPin, Users, User } from "lucide-react-native";
 import { Platform } from "react-native";
-import { useTheme } from "@/context/theme";
+import { useSession } from "@/src/core/auth/AuthProvider";
+import { useTheme } from "@/src/core/theme/ThemeProvider";
 
 function TabBarIcon({
   IconComponent,
@@ -21,28 +22,37 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: "#16A34A", // darker green for better contrast
-        tabBarInactiveTintColor: "#3c3b3b", // plain black for inactive
+        tabBarActiveTintColor: "#1A4D2E", // Deep Forest
+        tabBarInactiveTintColor: "#1A4D2E66", // Deep Forest with opacity
         headerShown: false,
         tabBarLabelStyle: {
+          fontFamily: "SpaceMono",
           fontWeight: "bold",
-          fontSize: 11,
+          fontSize: 10,
+          textTransform: "uppercase",
         },
         tabBarStyle: {
-          backgroundColor: isDark ? "#181719" : "#FFFFFF", // match background-dark and white
-          borderTopColor: isDark ? "#2D2D2D" : "#E5E7EB", // darker border for dark mode
-          borderTopWidth: 1,
-          ...Platform.select({
-            ios: {
-              // Use a transparent background on iOS to show the blur effect
-              position: "absolute",
-              paddingTop: 8, // Adjust padding for iOS
-            },
-            default: {
-              position: "absolute",
-              paddingTop: 8, // Adjust padding for iOS
-            },
-          }),
+          backgroundColor: "#F9FDF5", // Bio-Cream
+          borderTopColor: "#1A4D2E", // Deep Forest
+          borderTopWidth: 2,
+          borderLeftColor: "#1A4D2E",
+          borderLeftWidth: 2,
+          borderRightColor: "#1A4D2E",
+          borderRightWidth: 2,
+          borderTopLeftRadius: 24,
+          borderTopRightRadius: 24,
+          height: 70,
+          paddingBottom: 10,
+          paddingTop: 10,
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          elevation: 0,
+          shadowOpacity: 0,
+        },
+        tabBarIconStyle: {
+          marginBottom: 4,
         },
       }}
     >

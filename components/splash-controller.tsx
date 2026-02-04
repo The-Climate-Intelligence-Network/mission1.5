@@ -1,12 +1,5 @@
-import { SplashScreen } from "expo-router";
-import { useSession } from "@/context/auth";
-
-export function SplashScreenController() {
-  const { isLoading } = useSession();
-
-  if (!isLoading) {
-    SplashScreen.hideAsync();
-  }
-
-  return null;
-}
+/**
+ * Re-export shim for backward compatibility.
+ * Original file moved to: @/src/core/bootstrap/SplashController.tsx
+ */
+export { SplashScreenController } from "@/src/core/bootstrap/SplashController";
