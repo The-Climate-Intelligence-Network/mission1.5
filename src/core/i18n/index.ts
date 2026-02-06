@@ -21,6 +21,7 @@ const translations = {
         done: 'Done',
 
         // App specific
+        title: 'Mission 1.5',
         climateIntel: 'Mission 1.5',
         climateIntelligenceNetwork: 'Mission 1.5',
         empoweringClimateAction: 'Empowering Climate Action Through Data',
@@ -150,6 +151,7 @@ const translations = {
         done: 'Hecho',
 
         // App specific
+        title: 'Mission 1.5',
         climateIntel: 'Mission 1.5',
         climateIntelligenceNetwork: 'Mission 1.5',
         empoweringClimateAction: 'Potenciando la Acción Climática a través de Datos',
@@ -279,6 +281,7 @@ const translations = {
         done: 'Concluído',
 
         // App specific
+        title: 'Mission 1.5',
         climateIntel: 'Mission 1.5',
         climateIntelligenceNetwork: 'Mission 1.5',
         empoweringClimateAction: 'Capacitando Ação Climática através de Dados',

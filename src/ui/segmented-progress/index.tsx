@@ -14,7 +14,7 @@ interface SegmentedProgressBarProps {
 export const SegmentedProgressBar = ({
     current,
     total,
-    maxSegments = 12,
+    maxSegments = 16,
     activeColor = colors.digital,
     size = "md",
 }: SegmentedProgressBarProps) => {
@@ -23,32 +23,29 @@ export const SegmentedProgressBar = ({
         Math.floor((current / total) * maxSegments)
     );
 
-    const segmentHeight = size === "sm" ? 8 : size === "md" ? 12 : 16;
-    const segmentWidth = size === "sm" ? 12 : size === "md" ? 20 : 28;
+    const segmentHeight = size === "sm" ? 12 : size === "md" ? 16 : 20;
 
     return (
-        <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center" }}>
+        <HStack className="w-full" space="xs">
             {Array.from({ length: maxSegments }).map((_, index) => {
                 const isFilled = index < filledSegments;
                 return (
                     <View
                         key={index}
+                        className="flex-1"
                         style={[
                             styles.segment,
                             {
                                 height: segmentHeight,
-                                width: segmentWidth,
                                 backgroundColor: isFilled ? activeColor : "transparent",
-                                borderColor: colors.ink,
-                                borderWidth: 2,
-                                marginRight: 4,
-                                marginBottom: 4,
+                                borderColor: isFilled ? colors.ink : `${colors.ink}20`,
+                                borderWidth: isFilled ? 1 : 1.5,
                             },
                         ]}
                     />
                 );
             })}
-        </View>
+        </HStack>
     );
 };
 
