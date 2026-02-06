@@ -4,7 +4,7 @@ import gluestackPlugin from "@gluestack-ui/nativewind-utils/tailwind-plugin";
 module.exports = {
   darkMode: "class",
   content: [
-    "app/**/*.{tsx,jsx,ts,js}", 
+    "app/**/*.{tsx,jsx,ts,js}",
     "components/**/*.{tsx,jsx,ts,js}",
     "src/**/*.{tsx,jsx,ts,js}"
   ],
@@ -189,10 +189,10 @@ module.exports = {
       },
       fontFamily: {
         heading: [
-          "SpaceGrotesk_700Bold",
-          "SpaceGrotesk_600SemiBold",
-          "SpaceGrotesk_500Medium",
-          "SpaceGrotesk_400Regular",
+          "SpaceGrotesk-Bold",
+          "SpaceGrotesk-SemiBold",
+          "SpaceGrotesk-Medium",
+          "SpaceGrotesk-Regular",
           "Space Grotesk",
           "system-ui",
           "sans-serif",

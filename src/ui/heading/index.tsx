@@ -1,194 +1,34 @@
-import React, { forwardRef, memo } from 'react';
-import { H1, H2, H3, H4, H5, H6 } from '@expo/html-elements';
+import React, { forwardRef } from 'react';
+import { Text } from 'react-native';
 import { headingStyle } from './styles';
 import type { VariantProps } from '@gluestack-ui/nativewind-utils';
-import { cssInterop } from 'nativewind';
 
 type IHeadingProps = VariantProps<typeof headingStyle> &
-  React.ComponentPropsWithoutRef<typeof H1> & {
-    as?: React.ElementType;
+  React.ComponentProps<typeof Text> & {
+    weight?: 'regular' | 'medium' | 'semibold' | 'bold';
   };
 
-cssInterop(H1, { className: 'style' });
-cssInterop(H2, { className: 'style' });
-cssInterop(H3, { className: 'style' });
-cssInterop(H4, { className: 'style' });
-cssInterop(H5, { className: 'style' });
-cssInterop(H6, { className: 'style' });
+// Map weight variants to font family names
+const getFontFamily = (weight?: 'regular' | 'medium' | 'semibold' | 'bold') => {
+  switch (weight) {
+    case 'regular':
+      return 'SpaceGrotesk-Regular';
+    case 'medium':
+      return 'SpaceGrotesk-Medium';
+    case 'semibold':
+      return 'SpaceGrotesk-SemiBold';
+    case 'bold':
+    default:
+      return 'SpaceGrotesk-Bold';
+  }
+};
 
-const MappedHeading = memo(
-  forwardRef<React.ComponentRef<typeof H1>, IHeadingProps>(
-    function MappedHeading(
-      {
-        size,
-        className,
-        isTruncated,
-        bold,
-        underline,
-        strikeThrough,
-        sub,
-        italic,
-        highlight,
-        retro,
-        ...props
-      },
-      ref
-    ) {
-      switch (size) {
-        case '5xl':
-        case '4xl':
-        case '3xl':
-          return (
-            <H1
-              className={headingStyle({
-                size,
-                isTruncated,
-                bold,
-                underline,
-                strikeThrough,
-                sub,
-                italic,
-                highlight,
-                retro,
-                class: className,
-              })}
-              {...props}
-              // @ts-expect-error : type issue
-              ref={ref}
-            />
-          );
-        case '2xl':
-          return (
-            <H2
-              className={headingStyle({
-                size,
-                isTruncated,
-                bold,
-                underline,
-                strikeThrough,
-                sub,
-                italic,
-                highlight,
-                retro,
-                class: className,
-              })}
-              {...props}
-              // @ts-expect-error : type issue
-              ref={ref}
-            />
-          );
-        case 'xl':
-          return (
-            <H3
-              className={headingStyle({
-                size,
-                isTruncated,
-                bold,
-                underline,
-                strikeThrough,
-                sub,
-                italic,
-                highlight,
-                retro,
-                class: className,
-              })}
-              {...props}
-              // @ts-expect-error : type issue
-              ref={ref}
-            />
-          );
-        case 'lg':
-          return (
-            <H4
-              className={headingStyle({
-                size,
-                isTruncated,
-                bold,
-                underline,
-                strikeThrough,
-                sub,
-                italic,
-                highlight,
-                retro,
-                class: className,
-              })}
-              {...props}
-              // @ts-expect-error : type issue
-              ref={ref}
-            />
-          );
-        case 'md':
-          return (
-            <H5
-              className={headingStyle({
-                size,
-                isTruncated,
-                bold,
-                underline,
-                strikeThrough,
-                sub,
-                italic,
-                highlight,
-                retro,
-                class: className,
-              })}
-              {...props}
-              // @ts-expect-error : type issue
-              ref={ref}
-            />
-          );
-        case 'sm':
-        case 'xs':
-          return (
-            <H6
-              className={headingStyle({
-                size,
-                isTruncated,
-                bold,
-                underline,
-                strikeThrough,
-                sub,
-                italic,
-                highlight,
-                retro,
-                class: className,
-              })}
-              {...props}
-              // @ts-expect-error : type issue
-              ref={ref}
-            />
-          );
-        default:
-          return (
-            <H4
-              className={headingStyle({
-                size,
-                isTruncated,
-                bold,
-                underline,
-                strikeThrough,
-                sub,
-                italic,
-                highlight,
-                retro,
-                class: className,
-              })}
-              {...props}
-              // @ts-expect-error : type issue
-              ref={ref}
-            />
-          );
-      }
-    }
-  )
-);
-
-const EcoHeading = memo(
-  forwardRef<React.ComponentRef<typeof H1>, IHeadingProps>(function Heading(
-    { className, size = 'lg', as: AsComp, ...props },
-    ref
-  ) {
-    const {
+const Heading = forwardRef<React.ComponentRef<typeof Text>, IHeadingProps>(
+  function Heading(
+    {
+      className,
+      size = 'lg',
+      weight = 'bold',
       isTruncated,
       bold,
       underline,
@@ -197,37 +37,32 @@ const EcoHeading = memo(
       italic,
       highlight,
       retro,
-    } = props;
-
-    if (AsComp) {
-      return (
-        <AsComp
-          className={headingStyle({
-            size,
-            isTruncated,
-            bold,
-            underline,
-            strikeThrough,
-            sub,
-            italic,
-            highlight,
-            retro,
-            class: className,
-          })}
-          {...props}
-        />
-      );
-    }
-
+      ...props
+    },
+    ref
+  ) {
     return (
-      <MappedHeading className={className} size={size} ref={ref} {...props} />
+      <Text
+        className={headingStyle({
+          size,
+          isTruncated,
+          bold,
+          underline,
+          strikeThrough,
+          sub,
+          italic,
+          highlight,
+          retro,
+          class: className,
+        })}
+        style={{ fontFamily: getFontFamily(weight) }}
+        {...props}
+        ref={ref}
+      />
     );
-  })
+  }
 );
 
-EcoHeading.displayName = 'EcoHeading';
-
-const Heading = EcoHeading;
 Heading.displayName = 'Heading';
 
-export { Heading, EcoHeading };
+export { Heading };
