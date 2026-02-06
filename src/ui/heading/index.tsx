@@ -9,8 +9,10 @@ type IHeadingProps = VariantProps<typeof headingStyle> &
   };
 
 // Map weight variants to font family names
-const getFontFamily = (weight?: 'regular' | 'medium' | 'semibold' | 'bold') => {
+const getFontFamily = (weight?: 'light' | 'regular' | 'medium' | 'semibold' | 'bold') => {
   switch (weight) {
+    case 'light':
+      return 'SpaceGrotesk-Light';
     case 'regular':
       return 'SpaceGrotesk-Regular';
     case 'medium':

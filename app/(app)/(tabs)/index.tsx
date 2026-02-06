@@ -168,22 +168,22 @@ const HomePage = () => {
                       style={{ width: 40, height: 40, resizeMode: "contain" }}
                     />
                   </Box>
-                  <VStack space="xs" className="items-start">
-                    <Text size="sm" className="text-ink/60 font-light uppercase">
+                  <VStack space="2xs" className="items-start">
+                    <Text size="sm" className="text-ink/80 uppercase">
                       Current League
                     </Text>
-                    <Heading size="lg" className="text-ink font-extrabold uppercase tracking-wide">
+                    <Heading size="xl" className="text-ink uppercase tracking-wide">
                       Green Turtle
                     </Heading>
                   </VStack>
                 </HStack>
-                <VStack space="xs" className="items-end">
-                  <Text size="sm" className="text-ink/60 font-light uppercase">
+                <VStack space="2xs" className="items-end self-center">
+                  <Text size="sm" className="text-ink/80 uppercase">
                     CIQ
                   </Text>
-                  <Text size="xl" className="text-action font-extrabold" retro>
+                  <Heading size="lg" className="text-action">
                     {userStats.currentPoints}/1000
-                  </Text>
+                  </Heading>
                 </VStack>
               </HStack>
 
@@ -200,13 +200,13 @@ const HomePage = () => {
               <HStack className="justify-between items-center w-full">
                 <HStack space="sm" className="items-center">
                   <Box className="w-4 h-4 rounded-full bg-action border-0" />
-                  <Heading size="md" className="text-ink font-bold uppercase">Active Missions</Heading>
+                  <Heading size="md" className="text-ink uppercase">Active Missions</Heading>
                 </HStack>
                 <Pressable
                   onPress={() => router.push("/quests")}
                 >
                   <HStack space="xs" className="items-center">
-                    <Text size="sm" className="text-ink font-bold uppercase tracking-wider">
+                    <Text size="sm" className="text-inkuppercase tracking-wider">
                       View All
                     </Text>
                     <Text size="sm" className="text-ink">{"[->]"}</Text>

@@ -1,20 +1,15 @@
-import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { useFonts } from "expo-font";
+// import { useFonts } from "expo-font";
 import { useEffect } from "react";
 import { GluestackUIProvider } from "@/src/ui/gluestack-ui-provider";
 import { Stack } from "expo-router";
+import * as SplashScreen from 'expo-splash-screen';
 import {
-  Inter_400Regular,
-  Inter_500Medium,
-  Inter_600SemiBold,
-  Inter_700Bold,
-  Inter_900Black,
-} from "@expo-google-fonts/inter";
-import {
+  SpaceGrotesk_300Light,
   SpaceGrotesk_400Regular,
   SpaceGrotesk_500Medium,
   SpaceGrotesk_600SemiBold,
   SpaceGrotesk_700Bold,
+  useFonts
 } from "@expo-google-fonts/space-grotesk";
 import { LanguageProvider } from "@/src/core/i18n/language-context";
 
@@ -31,22 +26,23 @@ export {
 export default function RootLayout() {
   const [loaded, error] = useFonts({
     'SpaceMono': require("../assets/fonts/SpaceMono-Regular.ttf"),
+    'SpaceGrotesk-Light': SpaceGrotesk_300Light,
     'SpaceGrotesk-Regular': SpaceGrotesk_400Regular,
     'SpaceGrotesk-Medium': SpaceGrotesk_500Medium,
     'SpaceGrotesk-SemiBold': SpaceGrotesk_600SemiBold,
     'SpaceGrotesk-Bold': SpaceGrotesk_700Bold,
-    'Inter-Regular': Inter_400Regular,
-    'Inter-Medium': Inter_500Medium,
-    'Inter-SemiBold': Inter_600SemiBold,
-    'Inter-Bold': Inter_700Bold,
-    'Inter-Black': Inter_900Black,
-    ...FontAwesome.font,
   });
 
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
-    if (error) throw error;
-  }, [error]);
+    if (loaded || error) {
+      SplashScreen.hideAsync();
+    }
+  }, [loaded, error]);
+
+  if (!loaded) {
+    return null;
+  }
 
   return (
     <SessionProvider>

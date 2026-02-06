@@ -17,7 +17,7 @@ export const Header = ({ title, onNotificationPress }: HeaderProps) => {
     return (
         <VStack space="sm" className="w-full mb-6">
             <HStack className="justify-between items-center w-full px-1">
-                <Heading size="2xl" className="text-ink font-bold uppercase tracking-[2px]">
+                <Heading size="2xl" className="text-ink uppercase tracking-[2px]">
                     {title}
                 </Heading>
                 <Pressable

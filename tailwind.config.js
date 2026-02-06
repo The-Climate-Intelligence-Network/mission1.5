@@ -188,18 +188,10 @@ module.exports = {
         },
       },
       fontFamily: {
-        heading: [
-          "SpaceGrotesk-Bold",
-          "SpaceGrotesk-SemiBold",
-          "SpaceGrotesk-Medium",
-          "SpaceGrotesk-Regular",
-          "Space Grotesk",
-          "system-ui",
-          "sans-serif",
-        ],
-        body: ["SpaceMono", "Space Mono", "ui-monospace", "monospace"],
-        mono: ["SpaceMono", "Space Mono", "ui-monospace", "monospace"],
-        roboto: ["Roboto", "sans-serif"],
+        heading: "SpaceGrotesk_700Bold",
+        body: "SpaceMono",
+        mono: "SpaceMono",
+        roboto: "Roboto",
       },
       fontWeight: {
         extrablack: "950",
