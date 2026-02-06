@@ -128,9 +128,9 @@ const HomePage = () => {
     setRefreshing(false);
   };
 
-  const ongoingMissions = missions.filter(
+  const featuredMissions = missions.filter(
     (m) =>
-      m.submission_status === "in_progress" || m.submission_status === "started"
+      m.submission_status !== "reviewed"
   );
 
   const userStats = {
@@ -139,7 +139,9 @@ const HomePage = () => {
     completedMissions: missions.filter(
       (m) => m.submission_status === "reviewed"
     ).length,
-    activeMissions: ongoingMissions.length,
+    activeMissions: missions.filter(
+      (m) => m.submission_status === "in_progress" || m.submission_status === "started"
+    ).length,
   };
 
   return (
@@ -200,7 +202,7 @@ const HomePage = () => {
               <HStack className="justify-between items-center w-full">
                 <HStack space="sm" className="items-center">
                   <Box className="w-4 h-4 rounded-full bg-action border-0" />
-                  <Heading size="md" className="text-ink uppercase">Active Missions</Heading>
+                  <Heading size="md" className="text-ink uppercase">Featured Quests</Heading>
                 </HStack>
                 <Pressable
                   onPress={() => router.push("/quests")}
@@ -217,10 +219,10 @@ const HomePage = () => {
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ gap: 16, paddingBottom: 12, paddingHorizontal: 4 }}
+                contentContainerStyle={{ gap: 16, paddingBottom: 8, paddingRight: 8 }}
               >
-                {ongoingMissions.length > 0 ? (
-                  ongoingMissions.map((mission) => (
+                {featuredMissions.length > 0 ? (
+                  featuredMissions.map((mission) => (
                     <MissionCard
                       key={mission.id}
                       mission={mission}
@@ -229,7 +231,7 @@ const HomePage = () => {
                   ))
                 ) : (
                   <Card className="w-80 p-6 items-center justify-center border-dashed" variant="flat">
-                    <Text className="text-ink/40 font-bold uppercase">No active operations</Text>
+                    <Text className="text-ink/40 uppercase">No avaliable missions</Text>
                   </Card>
                 )}
               </ScrollView>

@@ -8,7 +8,7 @@ import { hardShadows } from "../tokens/shadows";
 import { cardStyle } from "./styles";
 
 type ICardProps = ViewProps &
-  VariantProps<typeof cardStyle> & { className?: string; pressed?: boolean };
+  VariantProps<typeof cardStyle> & { className?: string; pressed?: boolean; radius?: number };
 
 const resolveCardBackground = (variant: ICardProps["variant"]) => {
   switch (variant) {
@@ -36,7 +36,7 @@ const resolveCardRadius = (size: ICardProps["size"]) => {
 
 const Card = React.forwardRef<React.ComponentRef<typeof HardShadowFrame>, ICardProps>(
   function Card(
-    { className, size = "md", variant = "secondary", ...props },
+    { className, size = "md", variant = "secondary", radius: customRadius, ...props },
     ref
   ) {
     const shadowSize =
@@ -51,7 +51,7 @@ const Card = React.forwardRef<React.ComponentRef<typeof HardShadowFrame>, ICardP
         borderWidth={2}
         shadowColor={colors.ink}
         shadowSize={shadowSize}
-        radius={resolveCardRadius(size)}
+        radius={customRadius ?? resolveCardRadius(size)}
         {...props}
       />
     );

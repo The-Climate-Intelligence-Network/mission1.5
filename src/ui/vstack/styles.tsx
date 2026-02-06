@@ -9,6 +9,7 @@ export const vstackStyle = tva({
   base: `flex-col ${baseStyle}`,
   variants: {
     space: {
+      '2xs': 'gap-0.5',
       'xs': 'gap-1',
       'sm': 'gap-2',
       'md': 'gap-3',

@@ -1,6 +1,6 @@
 import { Tabs } from "expo-router";
 import React from "react";
-import { Home, Zap, MapPin, Users, User } from "lucide-react-native";
+import { Home, Zap, MapPin, Users, User, Map, Search, Gamepad, Gamepad2, Gamepad2Icon, PlayIcon, Sun, BirdIcon, Bird } from "lucide-react-native";
 import { Platform } from "react-native";
 import { useSession } from "@/src/core/auth/AuthProvider";
 import { useTheme } from "@/src/core/theme/ThemeProvider";
@@ -26,8 +26,7 @@ export default function TabLayout() {
         tabBarInactiveTintColor: "#1A4D2E66", // Deep Forest with opacity
         headerShown: false,
         tabBarLabelStyle: {
-          fontFamily: "SpaceMono",
-          fontWeight: "bold",
+          fontFamily: "SpaceGrotesk-Bold",
           fontSize: 10,
           textTransform: "uppercase",
         },
@@ -41,7 +40,7 @@ export default function TabLayout() {
           borderRightWidth: 2,
           borderTopLeftRadius: 24,
           borderTopRightRadius: 24,
-          height: 70,
+          height: 80,
           paddingBottom: 10,
           paddingTop: 10,
           position: "absolute",
@@ -52,7 +51,7 @@ export default function TabLayout() {
           shadowOpacity: 0,
         },
         tabBarIconStyle: {
-          marginBottom: 4,
+          marginBottom: 2,
         },
       }}
     >
@@ -71,7 +70,7 @@ export default function TabLayout() {
         options={{
           title: "Quests",
           tabBarIcon: ({ color }) => (
-            <TabBarIcon IconComponent={Zap} color={color} />
+            <TabBarIcon IconComponent={Bird} color={color} />
           ),
         }}
       />
@@ -81,7 +80,7 @@ export default function TabLayout() {
         options={{
           title: "Map",
           tabBarIcon: ({ color }) => (
-            <TabBarIcon IconComponent={MapPin} color={color} />
+            <TabBarIcon IconComponent={Map} color={color} />
           ),
         }}
       />
