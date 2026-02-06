@@ -1,6 +1,4 @@
 'use client';
-
-import { H4 } from '@expo/html-elements';
 import { createActionsheet } from '@gluestack-ui/actionsheet';
 import {
   Pressable,
@@ -50,7 +48,7 @@ export const UIActionsheet = createActionsheet({
   VirtualizedList: VirtualizedList,
   FlatList: FlatList,
   SectionList: SectionList,
-  SectionHeaderText: H4,
+  SectionHeaderText: Text,
   Icon: UIIcon,
   AnimatePresence: AnimatePresence,
 });

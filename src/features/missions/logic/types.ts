@@ -13,6 +13,9 @@ export interface MissionWithStats extends Mission {
     submission_status?: string | null;
     submission_progress?: number;
     thumbnailUrl?: string | null;
+    category?: string;
+    ciq_reward?: number;
+    time_estimate?: string;
 }
 
 export interface GuidanceStep {

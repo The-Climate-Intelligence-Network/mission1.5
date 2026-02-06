@@ -8,7 +8,7 @@ import { hardShadows } from "../tokens/shadows";
 import { cardStyle } from "./styles";
 
 type ICardProps = ViewProps &
-  VariantProps<typeof cardStyle> & { className?: string };
+  VariantProps<typeof cardStyle> & { className?: string; pressed?: boolean };
 
 const resolveCardBackground = (variant: ICardProps["variant"]) => {
   switch (variant) {

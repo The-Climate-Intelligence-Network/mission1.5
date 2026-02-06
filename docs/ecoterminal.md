@@ -60,7 +60,7 @@ Typography distinguishes the **Human Voice** from the **Machine Voice**.
 - **Headings – Space Grotesk**
   - *Role*: Human, optimistic, approachable.
   - *Usage*: App titles, section headers, announcements.
-  - *Style*: Uppercase, wide tracking, bold.
+  - *Style*: Uppercase and lowercase, wide tracking, bold.
   - *Line height*: 1.2–1.3.
 - **Body & Data – Space Mono**
   - *Role*: Machine interface, logs, data.

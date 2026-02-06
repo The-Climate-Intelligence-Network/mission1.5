@@ -13,7 +13,7 @@ import { Pressable } from "@/src/ui/pressable";
 import { Card } from "@/src/ui/card";
 import { Badge } from "@/src/ui/badge";
 import { Progress } from "@/src/ui/progress";
-import { useLanguage } from "@/components/i18n/language-context";
+import { useLanguage } from "@/src/core/i18n/language-context";
 import {
     Zap,
     Target,

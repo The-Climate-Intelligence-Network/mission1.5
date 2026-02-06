@@ -11,7 +11,7 @@ import { Icon } from "@/src/ui/icon";
 import { Button } from "@/src/ui/button";
 import { Card } from "@/src/ui/card";
 import { Badge } from "@/src/ui/badge";
-import { useLanguage } from "@/components/i18n/language-context";
+import { useLanguage } from "@/src/core/i18n/language-context";
 import {
     ArrowLeft,
     Target,

@@ -1,5 +1,4 @@
 import React from 'react';
-
 import type { VariantProps } from '@gluestack-ui/nativewind-utils';
 import { Text as RNText } from 'react-native';
 import { textStyle } from './styles';
@@ -20,6 +19,7 @@ const EcoText = React.forwardRef<React.ComponentRef<typeof RNText>, ITextProps>(
       italic,
       highlight,
       retro,
+      style,
       ...props
     },
     ref
@@ -38,6 +38,7 @@ const EcoText = React.forwardRef<React.ComponentRef<typeof RNText>, ITextProps>(
           retro,
           class: className,
         })}
+        style={[{ fontFamily: 'SpaceMono' }, style]}
         {...props}
         ref={ref}
       />

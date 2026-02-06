@@ -16,12 +16,12 @@ import {
   SpaceGrotesk_600SemiBold,
   SpaceGrotesk_700Bold,
 } from "@expo-google-fonts/space-grotesk";
-import { LanguageProvider } from "@/components/i18n/language-context";
+import { LanguageProvider } from "@/src/core/i18n/language-context";
 
 import "../global.css";
 import { SessionProvider, useSession } from "@/src/core/auth/AuthProvider";
 import { ThemeProvider } from "@/src/core/theme/ThemeProvider";
-import { SplashScreenController } from "@/components/splash-controller";
+import { SplashScreenController } from "@/src/core/bootstrap/SplashController";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -30,16 +30,16 @@ export {
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
-    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
-    SpaceGrotesk_400Regular,
-    SpaceGrotesk_500Medium,
-    SpaceGrotesk_600SemiBold,
-    SpaceGrotesk_700Bold,
-    Inter_400Regular,
-    Inter_500Medium,
-    Inter_600SemiBold,
-    Inter_700Bold,
-    Inter_900Black,
+    'SpaceMono': require("../assets/fonts/SpaceMono-Regular.ttf"),
+    'SpaceGrotesk-Regular': SpaceGrotesk_400Regular,
+    'SpaceGrotesk-Medium': SpaceGrotesk_500Medium,
+    'SpaceGrotesk-SemiBold': SpaceGrotesk_600SemiBold,
+    'SpaceGrotesk-Bold': SpaceGrotesk_700Bold,
+    'Inter-Regular': Inter_400Regular,
+    'Inter-Medium': Inter_500Medium,
+    'Inter-SemiBold': Inter_600SemiBold,
+    'Inter-Bold': Inter_700Bold,
+    'Inter-Black': Inter_900Black,
     ...FontAwesome.font,
   });
 

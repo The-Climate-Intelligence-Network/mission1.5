@@ -8,7 +8,6 @@ import {
   withStyleContext,
   useStyleContext,
 } from "@gluestack-ui/nativewind-utils/withStyleContext";
-import { H3 } from "@expo/html-elements";
 import { cssInterop } from "nativewind";
 import { PrimitiveIcon, UIIcon } from "@gluestack-ui/icon";
 
@@ -84,9 +83,7 @@ const accordionTriggerStyle = tva({
 
 const Root = withStyleContext(View, SCOPE);
 
-const Header = (
-  Platform.OS === "web" ? H3 : View
-) as React.ComponentType<TextProps>;
+const Header = View;
 
 /** Creator */
 const UIAccordion = createAccordion({
@@ -110,12 +107,6 @@ cssInterop(PrimitiveIcon, {
       color: "classNameColor",
       stroke: true,
     },
-  },
-});
-
-cssInterop(H3, {
-  className: {
-    target: "style",
   },
 });
 

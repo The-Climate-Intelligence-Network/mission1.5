@@ -7,7 +7,7 @@ import { Heading } from "@/src/ui/heading";
 import { VStack } from "@/src/ui/vstack";
 import { Icon } from "@/src/ui/icon";
 import { Card } from "@/src/ui/card";
-import { useLanguage } from "@/components/i18n/language-context";
+import { useLanguage } from "@/src/core/i18n/language-context";
 import {
     MapPin,
     Clock,
