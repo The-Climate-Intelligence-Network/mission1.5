@@ -24,6 +24,20 @@ interface MissionCardProps {
 export const MissionCard = ({ mission, onPress, className }: MissionCardProps) => {
     const [pressed, setPressed] = React.useState(false);
     const [isBookmarked, setIsBookmarked] = React.useState(mission.is_bookmarked || false);
+    const [imageError, setImageError] = React.useState(false);
+
+    // Use URL if available and hasn't failed, otherwise fallback
+    const imageSource = (mission.thumbnailUrl && !imageError)
+        ? { uri: mission.thumbnailUrl }
+        : DEFAULT_MISSION_IMAGE;
+
+    const handleImageError = (e: any) => {
+        console.log(`[Image Load Fail] Mission: ${mission.title}, URI: ${mission.thumbnailUrl}`);
+        if (e.nativeEvent) {
+            console.log(`[Image Error Detail] ${JSON.stringify(e.nativeEvent)}`);
+        }
+        setImageError(true);
+    };
 
     return (
         <Pressable
@@ -37,14 +51,14 @@ export const MissionCard = ({ mission, onPress, className }: MissionCardProps) =
                 pressed={pressed}
             >
                 {/* Header Media Section - Top 50% height equivalent */}
-                <Box className="relative h-44 overflow-hidden w-full"
+                <Box
+                    className="relative h-44 overflow-hidden w-full"
                     variant="plain"
                 >
                     <Image
-                        // source={DEFAULT_MISSION_IMAGE}
-                        source={mission.thumbnailUrl ? { uri: mission.thumbnailUrl } : DEFAULT_MISSION_IMAGE}
-                        className="w-full h-full"
-                        style={{ resizeMode: "cover" }}
+                        source={imageSource}
+                        style={{ width: '100%', height: '100%', resizeMode: "cover" }}
+                        onError={handleImageError}
                     />
 
                     {/* Gradient Overlay - Bottom-up Dark Green fade */}
@@ -89,17 +103,17 @@ export const MissionCard = ({ mission, onPress, className }: MissionCardProps) =
                     {/* Row 1 - Metadata (Points, CIQ, Time) */}
                     <HStack space="md" className="items-center w-full pb-2">
                         <Box className="px-3 py-1 bg-energy border border-ink rounded-md">
-                            <Text size="sm" bold>
+                            <Text size="xs" >
                                 {mission.points_awarded || 150}
                             </Text>
                         </Box>
 
-                        <Text size="sm" className="text-digitalDark font-bold uppercase tracking-wider">
+                        <Text size="xs" className="text-digitalDark tracking-wider">
                             {mission.ciq_reward || 300} CIQ
                         </Text>
 
-                        <Text size="sm" className="text-ink/50 font-bold uppercase tracking-wider">
-                            {mission.time_estimate || "15 mins"}
+                        <Text size="xs" className="text-ink/80 tracking-wider">
+                            {mission.time_estimate || "15 Mins"}
                         </Text>
                     </HStack>
 

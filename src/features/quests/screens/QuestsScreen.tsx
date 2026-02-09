@@ -49,6 +49,221 @@ import {
     MissionWithStats,
 } from "@/src/features/missions/logic";
 
+const DEFAULT_MISSION_IMAGE = require("@/assets/images/paddy.jpg");
+
+const QuestItem = ({ mission, statusInfo, onView, onStart, onResume, onBookmark, actionLoading }: any) => {
+    const [imageError, setImageError] = useState(false);
+    const router = useRouter();
+
+    return (
+        <Card
+            key={mission.id}
+            className="overflow-hidden border-2 border-ink  bg-surface"
+        >
+            <VStack space="md">
+                <Box variant="plain" className="h-48 w-full bg-data/10">
+                    <Image
+                        source={(mission.thumbnailUrl && !imageError) ? { uri: mission.thumbnailUrl } : DEFAULT_MISSION_IMAGE}
+                        style={{ width: '100%', height: '100%', resizeMode: "cover" }}
+                        onError={() => setImageError(true)}
+                    />
+                </Box>
+
+                <Box variant="plain" className="p-4">
+                    {/* Mission Header */}
+                    <VStack space="md">
+                        <HStack className="justify-between items-start">
+                            <VStack space="xs" className="flex-1">
+                                <HStack space="xs" className="items-center">
+                                    <Badge className="bg-digital border-2 border-ink ">
+                                        <HStack space="xs" className="items-center">
+                                            <Icon
+                                                as={Award}
+                                                size="xs"
+                                                className="text-ink"
+                                            />
+                                            <Text
+                                                size="xs"
+                                                className="text-ink font-bold tracking-wide"
+                                            >
+                                                +{mission.points_awarded} pts
+                                            </Text>
+                                        </HStack>
+                                    </Badge>
+                                    <Badge className="bg-energy border-2 border-ink ">
+                                        <HStack space="xs" className="items-center">
+                                            <Icon
+                                                as={Zap}
+                                                size="xs"
+                                                className="text-ink"
+                                            />
+                                            <Text
+                                                size="xs"
+                                                className="text-ink font-bold tracking-wide"
+                                            >
+                                                +{mission.energy_awarded} energy
+                                            </Text>
+                                        </HStack>
+                                    </Badge>
+                                </HStack>
+
+                                <Heading
+                                    size="md"
+                                    className="text-ink font-extrabold tracking-wider"
+                                    retro
+                                >
+                                    {mission.title}
+                                </Heading>
+
+                                <Text
+                                    size="sm"
+                                    className="text-ink font-semibold tracking-wide"
+                                    numberOfLines={2}
+                                >
+                                    {mission.description}
+                                </Text>
+                            </VStack>
+
+                            <HStack space="xs" className="items-center">
+                                <Icon
+                                    as={statusInfo.icon}
+                                    size="sm"
+                                    className={statusInfo.color}
+                                />
+                                <Text size="xs" className={statusInfo.color}>
+                                    {statusInfo.text}
+                                </Text>
+                            </HStack>
+                        </HStack>
+
+                        {/* Mission Info */}
+                        <HStack space="md" className="items-center">
+                            <HStack space="xs" className="items-center">
+                                <Icon
+                                    as={Building}
+                                    size="sm"
+                                    className="text-ink"
+                                />
+                                <Text
+                                    size="sm"
+                                    className="text-ink font-semibold tracking-wide"
+                                >
+                                    {mission.organization_name}
+                                </Text>
+                            </HStack>
+                            <HStack space="xs" className="items-center">
+                                <Icon
+                                    as={Users}
+                                    size="sm"
+                                    className="text-ink"
+                                />
+                                <Text
+                                    size="sm"
+                                    className="text-ink font-semibold tracking-wide"
+                                >
+                                    {mission.participants_count}
+                                </Text>
+                            </HStack>
+                        </HStack>
+
+                        {/* Progress Bar for Active Missions */}
+                        {mission.submission_status &&
+                            mission.submission_status !== "reviewed" && (
+                                <VStack space="xs">
+                                    <HStack className="justify-between">
+                                        <Text
+                                            size="sm"
+                                            className="text-ink font-bold tracking-wide"
+                                        >
+                                            Progress
+                                        </Text>
+                                        <Text
+                                            size="sm"
+                                            className="text-ink font-bold tracking-wide"
+                                        >
+                                            {mission.submission_progress || 0}%
+                                        </Text>
+                                    </HStack>
+                                    <Progress
+                                        value={mission.submission_progress || 0}
+                                        size="sm"
+                                        className="w-full"
+                                    />
+                                </VStack>
+                            )}
+
+                        {/* Action Buttons */}
+                        <HStack space="md" className="mt-2">
+                            <Button
+                                size="sm"
+                                onPress={() => onView(mission.id)}
+                                action="primary"
+                                className="flex-1"
+                            >
+                                <HStack space="sm" className="items-center">
+                                    <Icon as={Eye} size="xs" />
+                                    <Text className="font-bold tracking-wide uppercase">View</Text>
+                                </HStack>
+                            </Button>
+
+                            {mission.submission_status ? (
+                                <Button
+                                    variant="solid"
+                                    size="sm"
+                                    onPress={() => {
+                                        if (mission.submission_status === "reviewed") {
+                                            onView(mission.id);
+                                        } else {
+                                            router.push(`/mission/${mission.id}/submit`);
+                                        }
+                                    }}
+                                    className="flex-1 bg-sky border-2 border-ink shadow-retro-hard-sm"
+                                    disabled={mission.submission_status === "reviewed"}
+                                >
+                                    <HStack space="xs" className="items-center">
+                                        <Icon as={mission.submission_status === "reviewed" ? CheckCircle : Play} size="xs" />
+                                        <Text className="font-bold tracking-wide uppercase">
+                                            {mission.submission_status === "reviewed" ? "Done" : "Resume"}
+                                        </Text>
+                                    </HStack>
+                                </Button>
+                            ) : (
+                                <Button
+                                    variant="solid"
+                                    size="sm"
+                                    onPress={() => onStart(mission.id)}
+                                    disabled={actionLoading === `start-${mission.id}`}
+                                    className="flex-1 bg-sky border-2 border-ink shadow-retro-hard-sm"
+                                >
+                                    <HStack space="xs" className="items-center">
+                                        <Icon as={Target} size="xs" />
+                                        <Text className="font-bold tracking-wide uppercase">Start</Text>
+                                    </HStack>
+                                </Button>
+                            )}
+
+                            <Button
+                                size="sm"
+                                onPress={() => onBookmark(mission.id)}
+                                disabled={actionLoading === `bookmark-${mission.id}`}
+                                action="secondary"
+                                variant="outline"
+                                className="px-4"
+                            >
+                                <Icon
+                                    as={mission.is_bookmarked ? BookmarkCheck : Bookmark}
+                                    size="sm"
+                                    className="text-ink"
+                                />
+                            </Button>
+                        </HStack>
+                    </VStack>
+                </Box>
+            </VStack>
+        </Card>
+    );
+};
+
 const QuestsScreen = () => {
     const { t } = useLanguage();
     const router = useRouter();
@@ -400,220 +615,17 @@ const QuestsScreen = () => {
                             </VStack>
                         </Card>
                     ) : (
-                        filteredMissions.map((mission) => {
-                            const statusInfo = getStatusInfo(mission);
-
-                            return (
-                                <Card
-                                    key={mission.id}
-                                    className="overflow-hidden border-2 border-ink  bg-surface"
-                                >
-                                    <VStack space="md">
-                                        {/* Mission Image */}
-                                        {(mission as any).thumbnailUrl && (
-                                            <Box variant="plain" className="h-48 w-full">
-                                                <Image
-                                                    source={{ uri: (mission as any).thumbnailUrl }}
-                                                    className="w-full h-full"
-                                                    style={{ resizeMode: "cover" }}
-                                                />
-                                            </Box>
-                                        )}
-
-                                        <Box variant="plain" className="p-4">
-                                            {/* Mission Header */}
-                                            <VStack space="md">
-                                                <HStack className="justify-between items-start">
-                                                    <VStack space="xs" className="flex-1">
-                                                        <HStack space="xs" className="items-center">
-                                                            <Badge className="bg-digital border-2 border-ink ">
-                                                                <HStack space="xs" className="items-center">
-                                                                    <Icon
-                                                                        as={Award}
-                                                                        size="xs"
-                                                                        className="text-ink"
-                                                                    />
-                                                                    <Text
-                                                                        size="xs"
-                                                                        className="text-ink font-bold tracking-wide"
-                                                                    >
-                                                                        +{mission.points_awarded} pts
-                                                                    </Text>
-                                                                </HStack>
-                                                            </Badge>
-                                                            <Badge className="bg-energy border-2 border-ink ">
-                                                                <HStack space="xs" className="items-center">
-                                                                    <Icon
-                                                                        as={Zap}
-                                                                        size="xs"
-                                                                        className="text-ink"
-                                                                    />
-                                                                    <Text
-                                                                        size="xs"
-                                                                        className="text-ink font-bold tracking-wide"
-                                                                    >
-                                                                        +{mission.energy_awarded} energy
-                                                                    </Text>
-                                                                </HStack>
-                                                            </Badge>
-                                                        </HStack>
-
-                                                        <Heading
-                                                            size="md"
-                                                            className="text-ink font-extrabold tracking-wider"
-                                                            retro
-                                                        >
-                                                            {mission.title}
-                                                        </Heading>
-
-                                                        <Text
-                                                            size="sm"
-                                                            className="text-ink font-semibold tracking-wide"
-                                                            numberOfLines={2}
-                                                        >
-                                                            {mission.description}
-                                                        </Text>
-                                                    </VStack>
-
-                                                    <HStack space="xs" className="items-center">
-                                                        <Icon
-                                                            as={statusInfo.icon}
-                                                            size="sm"
-                                                            className={statusInfo.color}
-                                                        />
-                                                        <Text size="xs" className={statusInfo.color}>
-                                                            {statusInfo.text}
-                                                        </Text>
-                                                    </HStack>
-                                                </HStack>
-
-                                                {/* Mission Info */}
-                                                <HStack space="md" className="items-center">
-                                                    <HStack space="xs" className="items-center">
-                                                        <Icon
-                                                            as={Building}
-                                                            size="sm"
-                                                            className="text-ink"
-                                                        />
-                                                        <Text
-                                                            size="sm"
-                                                            className="text-ink font-semibold tracking-wide"
-                                                        >
-                                                            {mission.organization_name}
-                                                        </Text>
-                                                    </HStack>
-                                                    <HStack space="xs" className="items-center">
-                                                        <Icon
-                                                            as={Users}
-                                                            size="sm"
-                                                            className="text-ink"
-                                                        />
-                                                        <Text
-                                                            size="sm"
-                                                            className="text-ink font-semibold tracking-wide"
-                                                        >
-                                                            {mission.participants_count}
-                                                        </Text>
-                                                    </HStack>
-                                                </HStack>
-
-                                                {/* Progress Bar for Active Missions */}
-                                                {mission.submission_status &&
-                                                    mission.submission_status !== "reviewed" && (
-                                                        <VStack space="xs">
-                                                            <HStack className="justify-between">
-                                                                <Text
-                                                                    size="sm"
-                                                                    className="text-ink font-bold tracking-wide"
-                                                                >
-                                                                    Progress
-                                                                </Text>
-                                                                <Text
-                                                                    size="sm"
-                                                                    className="text-ink font-bold tracking-wide"
-                                                                >
-                                                                    {mission.submission_progress || 0}%
-                                                                </Text>
-                                                            </HStack>
-                                                            <Progress
-                                                                value={mission.submission_progress || 0}
-                                                                size="sm"
-                                                                className="w-full"
-                                                            />
-                                                        </VStack>
-                                                    )}
-
-                                                {/* Action Buttons */}
-                                                <HStack space="md" className="mt-2">
-                                                    <Button
-                                                        size="sm"
-                                                        onPress={() => handleViewMission(mission.id)}
-                                                        action="primary"
-                                                        className="flex-1"
-                                                    >
-                                                        <HStack space="sm" className="items-center">
-                                                            <Icon as={Eye} size="xs" />
-                                                            <Text className="font-bold tracking-wide uppercase">View</Text>
-                                                        </HStack>
-                                                    </Button>
-
-                                                    {mission.submission_status ? (
-                                                        <Button
-                                                            variant="solid"
-                                                            size="sm"
-                                                            onPress={() => {
-                                                                if (mission.submission_status === "reviewed") {
-                                                                    handleViewMission(mission.id);
-                                                                } else {
-                                                                    router.push(`/mission/${mission.id}/submit`);
-                                                                }
-                                                            }}
-                                                            className="flex-1 bg-sky border-2 border-ink shadow-retro-hard-sm"
-                                                            disabled={mission.submission_status === "reviewed"}
-                                                        >
-                                                            <HStack space="xs" className="items-center">
-                                                                <Icon as={mission.submission_status === "reviewed" ? CheckCircle : Play} size="xs" />
-                                                                <Text className="font-bold tracking-wide uppercase">
-                                                                    {mission.submission_status === "reviewed" ? "Done" : "Resume"}
-                                                                </Text>
-                                                            </HStack>
-                                                        </Button>
-                                                    ) : (
-                                                        <Button
-                                                            variant="solid"
-                                                            size="sm"
-                                                            onPress={() => handleStartMission(mission.id)}
-                                                            disabled={actionLoading === `start-${mission.id}`}
-                                                            className="flex-1 bg-sky border-2 border-ink shadow-retro-hard-sm"
-                                                        >
-                                                            <HStack space="xs" className="items-center">
-                                                                <Icon as={Target} size="xs" />
-                                                                <Text className="font-bold tracking-wide uppercase">Start</Text>
-                                                            </HStack>
-                                                        </Button>
-                                                    )}
-
-                                                    <Button
-                                                        size="sm"
-                                                        onPress={() => handleBookmarkToggle(mission.id)}
-                                                        disabled={actionLoading === `bookmark-${mission.id}`}
-                                                        action="secondary"
-                                                        variant="outline"
-                                                        className="px-4"
-                                                    >
-                                                        <Icon
-                                                            as={mission.is_bookmarked ? BookmarkCheck : Bookmark}
-                                                            size="sm"
-                                                            className="text-ink"
-                                                        />
-                                                    </Button>
-                                                </HStack>
-                                            </VStack>
-                                        </Box>
-                                    </VStack>
-                                </Card>
-                            );
-                        })
+                        filteredMissions.map((mission) => (
+                            <QuestItem
+                                key={mission.id}
+                                mission={mission}
+                                statusInfo={getStatusInfo(mission)}
+                                onView={handleViewMission}
+                                onStart={handleStartMission}
+                                onBookmark={handleBookmarkToggle}
+                                actionLoading={actionLoading}
+                            />
+                        ))
                     )}
                 </VStack>
             </ScrollView>

@@ -37,6 +37,7 @@ import {
     getMissionThumbnailUrl,
     MissionWithStats,
 } from "@/src/features/missions/logic";
+const DEFAULT_MISSION_IMAGE = require("@/assets/images/paddy.jpg");
 
 const MissionDetailScreen = () => {
     const { t } = useLanguage();
@@ -47,6 +48,7 @@ const MissionDetailScreen = () => {
     const [instructions, setInstructions] = useState<MissionInstruction[]>([]);
     const [guidanceSteps, setGuidanceSteps] = useState<GuidanceStep[]>([]);
     const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
+    const [imageError, setImageError] = useState(false);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -240,17 +242,13 @@ const MissionDetailScreen = () => {
                     {/* Mission Header */}
                     <Card className="p-6 mb-6">
                         <VStack space="lg">
-                            {/* Thumbnail */}
-                            {thumbnailUrl && (
-                                <Box variant="plain" className="w-full h-48 rounded-lg overflow-hidden border-2 border-ink">
-                                    <Image
-                                        source={{ uri: thumbnailUrl }}
-                                        className="w-full h-full"
-                                        style={{ resizeMode: "cover" }}
-                                        alt="Mission Thumbnail"
-                                    />
-                                </Box>
-                            )}
+                            <Box variant="plain" className="w-full h-48 rounded-lg overflow-hidden border-2 border-ink bg-data/10">
+                                <Image
+                                    source={(thumbnailUrl && !imageError) ? { uri: thumbnailUrl } : DEFAULT_MISSION_IMAGE}
+                                    style={{ width: '100%', height: '100%', resizeMode: "cover" }}
+                                    onError={() => setImageError(true)}
+                                />
+                            </Box>
 
                             {/* Title and Status */}
                             <VStack space="md">

@@ -68,10 +68,33 @@ export async function getPublishedMissions(): Promise<{
 export async function getMissionThumbnailUrl(path: string): Promise<string | null> {
     if (!path) return null;
     try {
-        const { data } = supabase.storage.from("mission-thumbnails").getPublicUrl(path);
-        return data.publicUrl;
-    } catch (error) {
-        console.error("Error getting thumbnail URL:", error);
+        // Ensure path points to the thumbnails folder if not already
+        const storagePath = path.startsWith('thumbnails/') ? path : `thumbnails/${path}`;
+
+        // Use createSignedUrl for private buckets instead of getPublicUrl
+        const { data, error } = await supabase.storage
+            .from("mission-content")
+            .createSignedUrl(storagePath, 60 * 60); // 1 hour expiry
+
+        if (error) {
+            // Suppress 'Object not found' - commonly happens if file was deleted but DB record exists
+            if (error.statusCode === '404' || (error.message && error.message.includes('Object not found'))) {
+                console.log(`[Thumbnail Warning] File missing in storage: ${storagePath}`);
+                return null;
+            }
+            console.error("Error signing URL:", error);
+            return null;
+        }
+
+        console.log(`[Thumbnail Success] URL generated for: ${storagePath}`);
+        return data.signedUrl;
+    } catch (error: any) {
+        // Suppress 'Object not found' errors as they are expected for some missions
+        if (error.status === 400 || (error.message && error.message.includes('Object not found'))) {
+            console.log(`[Thumbnail Warning] Image not found for path: ${path}`);
+        } else {
+            console.error("Error getting thumbnail URL:", error);
+        }
         return null;
     }
 }
