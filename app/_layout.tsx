@@ -9,8 +9,12 @@ import {
   SpaceGrotesk_500Medium,
   SpaceGrotesk_600SemiBold,
   SpaceGrotesk_700Bold,
-  useFonts
 } from "@expo-google-fonts/space-grotesk";
+import {
+  SpaceMono_400Regular,
+  SpaceMono_700Bold,
+  useFonts
+} from "@expo-google-fonts/space-mono";
 import { LanguageProvider } from "@/src/core/i18n/language-context";
 
 import "../global.css";
@@ -25,7 +29,8 @@ export {
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
-    'SpaceMono': require("../assets/fonts/SpaceMono-Regular.ttf"),
+    'SpaceMono': SpaceMono_400Regular,
+    'SpaceMono-Bold': SpaceMono_700Bold,
     'SpaceGrotesk-Light': SpaceGrotesk_300Light,
     'SpaceGrotesk-Regular': SpaceGrotesk_400Regular,
     'SpaceGrotesk-Medium': SpaceGrotesk_500Medium,
