@@ -16,6 +16,8 @@ export interface MissionWithStats extends Mission {
     category?: string;
     ciq_reward?: number;
     time_estimate?: string;
+    difficulty?: string;
+    submission_type?: string;
 }
 
 export interface GuidanceStep {

@@ -4,7 +4,20 @@ import { Text as RNText } from 'react-native';
 import { textStyle } from './styles';
 
 type ITextProps = React.ComponentProps<typeof RNText> &
-  VariantProps<typeof textStyle>;
+  VariantProps<typeof textStyle> & {
+    weight?: 'regular' | 'bold';
+  };
+
+// Map weight variants to font family names
+const getFontFamily = (weight?: 'regular' | 'bold') => {
+  switch (weight) {
+    case 'bold':
+      return 'SpaceMono-Bold';
+    case 'regular':
+    default:
+      return 'SpaceMono';
+  }
+};
 
 const EcoText = React.forwardRef<React.ComponentRef<typeof RNText>, ITextProps>(
   function EcoText(
@@ -19,6 +32,7 @@ const EcoText = React.forwardRef<React.ComponentRef<typeof RNText>, ITextProps>(
       italic,
       highlight,
       retro,
+      weight = 'regular',
       style,
       ...props
     },
@@ -38,7 +52,7 @@ const EcoText = React.forwardRef<React.ComponentRef<typeof RNText>, ITextProps>(
           retro,
           class: className,
         })}
-        style={[{ fontFamily: 'SpaceMono' }, style]}
+        style={[{ fontFamily: getFontFamily(weight) }, style]}
         {...props}
         ref={ref}
       />

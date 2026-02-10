@@ -1,0 +1,280 @@
+import React from "react";
+import { Image, Pressable, StyleSheet, View } from "react-native";
+import { Box } from "@/src/ui/box";
+import { Text } from "@/src/ui/text";
+import { Heading } from "@/src/ui/heading";
+import { VStack } from "@/src/ui/vstack";
+import { HStack } from "@/src/ui/hstack";
+import { Icon } from "@/src/ui/icon";
+import { Card } from "@/src/ui/card";
+import { MapPin, Calendar, Users, Bookmark } from "lucide-react-native";
+import Svg, { Defs, LinearGradient, Stop, Rect } from "react-native-svg";
+
+const DEFAULT_EVENT_IMAGE = require("@/assets/images/paddy.jpg");
+
+export interface Event {
+    id: string;
+    title: string;
+    description?: string;
+    category?: string;
+    points_awarded?: number;
+    ciq_reward?: number;
+    location?: string;
+    date?: string;
+    time?: string;
+    attendee_count?: number;
+    thumbnailUrl?: string;
+    is_bookmarked?: boolean;
+}
+
+interface EventCardProps {
+    event: Event;
+    onPress?: () => void;
+    className?: string;
+    variant?: 'vertical' | 'landscape';
+}
+
+export const EventCard = ({ event, onPress, className, variant = 'vertical' }: EventCardProps) => {
+    const [pressed, setPressed] = React.useState(false);
+    const [isBookmarked, setIsBookmarked] = React.useState(event.is_bookmarked || false);
+    const [imageError, setImageError] = React.useState(false);
+
+    const imageSource = (event.thumbnailUrl && !imageError)
+        ? { uri: event.thumbnailUrl }
+        : DEFAULT_EVENT_IMAGE;
+
+    const handleImageError = () => {
+        setImageError(true);
+    };
+
+    // Landscape variant
+    if (variant === 'landscape') {
+        return (
+            <Pressable
+                onPress={onPress}
+                onPressIn={() => setPressed(true)}
+                onPressOut={() => setPressed(false)}
+            >
+                <Card
+                    className={`w-full h-48 p-0 overflow-hidden ${className}`}
+                    variant="secondary"
+                    pressed={pressed}
+                >
+                    <HStack className="h-full">
+                        {/* Image Section - 40% */}
+                        <Box
+                            className="relative w-[40%] h-full overflow-hidden"
+                            variant="plain"
+                        >
+                            <Image
+                                source={imageSource}
+                                style={{ width: '100%', height: '100%', resizeMode: "cover" }}
+                                onError={handleImageError}
+                            />
+
+                            {/* Gradient Overlay */}
+                            <View style={StyleSheet.absoluteFillObject} pointerEvents="none">
+                                <Svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                    <Defs>
+                                        <LinearGradient id="overlay-grad-event-landscape" x1="0" y1="1" x2="0" y2="0">
+                                            <Stop offset="0" stopColor="#1A4D2E" stopOpacity="0.6" />
+                                            <Stop offset="0.5" stopColor="#1A4D2E" stopOpacity="0" />
+                                        </LinearGradient>
+                                    </Defs>
+                                    <Rect width="100" height="100" fill="url(#overlay-grad-event-landscape)" />
+                                </Svg>
+                            </View>
+
+                            {/* Category Badge */}
+                            <Box className="absolute top-2 left-2 px-2 py-1 bg-white border-0 rounded-none">
+                                <Text size="2xs">
+                                    {event.category || "EVENT"}
+                                </Text>
+                            </Box>
+                        </Box>
+
+                        {/* Content Section - 60% */}
+                        <VStack space="xs" className="flex-1 p-3 items-start justify-between">
+                            {/* Points Badge */}
+                            <Box className="px-2 py-1 bg-energy border border-ink rounded-md self-start">
+                                <Text size="2xs" weight="bold">
+                                    {event.points_awarded || 300} PTS
+                                </Text>
+                            </Box>
+
+                            {/* Title */}
+                            <Heading size="md" className="text-ink leading-tight" numberOfLines={2}>
+                                {event.title}
+                            </Heading>
+
+                            {/* Location & Date */}
+                            <VStack space="2xs" className="w-full">
+                                {event.location && (
+                                    <HStack space="xs" className="items-center">
+                                        <Icon as={MapPin} size="xs" className="text-digitalDark" />
+                                        <Text size="2xs" className="text-ink/80" numberOfLines={1}>
+                                            {event.location}
+                                        </Text>
+                                    </HStack>
+                                )}
+                                {event.date && (
+                                    <HStack space="xs" className="items-center">
+                                        <Icon as={Calendar} size="xs" className="text-digitalDark" />
+                                        <Text size="2xs" className="text-ink/80">
+                                            {event.date} {event.time && `• ${event.time}`}
+                                        </Text>
+                                    </HStack>
+                                )}
+                            </VStack>
+
+                            {/* Metadata Row with Bookmark */}
+                            <HStack space="xs" className="items-center w-full justify-between">
+                                <HStack space="xs" className="items-center flex-1">
+                                    <Icon as={Users} size="xs" className="text-ink/60" />
+                                    <Text size="2xs" className="text-ink/80">
+                                        {event.attendee_count || 0} attending
+                                    </Text>
+                                </HStack>
+
+                                {/* Bookmark Button */}
+                                <Pressable
+                                    onPress={(e) => {
+                                        e.stopPropagation();
+                                        setIsBookmarked(!isBookmarked);
+                                    }}
+                                    className="p-1"
+                                >
+                                    <Icon
+                                        as={Bookmark}
+                                        size="md"
+                                        className={isBookmarked ? "text-ink fill-ink" : "text-ink"}
+                                    />
+                                </Pressable>
+                            </HStack>
+                        </VStack>
+                    </HStack>
+                </Card>
+            </Pressable>
+        );
+    }
+
+    // Vertical variant
+    return (
+        <Pressable
+            onPress={onPress}
+            onPressIn={() => setPressed(true)}
+            onPressOut={() => setPressed(false)}
+        >
+            <Card
+                className={`w-80 p-0 overflow-hidden ${className}`}
+                variant="secondary"
+                pressed={pressed}
+            >
+                {/* Header Media Section */}
+                <Box
+                    className="relative h-44 overflow-hidden w-full"
+                    variant="plain"
+                >
+                    <Image
+                        source={imageSource}
+                        style={{ width: '100%', height: '100%', resizeMode: "cover" }}
+                        onError={handleImageError}
+                    />
+
+                    {/* Gradient Overlay */}
+                    <View style={StyleSheet.absoluteFillObject} pointerEvents="none">
+                        <Svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
+                            <Defs>
+                                <LinearGradient id="overlay-grad-event" x1="0" y1="1" x2="0" y2="0">
+                                    <Stop offset="0" stopColor="#1A4D2E" stopOpacity="0.6" />
+                                    <Stop offset="0.5" stopColor="#1A4D2E" stopOpacity="0" />
+                                </LinearGradient>
+                            </Defs>
+                            <Rect width="100" height="100" fill="url(#overlay-grad-event)" />
+                        </Svg>
+                    </View>
+
+                    {/* Category Badge */}
+                    <Box className="absolute top-3 left-3 px-2 py-1 bg-white border-0 rounded-none">
+                        <Text size="2xs">
+                            {event.category || "EVENT"}
+                        </Text>
+                    </Box>
+
+                    {/* Bookmark Icon */}
+                    <Pressable
+                        className="absolute top-2 right-3 p-1"
+                        onPress={(e) => {
+                            e.stopPropagation();
+                            setIsBookmarked(!isBookmarked);
+                        }}
+                    >
+                        <Icon
+                            as={Bookmark}
+                            size="xl"
+                            className={isBookmarked ? "text-white fill-white" : "text-white"}
+                        />
+                    </Pressable>
+                </Box>
+
+                {/* Content Section */}
+                <VStack space="xs" className="p-4 items-start">
+                    {/* Points & CIQ */}
+                    <HStack space="md" className="items-center w-full pb-2">
+                        <Box className="px-3 py-1 bg-energy border border-ink rounded-md">
+                            <Text size="xs" weight="bold">
+                                {event.points_awarded || 300}
+                            </Text>
+                        </Box>
+
+                        <Text size="xs" weight="bold" className="text-digitalDark tracking-wider">
+                            {event.ciq_reward || 500} CIQ
+                        </Text>
+                    </HStack>
+
+                    {/* Event Title */}
+                    <Heading size="lg" className="text-ink leading-tight">
+                        {event.title}
+                    </Heading>
+
+                    {/* Description */}
+                    {event.description && (
+                        <Text
+                            size="sm"
+                            numberOfLines={2}
+                            className="text-ink/80 leading-snug"
+                        >
+                            {event.description}
+                        </Text>
+                    )}
+
+                    {/* Location & Date Info */}
+                    <VStack space="xs" className="w-full mt-2">
+                        {event.location && (
+                            <HStack space="xs" className="items-center">
+                                <Icon as={MapPin} size="sm" className="text-digitalDark" />
+                                <Text size="sm" className="text-ink/80 flex-1" numberOfLines={1}>
+                                    {event.location}
+                                </Text>
+                            </HStack>
+                        )}
+                        {event.date && (
+                            <HStack space="xs" className="items-center">
+                                <Icon as={Calendar} size="sm" className="text-digitalDark" />
+                                <Text size="sm" className="text-ink/80">
+                                    {event.date} {event.time && `• ${event.time}`}
+                                </Text>
+                            </HStack>
+                        )}
+                        <HStack space="xs" className="items-center">
+                            <Icon as={Users} size="sm" className="text-ink/60" />
+                            <Text size="sm" className="text-ink/80">
+                                {event.attendee_count || 0} attending
+                            </Text>
+                        </HStack>
+                    </VStack>
+                </VStack>
+            </Card>
+        </Pressable>
+    );
+};

@@ -54,7 +54,24 @@ export async function getPublishedMissions(): Promise<{
                 is_bookmarked: isBookmarked,
                 submission_status: userSubmission?.status || null,
                 // Calculate progress roughly if simple logic, or use helper if imported (avoid for now to minimize deps)
-                submission_progress: userSubmission ? 0 : 0, // Placeholder, detailed logic in details.ts
+                submission_progress: userSubmission ? 0 : 0, // Placeholder
+                // Mock data for new UI fields
+                ciq_reward: (mission.points_awarded || 100) * 2,
+                time_estimate: ["15m", "30m", "45m", "1h"][mission.id.charCodeAt(0) % 4],
+                difficulty: ["EASY", "MEDIUM", "HARD"][mission.id.charCodeAt(1) % 3],
+                category: ["AIR QUALITY", "BIODIVERSITY", "WASTE REDUCTION", "WATER SOURCE", "CLIMATE ACTION"][mission.id.charCodeAt(2) % 5],
+                submission_type: (() => {
+                    if (!mission.guidance_steps || !Array.isArray(mission.guidance_steps)) return "PHOTO";
+                    const types = new Set<string>();
+                    mission.guidance_steps.forEach((step: any) => {
+                        if (Array.isArray(step.requiredEvidence)) {
+                            step.requiredEvidence.forEach((type: string) => types.add(type.toUpperCase()));
+                        }
+                    });
+                    if (types.has("VIDEO")) return "VIDEO";
+                    if (types.has("AUDIO")) return "AUDIO";
+                    return "PHOTO";
+                })(),
             };
         });
 

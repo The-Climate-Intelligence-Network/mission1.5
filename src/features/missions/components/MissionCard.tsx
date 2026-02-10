@@ -19,9 +19,10 @@ interface MissionCardProps {
     mission: MissionWithStats;
     onPress?: () => void;
     className?: string;
+    variant?: 'vertical' | 'landscape';
 }
 
-export const MissionCard = ({ mission, onPress, className }: MissionCardProps) => {
+export const MissionCard = ({ mission, onPress, className, variant = 'vertical' }: MissionCardProps) => {
     const [pressed, setPressed] = React.useState(false);
     const [isBookmarked, setIsBookmarked] = React.useState(mission.is_bookmarked || false);
     const [imageError, setImageError] = React.useState(false);
@@ -39,6 +40,141 @@ export const MissionCard = ({ mission, onPress, className }: MissionCardProps) =
         setImageError(true);
     };
 
+    // Landscape variant
+    if (variant === 'landscape') {
+        return (
+            <Pressable
+                onPress={onPress}
+                onPressIn={() => setPressed(true)}
+                onPressOut={() => setPressed(false)}
+            >
+                <Card
+                    className={`w-full h-48 p-0 overflow-hidden ${className}`}
+                    variant="secondary"
+                    pressed={pressed}
+                >
+                    <HStack className="h-full">
+                        {/* Image Section - 40% */}
+                        <Box
+                            className="relative w-[40%] h-full overflow-hidden bg-ink"
+                            variant="plain"
+                        >
+                            <Image
+                                source={imageSource}
+                                style={{ width: '100%', height: '100%', resizeMode: "cover" }}
+                                onError={handleImageError}
+                            />
+
+                            {/* Gradient Overlay */}
+                            <View style={StyleSheet.absoluteFillObject} pointerEvents="none">
+                                <Svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                    <Defs>
+                                        <LinearGradient id="overlay-grad-landscape" x1="0" y1="1" x2="0" y2="0">
+                                            <Stop offset="0" stopColor="#1A4D2E" stopOpacity="0.6" />
+                                            <Stop offset="0.5" stopColor="#1A4D2E" stopOpacity="0" />
+                                        </LinearGradient>
+                                    </Defs>
+                                    <Rect width="100" height="100" fill="url(#overlay-grad-landscape)" />
+                                </Svg>
+                            </View>
+                        </Box>
+
+                        {/* Content Section - 60% */}
+                        <VStack space="xs" className="flex-1 p-3 items-start justify-between">
+                            
+                            {/*Top Section*/}
+                            <VStack space="md">
+                                {/* Category Badge and bookmark */}
+                                <HStack space="xs" className="items-center w-full justify-between">
+                                    <Box className="px-2 py-1 bg-surface border border-ink/20 rounded-sm self-start">
+                                        <Text size="2xs" className="uppercase text-ink/60">
+                                            {mission.category || "BIODIVERSITY"}
+                                        </Text>
+                                    </Box>
+                                    {/* Bookmark Button */}
+                                    <Pressable
+                                        onPress={(e) => {
+                                            e.stopPropagation();
+                                            setIsBookmarked(!isBookmarked);
+                                        }}
+                                        className="p-1"
+                                    >
+                                        <Icon
+                                            as={Bookmark}
+                                            size="md"
+                                            className={isBookmarked ? "text-ink fill-ink" : "text-ink"}
+                                        />
+                                    </Pressable>
+                                </HStack>
+
+                                {/* Title and Description */}
+                                <VStack space="xs">
+                                    {/* Title */}
+                                    <Heading size="lg" className="text-ink leading-tight" numberOfLines={1}>
+                                        {mission.title}
+                                    </Heading>
+
+                                    {/* Description */}
+                                    <Text
+                                        size="sm"
+                                        numberOfLines={2}
+                                        className="text-ink/80 leading-snug"
+                                    >
+                                        {mission.description || "Contribute to the global sustainability efforts by documenting biodiversity in your local area."}
+                                    </Text>
+                                </VStack>
+                            </VStack>
+
+                            {/*Row: Points, CIQ, Time*/}
+                            <HStack space="lg" className="items-center">
+                                {/* Points Badge */}
+                                <Box className="px-2 py-1 bg-energy border border-ink rounded-md">
+                                    <Text size="sm" weight="bold">
+                                        {mission.points_awarded || 150}
+                                    </Text>
+                                </Box>
+
+                                {/* CIQ Reward */}
+                                <Text size="sm" weight="bold" className="text-digitalDark tracking-wider">
+                                    {mission.ciq_reward || 300}{"\u2009"}CIQ
+                                </Text>
+
+                                {/* Time Estimate */}
+                                <Text size="sm" className="text-ink/80 tracking-wider">
+                                    {mission.time_estimate || "15m"}
+                                </Text>
+                            </HStack>
+                            
+                            {/* Progress Bar */}
+                            {(mission.submission_status === "in_progress" || (mission.submission_progress ?? 0) > 0) && (
+                                <VStack space="xs">
+                                    <HStack className="w-full justify-between">
+                                        <Text size="xs" className="text-ink/80">
+                                            Progress
+                                        </Text>
+                                        <Text size="xs" className="text-ink/80">
+                                            {mission.submission_progress || 25}%
+                                        </Text>
+                                    </HStack>
+                                    <HStack className="w-full">
+                                        <SegmentedProgressBar
+                                            current={mission.submission_progress || 25}
+                                            total={100}
+                                            maxSegments={10}
+                                            size="sm"
+                                            activeColor={colors.data}
+                                        />
+                                    </HStack>
+                                </VStack>
+                            )}
+                        </VStack>
+                    </HStack>
+                </Card>
+            </Pressable>
+        );
+    }
+
+    // Vertical variant (original)
     return (
         <Pressable
             onPress={onPress}
@@ -52,7 +188,7 @@ export const MissionCard = ({ mission, onPress, className }: MissionCardProps) =
             >
                 {/* Header Media Section - Top 50% height equivalent */}
                 <Box
-                    className="relative h-44 overflow-hidden w-full"
+                    className="relative h-44 overflow-hidden w-full bg-ink"
                     variant="plain"
                 >
                     <Image
@@ -99,24 +235,7 @@ export const MissionCard = ({ mission, onPress, className }: MissionCardProps) =
                 </Box>
 
                 {/* Content Section */}
-                <VStack space="xs" className="p-4 items-start">
-                    {/* Row 1 - Metadata (Points, CIQ, Time) */}
-                    <HStack space="md" className="items-center w-full pb-2">
-                        <Box className="px-3 py-1 bg-energy border border-ink rounded-md">
-                            <Text size="xs" >
-                                {mission.points_awarded || 150}
-                            </Text>
-                        </Box>
-
-                        <Text size="xs" className="text-digitalDark tracking-wider">
-                            {mission.ciq_reward || 300} CIQ
-                        </Text>
-
-                        <Text size="xs" className="text-ink/80 tracking-wider">
-                            {mission.time_estimate || "15 Mins"}
-                        </Text>
-                    </HStack>
-
+                <VStack space="sm" className="p-4 items-start">
                     {/* Row 2 - Mission Title (Human Voice: Space Grotesk) */}
                     <Heading size="lg" className="text-ink leading-tight">
                         {mission.title}
@@ -130,10 +249,38 @@ export const MissionCard = ({ mission, onPress, className }: MissionCardProps) =
                     >
                         {mission.description || "Contribute to the global sustainability efforts by documenting biodiversity in your local area."}
                     </Text>
+                    
+                    {/* Row - Metadata (Points, CIQ, Time) */}
+                    <HStack space="lg" className="items-center w-full mt-2">
+                        <Box className="px-3 py-1 bg-energy border border-ink rounded-md">
+                            <Text size="sm" weight="bold">
+                                {mission.points_awarded || 150}
+                            </Text>
+                        </Box>
 
-                    {/* Row 4 - Segmented Progress Bar (Only if in progress) */}
-                    {(mission.submission_status === "in_progress" || (mission.submission_progress ?? 0) > 0) && (
-                        <HStack className="w-full mt-4">
+                        <Text size="sm" weight="bold" className="text-digitalDark tracking-wider">
+                            {mission.ciq_reward || 300}{"\u2009"}CIQ
+                        </Text>
+
+                        <Text size="sm" className="text-ink/80 tracking-wider">
+                            {mission.time_estimate || "15 Mins"}
+                        </Text>
+                    </HStack>
+                </VStack>
+
+
+                {/* Progress Section */}
+                {(mission.submission_status === "in_progress" || (mission.submission_progress ?? 0) > 0) && (
+                    <VStack space="sm" className="mt-2 p-4 pt-2 border-t border-ink">
+                        <HStack className="w-full justify-between">
+                            <Text size="xs" className="text-ink/80">
+                                Progress
+                            </Text>
+                            <Text size="xs" className="text-ink/80">
+                                {mission.submission_progress || 25}%
+                            </Text>
+                        </HStack>
+                        <HStack className="w-full">
                             <SegmentedProgressBar
                                 current={mission.submission_progress || 25}
                                 total={100}
@@ -142,8 +289,8 @@ export const MissionCard = ({ mission, onPress, className }: MissionCardProps) =
                                 activeColor={colors.data}
                             />
                         </HStack>
-                    )}
-                </VStack>
+                    </VStack>
+                )}
             </Card>
         </Pressable>
     );
