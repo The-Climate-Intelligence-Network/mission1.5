@@ -20,6 +20,39 @@ export interface ProfileUpdateData {
   avatar_url?: string;
 }
 
+export interface AgentStats {
+  completedMissions: number;
+  ongoingMissions: number;
+  savedMissions: number;
+  totalPoints: number;
+  totalEnergy: number;
+  dataPointsContributed: number;
+}
+
+export interface Achievement {
+  id: number;
+  title: string;
+  description: string;
+  icon: any; // Using any for Lucide icons to avoid strict type dependency
+  earned: boolean;
+}
+
+export interface AgentLevel {
+  level: number;
+  name: string;
+  minPoints: number;
+  maxPoints: number;
+  icon?: any;
+}
+
+export interface Activity {
+  id: string;
+  title: string;
+  date: string;
+  icon: any;
+  color: string;
+}
+
 /**
  * Get current user profile from agents table
  */
@@ -309,6 +342,117 @@ export const pickImage = async (useCamera: boolean = false): Promise<ProfileServ
     return {
       success: false,
       error: 'Unexpected error occurred while picking image'
+    };
+  }
+};
+
+/**
+ * Get aggregated agent stats
+ */
+export const getAgentStats = async (agentId: string): Promise<ProfileServiceResponse<AgentStats>> => {
+  try {
+    const { data: profile, error: profileError } = await supabase
+      .from('agents')
+      .select('points, energy')
+      .eq('id', agentId)
+      .single();
+
+    if (profileError) throw profileError;
+
+    // Get mission stats
+    const { count: completedCount, error: completedError } = await supabase
+      .from('mission_submissions')
+      .select('*', { count: 'exact', head: true })
+      .eq('agent_id', agentId)
+      .eq('status', 'reviewed');
+
+    if (completedError) throw completedError;
+
+    const { count: ongoingCount, error: ongoingError } = await supabase
+      .from('mission_submissions')
+      .select('*', { count: 'exact', head: true })
+      .eq('agent_id', agentId)
+      .in('status', ['started', 'in_progress']);
+
+    if (ongoingError) throw ongoingError;
+
+    const { count: savedCount, error: savedError } = await supabase
+      .from('mission_bookmarks')
+      .select('*', { count: 'exact', head: true })
+      .eq('agent_id', agentId);
+
+    if (savedError) throw savedError;
+
+    return {
+      success: true,
+      data: {
+        completedMissions: completedCount || 0,
+        ongoingMissions: ongoingCount || 0,
+        savedMissions: savedCount || 0,
+        totalPoints: profile?.points || 0,
+        totalEnergy: profile?.energy || 0,
+        dataPointsContributed: (completedCount || 0) * 10
+      }
+    };
+  } catch (error) {
+    console.error('Error fetching agent stats:', error);
+    return {
+      success: false,
+      error: 'Failed to fetch agent stats'
+    };
+  }
+};
+
+/**
+ * Calculate agent level based on points
+ */
+export const getAgentLevel = (points: number): AgentLevel => {
+  if (points >= 2000) return { level: 5, name: "Climate Champion", minPoints: 2000, maxPoints: 5000 };
+  if (points >= 1500) return { level: 4, name: "Earth Guardian", minPoints: 1500, maxPoints: 2000 };
+  if (points >= 1000) return { level: 3, name: "Green Warrior", minPoints: 1000, maxPoints: 1500 };
+  if (points >= 500) return { level: 2, name: "Eco Explorer", minPoints: 500, maxPoints: 1000 };
+  if (points >= 100) return { level: 1, name: "Climate Rookie", minPoints: 100, maxPoints: 500 };
+  return { level: 0, name: "Newcomer", minPoints: 0, maxPoints: 100 };
+};
+
+/**
+ * Get recent activity
+ */
+export const getRecentActivity = async (agentId: string): Promise<ProfileServiceResponse<Activity[]>> => {
+  try {
+    const { data, error } = await supabase
+      .from('mission_submissions')
+      .select(`
+        id,
+        completed_at,
+        missions (
+          title
+        )
+      `)
+      .eq('agent_id', agentId)
+      .eq('status', 'reviewed')
+      .order('completed_at', { ascending: false })
+      .limit(3);
+
+    if (error) throw error;
+
+    const activities: Activity[] = data.map((item: any) => ({
+      id: item.id,
+      title: `Completed ${item.missions?.title || 'Mission'}`,
+      date: item.completed_at ? new Date(item.completed_at).toLocaleDateString() : 'Recently',
+      icon: null, // Icon handled in UI
+      color: 'bg-green-500'
+    }));
+
+    return {
+      success: true,
+      data: activities
+    };
+  } catch (error) {
+    console.error('Error fetching recent activity:', error);
+    return {
+      success: false,
+      error: 'Failed to fetch recent activity'
     };
   }
 };

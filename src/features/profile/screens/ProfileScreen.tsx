@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
-    SafeAreaView,
     ScrollView,
     RefreshControl,
     Alert,
+    View,
     Image,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { Box } from "@/src/ui/box";
 import { Text } from "@/src/ui/text";
@@ -17,75 +18,140 @@ import { Button } from "@/src/ui/button";
 import { Card } from "@/src/ui/card";
 import { Avatar, AvatarImage } from "@/src/ui/avatar";
 import { Badge } from "@/src/ui/badge";
-import { useTheme } from "@/src/core/theme/ThemeProvider";
+import { BackgroundGradient } from "@/src/ui/background-gradient";
+import { Scanlines } from "@/src/ui/scanlines";
+import { Header } from "@/src/ui/header";
+import { HardShadowFrame } from "@/src/ui/primitives/HardShadowFrame";
+import { Divider, FilterChip, StatusCard } from "@/src/ui";
+import { Pressable } from "react-native";
 import { useSession } from "@/src/core/auth/AuthProvider";
 import {
     User,
     Award,
     Target,
     BarChart3,
-    LogOut,
     Calendar,
     CheckCircle,
-    Edit,
-    Trash2,
+    Turtle,
+    Sun,
+    ShoppingBag,
+    Leaf,
+    Droplet,
+    Plus,
+    Bookmark,
+    Play,
+    Calendar1,
+    Ticket,
 } from "lucide-react-native";
-import { getPublishedMissions, MissionWithStats } from "@/src/features/missions/logic";
+import { Progress } from "@/src/ui/progress";
+import { colors } from "@/src/ui/tokens/colors";
 import {
     getCurrentUserProfileWithAvatar,
+    getAgentStats,
+    getAgentLevel,
+    getRecentActivity,
     Agent,
+    AgentStats,
+    AgentLevel,
+    Activity,
 } from "@/src/features/profile/logic/profile.service";
+import { ProfileSettingsMenu } from "../components/ProfileSettingsMenu";
 import { BASE_URL } from "@/src/core/config/constants";
+import { SegmentedProgressBar } from "@/src/ui/segmented-progress";
+import { getPublishedMissions } from "../../missions/logic/missions.service";
+import { MissionWithStats } from "../../missions/logic/types";
+import { EventRepo } from "@/src/data/repositories/EventRepo";
+import { EventQuest } from "@/src/domain/events/models";
+import { MissionCard } from "../../missions/components/MissionCard";
 
-const ProfileScreen = () => {
-    const { signOut, user } = useSession();
-    const [missions, setMissions] = useState<MissionWithStats[]>([]);
+export const ProfileScreen = () => {
+    const { user, signOut } = useSession();
+    // router is imported directly from expo-router
+
+    // State
     const [profile, setProfile] = useState<Agent | null>(null);
     const [avatarUrl, setAvatarUrl] = useState<string>("");
+    const [stats, setStats] = useState<AgentStats | null>(null);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
+    const [events, setEvents] = useState<EventQuest[]>([]);
+    const [selectedEventFilter, setSelectedEventFilter] = useState<"Going" | "Bookmarked" | "Done">("Going");
 
-    useEffect(() => {
-        loadData();
-    }, []);
+    // Mission Log State
+    const [missions, setMissions] = useState<MissionWithStats[]>([]);
+    const [selectedFilter, setSelectedFilter] = useState<"In Progress" | "Bookmarked" | "Completed">("In Progress");
 
-    const loadData = async () => {
-        await Promise.all([loadMissions(), loadProfile()]);
-    };
+    const fetchData = async () => {
+        if (!user) return;
 
-    const loadMissions = async () => {
         try {
-            const { data, error } = await getPublishedMissions();
+            // Parallel fetch for profile, stats and missions
+            const [profileRes, statsRes, activityRes, eventsData, missionsRes] = await Promise.all([
+                getCurrentUserProfileWithAvatar(),
+                getAgentStats(user.id),
+                getRecentActivity(user.id),
+                EventRepo.getAll(),
+                getPublishedMissions()
+            ]);
 
-            if (error) {
-                console.error("Error loading missions:", error);
-            } else if (data) {
-                setMissions(data);
+            if (profileRes.success && profileRes.data) {
+                setProfile(profileRes.data);
+                setAvatarUrl(profileRes.data.avatarSignedUrl || "");
+            }
+
+            if (statsRes.success && statsRes.data) {
+                setStats(statsRes.data);
+            }
+
+            if (activityRes.success && activityRes.data) {
+                // Assuming setActivities state exists or needs to be added
+                // setActivities(activityRes.data);
+            }
+
+            if (eventsData) {
+                setEvents(eventsData);
+            }
+
+            if (missionsRes.data) {
+                setMissions(missionsRes.data);
             }
         } catch (error) {
-            console.error("Error loading missions:", error);
-        }
-    };
-
-    const loadProfile = async () => {
-        try {
-            const response = await getCurrentUserProfileWithAvatar();
-            if (response.success && response.data) {
-                setProfile(response.data);
-                setAvatarUrl(response.data.avatarSignedUrl || "");
-            }
-        } catch (error) {
-            console.error("Error loading profile:", error);
+            console.error("Error loading profile data:", error);
         } finally {
             setLoading(false);
+            setRefreshing(false);
         }
     };
+
+    useEffect(() => {
+        fetchData();
+    }, [user]);
 
     const onRefresh = async () => {
         setRefreshing(true);
-        await loadData();
+        await fetchData();
         setRefreshing(false);
     };
+
+    const filteredMissions = useMemo(() => {
+        if (!Array.isArray(missions)) return [];
+        return missions.filter(m => {
+            if (selectedFilter === "In Progress") return m.submission_status === 'started' || m.submission_status === 'in_progress';
+            if (selectedFilter === "Bookmarked") return m.is_bookmarked;
+            if (selectedFilter === "Completed") return m.submission_status === 'reviewed';
+            return false;
+        });
+    }, [missions, selectedFilter]);
+
+    const filteredEvents = useMemo(() => {
+        if (!Array.isArray(events)) return [];
+        return events.filter(event => {
+            if (selectedEventFilter === "Going") return true;
+            if (selectedEventFilter === "Bookmarked") return false;
+            if (selectedEventFilter === "Done") return new Date(event.endDate) < new Date();
+            return true;
+        });
+    }, [events, selectedEventFilter]);
 
     const deleteAccount = async () => {
         Alert.alert(
@@ -142,130 +208,83 @@ const ProfileScreen = () => {
         );
     };
 
-    // Calculate real user statistics from missions
-    const userStats = {
-        completedMissions: missions.filter(
-            (m) => m.submission_status === "reviewed"
-        ).length,
-        ongoingMissions: missions.filter(
-            (m) =>
-                m.submission_status === "in_progress" ||
-                m.submission_status === "started"
-        ).length,
-        savedMissions: missions.filter((m) => m.is_bookmarked).length,
-        totalPoints: missions
-            .filter((m) => m.submission_status === "reviewed")
-            .reduce((sum, m) => sum + (m.points_awarded || 0), 0),
-        totalEnergy: missions
-            .filter((m) => m.submission_status === "reviewed")
-            .reduce((sum, m) => sum + (m.energy_awarded || 0), 0),
-        dataPointsContributed: missions
-            .filter((m) => m.submission_status === "reviewed")
-            .reduce((sum, m) => sum + (m.participants_count || 1), 0),
-    };
+    // Display stats for the UI
+    const displayStats = [
+        {
+            label: "Missions Completed",
+            value: stats?.completedMissions.toString() || "0",
+            color: "text-green-600",
+        },
+        {
+            label: "Missions In Progress",
+            value: stats?.ongoingMissions.toString() || "0",
+            color: "text-blue-600",
+        },
+        {
+            label: "Saved Missions",
+            value: stats?.savedMissions.toString() || "0",
+            color: "text-purple-600",
+        },
+        {
+            label: "Points Earned",
+            value: stats?.totalPoints.toString() || "0",
+            color: "text-orange-600",
+        },
+        {
+            label: "Energy Collected",
+            value: stats?.totalEnergy.toString() || "0",
+            color: "text-yellow-600",
+        },
+        {
+            label: "Data Points",
+            value: stats?.dataPointsContributed.toString() || "0",
+            color: "text-blue-500",
+        },
+    ];
 
-    // Calculate achievements based on real data
+    // Achievements based on stats (Logic could also be moved to service in future)
     const achievements = [
         {
             id: 1,
             title: "First Steps",
             description: "Complete your first mission",
             icon: Target,
-            earned: userStats.completedMissions >= 1,
+            earned: (stats?.completedMissions || 0) >= 1,
         },
         {
             id: 2,
             title: "Climate Activist",
             description: "Complete 5 missions",
             icon: Award,
-            earned: userStats.completedMissions >= 5,
+            earned: (stats?.completedMissions || 0) >= 5,
         },
         {
             id: 3,
             title: "Data Pioneer",
             description: "Contribute 100 data points",
             icon: BarChart3,
-            earned: userStats.dataPointsContributed >= 100,
+            earned: (stats?.dataPointsContributed || 0) >= 100,
         },
         {
             id: 4,
             title: "Mission Master",
             description: "Complete 10 missions",
             icon: CheckCircle,
-            earned: userStats.completedMissions >= 10,
+            earned: (stats?.completedMissions || 0) >= 10,
         },
         {
             id: 5,
             title: "Point Collector",
             description: "Earn 1000 points",
             icon: Award,
-            earned: userStats.totalPoints >= 1000,
+            earned: (stats?.totalPoints || 0) >= 1000,
         },
         {
             id: 6,
             title: "Energy Saver",
             description: "Collect 500 energy",
             icon: Award,
-            earned: userStats.totalEnergy >= 500,
-        },
-    ];
-
-    const earnedAchievements = achievements.filter((a) => a.earned);
-
-    // Calculate user level based on points
-    const getUserLevel = (points: number) => {
-        if (points >= 2000) return { level: 5, name: "Climate Champion" };
-        if (points >= 1500) return { level: 4, name: "Earth Guardian" };
-        if (points >= 1000) return { level: 3, name: "Green Warrior" };
-        if (points >= 500) return { level: 2, name: "Eco Explorer" };
-        if (points >= 100) return { level: 1, name: "Climate Rookie" };
-        return { level: 0, name: "Newcomer" };
-    };
-
-    const currentLevel = getUserLevel(userStats.totalPoints);
-
-    // Recent activity from missions
-    const recentActivity = missions
-        .filter((m) => m.submission_status === "reviewed")
-        .slice(0, 3)
-        .map((mission) => ({
-            id: mission.id,
-            title: `Completed ${mission.title}`,
-            date: "Recently",
-            icon: CheckCircle,
-            color: "bg-green-500",
-        }));
-
-    const stats = [
-        {
-            label: "Missions Completed",
-            value: userStats.completedMissions.toString(),
-            color: "text-green-600",
-        },
-        {
-            label: "Missions In Progress",
-            value: userStats.ongoingMissions.toString(),
-            color: "text-blue-600",
-        },
-        {
-            label: "Saved Missions",
-            value: userStats.savedMissions.toString(),
-            color: "text-purple-600",
-        },
-        {
-            label: "Points Earned",
-            value: userStats.totalPoints.toString(),
-            color: "text-orange-600",
-        },
-        {
-            label: "Energy Collected",
-            value: userStats.totalEnergy.toString(),
-            color: "text-yellow-600",
-        },
-        {
-            label: "Data Points",
-            value: userStats.dataPointsContributed.toString(),
-            color: "text-blue-500",
+            earned: (stats?.totalEnergy || 0) >= 500,
         },
     ];
 
@@ -278,251 +297,365 @@ const ProfileScreen = () => {
         "Climate Advocate";
 
     const displayEmail = profile?.email || user?.email || "No email";
-    const displayLocation = profile?.address || user?.user_metadata?.location;
-
     return (
-        <SafeAreaView style={{ flex: 1 }} className="bg-[#FCFCFC]">
-            <ScrollView
-                className="flex-1"
-                refreshControl={
-                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-                }
-            >
-                <Box className="p-6 items-start">
-                    {/* Header */}
-                    <VStack space="lg" className="mb-8 items-start w-full">
-                        <HStack space="md" className="flex-row items-start">
-                            <Image
-                                source={require("@/assets/icon.png")}
-                                style={{ width: 44, height: 44 }}
-                                resizeMode="contain"
-                            />
-                            <VStack space="xs">
-                                <Heading size="xl">Agent Profile</Heading>
-                                <Text size="sm" className="text-data font-bold tracking-widest uppercase">
-                                    Terminal Node 01 User
-                                </Text>
-                            </VStack>
-                        </HStack>
-                    </VStack>
+        <View style={{ flex: 1 }}>
+            <BackgroundGradient />
+            <Scanlines />
+            <SafeAreaView style={{ flex: 1 }}>
+                <ScrollView
+                    className="flex-1"
+                    refreshControl={
+                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                    }
+                    contentContainerStyle={{ padding: 24, paddingTop: 16, paddingBottom: 100 }}
+                >
+                    <VStack space="lg" className="w-full">
+                        <Header
+                            title="Profile"
+                            variant="profile"
+                            rightContent={
+                                <ProfileSettingsMenu
+                                    onSignOut={async () => {
+                                        await signOut();
+                                    }}
+                                    onDeleteAccount={deleteAccount}
+                                />
+                            }
+                        />
 
-                    {/* Profile Info Card */}
-                    <Card className="p-6 mb-6 w-full">
-                        <VStack space="xl">
-                            <HStack space="lg" className="flex-row items-start">
-                                {avatarUrl ||
-                                    user?.user_metadata?.avatar_url ||
-                                    user?.user_metadata?.picture ? (
-                                    <Avatar size="xl" className="border-2 border-ink shadow-retro-hard-sm">
-                                        <AvatarImage
-                                            source={{
-                                                uri:
-                                                    avatarUrl ||
-                                                    user?.user_metadata?.avatar_url ||
-                                                    user?.user_metadata?.picture,
-                                            }}
+                        {/* Content */}
+                        <VStack space="3xl" className="w-full">
+                            {/* Profile Info Card */}
+                            <HStack space="lg" className="flex-row items-start w-full">
+                                <HardShadowFrame
+                                    bg={colors.surface}
+                                    radius={16}
+                                    shadowSize={4}
+                                    className="p-1 border-2 border-ink"
+                                >
+                                    {avatarUrl ||
+                                        user?.user_metadata?.avatar_url ||
+                                        user?.user_metadata?.picture ? (
+                                        <Avatar className="border-0 h-24 w-24">
+                                            <AvatarImage
+                                                source={{
+                                                    uri:
+                                                        avatarUrl ||
+                                                        user?.user_metadata?.avatar_url ||
+                                                        user?.user_metadata?.picture,
+                                                }}
+                                                className="rounded-xl"
+                                            />
+                                        </Avatar>
+                                    ) : (
+                                        <Box className="w-24 h-24 bg-sky border-0 items-center justify-center rounded-xl">
+                                            <Icon as={User} size="xl" className="text-ink" />
+                                        </Box>
+                                    )}
+                                    <Box className="absolute -bottom-2 -right-2 w-10 h-10 bg-surface border-2 border-ink items-center justify-center z-10">
+                                        <Image
+                                            source={require("@/assets/sea-turtle.png")}
+                                            style={{ width: 28, height: 28, resizeMode: "contain" }}
                                         />
-                                    </Avatar>
-                                ) : (
-                                    <Box className="w-20 h-20 bg-sky border-2 border-ink shadow-retro-hard-sm items-center justify-center">
-                                        <Icon as={User} size="xl" className="text-ink" />
                                     </Box>
-                                )}
-                                <VStack space="xs" className="flex-1 items-start">
+                                </HardShadowFrame>
+
+                                <VStack space="2xs" className="flex-1 items-start">
                                     <Heading
-                                        retro
-                                        size="lg"
-                                        className="text-ink font-bold tracking-wide"
+                                        size="xl"
+                                        className="text-ink tracking-wide uppercase"
                                     >
                                         {displayName}
                                     </Heading>
-                                    <Text size="sm" className="text-ink/60 font-mono lower">
-                                        {displayEmail}
-                                    </Text>
-                                    <HStack space="xs" className="flex-row items-center mt-2 flex-wrap">
-                                        <Badge className="bg-digital border-2 border-ink">
-                                            <Text size="xs" className="font-bold uppercase">Lvl {currentLevel.level}</Text>
-                                        </Badge>
-                                        <Badge className="bg-energy border-2 border-ink">
-                                            <Text size="xs" className="font-bold uppercase">{userStats.totalPoints} pts</Text>
-                                        </Badge>
+                                    <HStack space="xs" className="items-center mb-4">
+                                        <Text weight="bold" className="text-ink/60 uppercase tracking-widest">LEAGUE:</Text>
+                                        <Text weight="bold" className="text-ink uppercase tracking-widest">Green Turtle</Text>
                                     </HStack>
+
+                                    <VStack space="xs" className="w-full">
+                                        <HStack className="justify-between items-center w-full">
+                                            <Text size="md" weight="bold" className="text-ink/60 tracking-widest">Progress</Text>
+                                            <Text size="md" weight="bold" className="text-ink/60 tracking-widest">{stats?.totalEnergy || 300}/1000</Text>
+                                        </HStack>
+                                        <SegmentedProgressBar
+                                            current={stats?.totalEnergy || 300}
+                                            total={1000}
+                                            maxSegments={16}
+                                            size="sm"
+                                        />
+                                    </VStack>
                                 </VStack>
                             </HStack>
 
-                            <VStack space="md" className="w-full">
-                                <HStack space="md" className="flex-row">
-                                    <Button
-                                        action="primary"
-                                        className="flex-1 shadow-retro-hard-sm"
-                                        onPress={() => router.push("/profile/edit")}
-                                    >
-                                        <HStack space="sm" className="flex-row items-center">
-                                            <Icon as={Edit} size="xs" />
-                                            <Text className="font-bold tracking-wide uppercase">Edit</Text>
-                                        </HStack>
-                                    </Button>
-                                    <Button
-                                        action="secondary"
-                                        variant="outline"
-                                        className="flex-1"
-                                        onPress={signOut}
-                                    >
-                                        <HStack space="sm" className="flex-row items-center">
-                                            <Icon as={LogOut} size="xs" />
-                                            <Text className="font-bold tracking-wide uppercase">Sign Out</Text>
-                                        </HStack>
-                                    </Button>
-                                </HStack>
-                            </VStack>
-                        </VStack>
-                    </Card>
-
-                    {/* Delete Account Button */}
-                    <Button
-                        action="negative"
-                        variant="outline"
-                        className="mt-4 w-full"
-                        onPress={deleteAccount}
-                    >
-                        <HStack space="sm" className="flex-row items-center justify-center">
-                            <Icon as={Trash2} size="xs" />
-                            <Text className="font-bold tracking-wide uppercase">Delete Data Access</Text>
-                        </HStack>
-                    </Button>
-
-                    {/* Stats Card */}
-                    <Card className="p-6 mb-6 w-full">
-                        <VStack space="lg">
-                            <Heading
-                                retro
-                                size="lg"
-                                className="text-ink font-bold tracking-wide"
-                            >
-                                Contributions
-                            </Heading>
-                            <VStack space="md">
-                                {stats.map((stat, index) => (
-                                    <HStack key={index} className="flex-row justify-between items-center">
-                                        <Text retro className="text-ink">
-                                            {stat.label}
-                                        </Text>
-                                        <Text retro className="text-ink font-bold">
-                                            {stat.value}
-                                        </Text>
-                                    </HStack>
-                                ))}
-                            </VStack>
-                        </VStack>
-                    </Card>
-
-                    {/* Achievements Card */}
-                    <Card className="p-6 mb-6 w-full">
-                        <VStack space="lg">
-                            <Heading
-                                retro
-                                size="lg"
-                                className="text-ink font-bold tracking-wide"
-                            >
-                                Achievements
-                            </Heading>
-                            <VStack space="md">
-                                {achievements.map((achievement) => (
-                                    <HStack
-                                        key={achievement.id}
-                                        space="md"
-                                        className="flex-row items-center"
-                                    >
-                                        <Box
-                                            className={`p-2 border-2 border-ink shadow-retro-hard-sm ${achievement.earned ? "bg-digital" : "bg-ink/5"
-                                                }`}
-                                        >
-                                            <Icon
-                                                as={achievement.icon}
-                                                size="md"
-                                                className="text-ink"
-                                            />
-                                        </Box>
-                                        <VStack space="xs" className="flex-1">
-                                            <Text
-                                                retro
-                                                className={`font-bold tracking-wide text-ink`}
-                                            >
-                                                {achievement.title}
-                                            </Text>
-                                            <Text
-                                                retro
-                                                size="sm"
-                                                className={`text-ink/70`}
-                                            >
-                                                {achievement.description}
-                                            </Text>
-                                        </VStack>
-                                        {achievement.earned && (
-                                            <Badge className="bg-energy border-2 border-ink shadow-retro-hard-sm">
-                                                <Text
-                                                    retro
-                                                    size="xs"
-                                                    className="text-ink font-bold"
-                                                >
-                                                    EARNED
-                                                </Text>
-                                            </Badge>
-                                        )}
-                                    </HStack>
-                                ))}
-                            </VStack>
-                        </VStack>
-                    </Card>
-                    {/* Recent Activity Card */}
-                    <Card className="p-6 mb-6 w-full">
-                        <VStack space="lg">
-                            <Heading
-                                retro
-                                size="lg"
-                                className="text-ink font-bold tracking-wide"
-                            >
-                                Recent Activity
-                            </Heading>
-                            {loading ? (
-                                <Text retro className="text-ink/60">
-                                    Loading activity...
-                                </Text>
-                            ) : recentActivity.length > 0 ? (
-                                <VStack space="md">
-                                    {recentActivity.map((activity, index) => (
-                                        <HStack key={index} space="md" className="flex-row items-center">
-                                            <Box className="w-3 h-3 bg-digital border border-ink rounded-full" />
-                                            <VStack space="xs" className="flex-1 items-start">
-                                                <Text retro className="text-ink font-bold">
-                                                    {activity.title}
-                                                </Text>
-                                                <Text
-                                                    retro
-                                                    size="sm"
-                                                    className="text-ink/60"
-                                                >
-                                                    {activity.date}
-                                                </Text>
-                                            </VStack>
-                                        </HStack>
-                                    ))}
-                                </VStack>
-                            ) : (
-                                <VStack space="md" className="items-start">
-                                    <Box className="p-4 bg-ink mb-2">
-                                        <Icon as={Calendar} size="lg" className="text-digital" />
+                            {/* CIQ and Points Boxes */}
+                            <HStack space="md" className="w-full">
+                                {/* Left Box - CIQ (Energy) */}
+                                <HardShadowFrame
+                                    bg={colors.data}
+                                    radius={16}
+                                    shadowSize={4}
+                                    wrapperClassName="flex-1"
+                                    className="p-4 pt-2 border-2 border-ink relative overflow-hidden h-24 justify-center"
+                                >
+                                    <Box className="absolute -right-4 -bottom-4 z-0 bg-transparent border-0">
+                                        <Icon as={Sun} size={72} className="text-ink opacity-60" />
                                     </Box>
-                                    <Text retro className="text-ink font-semibold">
-                                        Complete missions to synchronize your activity stream.
-                                    </Text>
+                                    <VStack space="xs">
+                                        <Text size="sm" weight="bold" className="text-digital uppercase tracking-widest">CIQ</Text>
+                                        <Text weight="bold" size="2xl" className="text-white tracking-widest">
+                                            {stats?.totalEnergy || 2500}
+                                        </Text>
+                                    </VStack>
+                                </HardShadowFrame>
+
+                                {/* Right Box - Redeemable Pts (Points) */}
+                                <HardShadowFrame
+                                    bg={colors.energy}
+                                    radius={16}
+                                    shadowSize={4}
+                                    wrapperClassName="flex-1"
+                                    className="p-4 pt-2 border-2 border-ink relative overflow-hidden h-24 justify-center"
+                                >
+                                    <Box
+                                        className="absolute -right-4 -bottom-4 z-0 bg-transparent border-0"
+                                        style={{ transform: [{ rotate: '-12deg' }] }}
+                                    >
+                                        <Icon as={ShoppingBag} size={70} className="text-ink opacity-50" />
+                                    </Box>
+                                    <VStack space="xs">
+                                        <Text size="sm" weight="bold" className="text-ink/80 uppercase tracking-widest">Redeemable Pts</Text>
+                                        <Text weight="bold" size="2xl" className="text-ink tracking-widest">
+                                            {stats?.totalPoints || 1500}
+                                        </Text>
+                                    </VStack>
+                                </HardShadowFrame>
+                            </HStack>
+
+                            {/* Reward Showcase */}
+                            <HardShadowFrame
+                                bg={colors.surface}
+                                radius={16}
+                                shadowSize={4}
+                                className="p-6 w-full border-2 border-ink"
+                            >
+                                <VStack space="lg">
+                                    <Heading size="lg" className="text-ink/30 tracking-wide uppercase">
+                                        Achievements
+                                    </Heading>
+                                    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                                        <HStack space="md" className="pb-2">
+                                            {[Sun, Leaf, Droplet, Turtle, Target, Plus].map((IconComponent, index) => (
+                                                <Box key={index} className="w-16 h-16 bg-ink/5 rounded-xl items-center justify-center border-2 border-ink/5">
+                                                    <Icon as={IconComponent} size="xl" className="text-ink/20" />
+                                                </Box>
+                                            ))}
+                                        </HStack>
+                                    </ScrollView>
                                 </VStack>
-                            )}
+                            </HardShadowFrame>
+
+                            <VStack space="md">
+                                {/* Missions */}
+                                <VStack space="sm" className="mt-4 w-full">
+                                    <HStack space="sm" className="items-center">
+                                        <Icon as={Leaf} size="lg" className="text-ink" />
+                                        <Heading size="lg" className="text-ink uppercase">Mission Log</Heading>
+                                    </HStack>
+
+                                    {/* Filter chips */}
+                                    <ScrollView horizontal showsHorizontalScrollIndicator={false} className="w-full">
+                                        <HStack space="sm" className="pb-1">
+                                            {["In Progress", "Bookmarked", "Completed"].map((filterOption) => {
+                                                const filterIcons: Record<string, any> = {
+                                                    "In Progress": Play,
+                                                    "Bookmarked": Bookmark,
+                                                    "Completed": CheckCircle
+                                                };
+                                                return (
+                                                    <FilterChip
+                                                        key={filterOption}
+                                                        label={filterOption}
+                                                        isSelected={selectedFilter === filterOption}
+                                                        icon={filterIcons[filterOption]}
+                                                        onPress={() => setSelectedFilter(filterOption as any)}
+                                                    />
+                                                );
+                                            })}
+                                        </HStack>
+                                    </ScrollView>
+
+                                    {filteredMissions.length > 0 ? (
+                                        <ScrollView
+                                            horizontal
+                                            showsHorizontalScrollIndicator={false}
+                                            style={{ marginHorizontal: -24 }}
+                                            contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 16, gap: 16 }}
+                                            className="mt-2"
+                                        >
+                                            {filteredMissions.map((mission) => (
+                                                <MissionCard
+                                                    key={mission.id}
+                                                    mission={mission}
+                                                    variant="compact"
+                                                    onPress={() => router.push(`/mission/${mission.id}` as any)}
+                                                />
+                                            ))}
+                                        </ScrollView>
+                                    ) : (
+                                        <StatusCard
+                                            title={`No missions found in "${selectedFilter}"`}
+                                            className="mt-2"
+                                        />
+                                    )}
+                                </VStack>
+
+                                {/* Events */}
+                                <VStack space="sm" className="w-full">
+                                    <HStack space="sm" className="items-center">
+                                        <Icon as={Ticket} size="lg" className="text-ink" style={{ transform: [{ rotate: '-45deg' }] }} />
+                                        <Heading size="lg" className="text-ink uppercase">Event Dashboard</Heading>
+                                    </HStack>
+
+                                    {/* Filter chips */}
+                                    <ScrollView horizontal showsHorizontalScrollIndicator={false} className="w-full">
+                                        <HStack space="sm" className="pb-1">
+                                            {["Going", "Bookmarked", "Done"].map((filterOption) => {
+                                                const filterIcons: Record<string, any> = {
+                                                    "Going": Calendar,
+                                                    "Bookmarked": Bookmark,
+                                                    "Done": CheckCircle
+                                                };
+                                                return (
+                                                    <FilterChip
+                                                        key={filterOption}
+                                                        label={filterOption}
+                                                        isSelected={selectedEventFilter === filterOption}
+                                                        icon={filterIcons[filterOption]}
+                                                        onPress={() => setSelectedEventFilter(filterOption as any)}
+                                                    />
+                                                );
+                                            })}
+                                        </HStack>
+                                    </ScrollView>
+
+                                    {filteredEvents.length > 0 ? (
+                                        <ScrollView
+                                            horizontal
+                                            showsHorizontalScrollIndicator={false}
+                                            style={{ marginHorizontal: -24 }}
+                                            contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 16, gap: 16 }}
+                                            className="mt-2"
+                                        >
+                                            {filteredEvents.map((event) => {
+                                                // Map EventQuest to MissionWithStats for the card
+                                                const missionProps: MissionWithStats = {
+                                                    id: event.id,
+                                                    title: event.title,
+                                                    description: event.description,
+                                                    points_awarded: event.pointsReward,
+                                                    ciq_reward: event.ciqReward,
+                                                    thumbnailUrl: event.imageUrl,
+                                                    // Use event date as time estimate or display string
+                                                    time_estimate: `${event.eventDate} • ${event.eventStartTime}`,
+                                                    category: "EVENT",
+                                                    // Required Mission fields (placeholders)
+                                                    created_at: event.createdAt,
+                                                    updated_at: event.updatedAt,
+                                                    organization_id: "",
+                                                    created_by: "",
+                                                    energy_awarded: event.ciqReward,
+                                                    instructions: {},
+                                                    guidance_steps: {},
+                                                    is_featured: false,
+                                                    status: event.status,
+                                                    thumbnail_path: null,
+                                                };
+
+                                                return (
+                                                    <MissionCard
+                                                        key={event.id}
+                                                        mission={missionProps}
+                                                        variant="compact"
+                                                        onPress={() => {
+                                                            // TODO: Navigate to event details
+                                                            Alert.alert("Event Details", `Navigate to event: ${event.title}`);
+                                                        }}
+                                                    />
+                                                );
+                                            })}
+                                        </ScrollView>
+                                    ) : (
+                                        <StatusCard
+                                            title={`No events found in "${selectedEventFilter}"`}
+                                            className="mt-2"
+                                        />
+                                    )}
+                                </VStack>
+                            </VStack>
+
+                            {/* Contribution Data */}
+                            <VStack space="lg" className="w-full">
+                                <HardShadowFrame
+                                    bg={colors.surface}
+                                    radius={16}
+                                    shadowSize={4}
+                                    className="p-6 w-full border-2 border-ink"
+                                >
+                                    <VStack space="md">
+                                        <Heading size="lg" className="text-ink tracking-wide uppercase">
+                                            Contribution Data
+                                        </Heading>
+                                        <Divider className="bg-ink/20" />
+
+                                        {/* Row 1: Missions, Events, Time, Locations */}
+                                        <HStack className="w-full items-center justify-between">
+                                            {[
+                                                { label: "Missions", value: stats?.completedMissions || 12 },
+                                                { label: "Events", value: 5 },
+                                                { label: "Time", value: "12h" },
+                                                { label: "Locations", value: 8 }
+                                            ].map((stat, index, arr) => (
+                                                <React.Fragment key={stat.label}>
+                                                    <VStack className="flex-1 items-center">
+                                                        <Text size="xs" className="text-ink uppercase tracking-widest mb-1">{stat.label}</Text>
+                                                        <Heading size="xl" className="text-ink">{stat.value}</Heading>
+                                                    </VStack>
+                                                    {index < arr.length - 1 && (
+                                                        <Divider orientation="vertical" className="h-8 bg-ink/20" />
+                                                    )}
+                                                </React.Fragment>
+                                            ))}
+                                        </HStack>
+
+                                        <Divider className="bg-ink/20" />
+
+                                        {/* Row 2: Photos, Videos, Audio, Text */}
+                                        <HStack className="w-full items-center justify-between">
+                                            {[
+                                                { label: "Photos", value: stats?.dataPointsContributed || 48 },
+                                                { label: "Videos", value: 0 },
+                                                { label: "Audio", value: 0 },
+                                                { label: "Text", value: 12 }
+                                            ].map((stat, index, arr) => (
+                                                <React.Fragment key={stat.label}>
+                                                    <VStack className="flex-1 items-center">
+                                                        <Text size="xs" className="text-ink uppercase tracking-widest mb-1">{stat.label}</Text>
+                                                        <Heading size="xl" className="text-ink">{stat.value}</Heading>
+                                                    </VStack>
+                                                    {index < arr.length - 1 && (
+                                                        <Divider orientation="vertical" className="h-8 bg-ink/20" />
+                                                    )}
+                                                </React.Fragment>
+                                            ))}
+                                        </HStack>
+                                    </VStack>
+                                </HardShadowFrame>
+                            </VStack>
                         </VStack>
-                    </Card>
-                </Box>
-            </ScrollView >
-        </SafeAreaView >
+                    </VStack>
+                </ScrollView>
+            </SafeAreaView>
+        </View>
     );
 };
 
