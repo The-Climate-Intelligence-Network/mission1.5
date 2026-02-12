@@ -68,7 +68,7 @@ cssInterop(PrimitiveIcon, {
 });
 
 const inputStyle = tva({
-  base: 'border-2 border-ink bg-surface flex-row overflow-hidden content-center items-center data-[hover=true]:border-ink data-[focus=true]:border-digitalDark data-[focus=true]:hover:border-digitalDark data-[disabled=true]:opacity-40 data-[invalid=true]:border-actionDark data-[invalid=true]:data-[focus=true]:border-actionDark',
+  base: 'border-2 border-ink bg-surface flex-row overflow-hidden content-center items-center data-[hover=true]:border-ink data-[focus=true]:border-digital-dark data-[focus=true]:hover:border-digital-dark data-[disabled=true]:opacity-40 data-[invalid=true]:border-action-dark data-[invalid=true]:data-[focus=true]:border-action-dark',
 
   variants: {
     size: {

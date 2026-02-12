@@ -111,7 +111,7 @@ export const EventCard = ({ event, onPress, className, variant = 'vertical' }: E
                             <VStack space="2xs" className="w-full">
                                 {event.location && (
                                     <HStack space="xs" className="items-center">
-                                        <Icon as={MapPin} size="xs" className="text-digitalDark" />
+                                        <Icon as={MapPin} size="xs" className="text-digital-dark" />
                                         <Text size="2xs" className="text-ink/80" numberOfLines={1}>
                                             {event.location}
                                         </Text>
@@ -119,7 +119,7 @@ export const EventCard = ({ event, onPress, className, variant = 'vertical' }: E
                                 )}
                                 {event.date && (
                                     <HStack space="xs" className="items-center">
-                                        <Icon as={Calendar} size="xs" className="text-digitalDark" />
+                                        <Icon as={Calendar} size="xs" className="text-digital-dark" />
                                         <Text size="2xs" className="text-ink/80">
                                             {event.date} {event.time && `• ${event.time}`}
                                         </Text>
@@ -227,7 +227,7 @@ export const EventCard = ({ event, onPress, className, variant = 'vertical' }: E
                             </Text>
                         </Box>
 
-                        <Text size="xs" weight="bold" className="text-digitalDark tracking-wider">
+                        <Text size="xs" weight="bold" className="text-digital-dark tracking-wider">
                             {event.ciq_reward || 500} CIQ
                         </Text>
                     </HStack>
@@ -252,7 +252,7 @@ export const EventCard = ({ event, onPress, className, variant = 'vertical' }: E
                     <VStack space="xs" className="w-full mt-2">
                         {event.location && (
                             <HStack space="xs" className="items-center">
-                                <Icon as={MapPin} size="sm" className="text-digitalDark" />
+                                <Icon as={MapPin} size="sm" className="text-digital-dark" />
                                 <Text size="sm" className="text-ink/80 flex-1" numberOfLines={1}>
                                     {event.location}
                                 </Text>
@@ -260,7 +260,7 @@ export const EventCard = ({ event, onPress, className, variant = 'vertical' }: E
                         )}
                         {event.date && (
                             <HStack space="xs" className="items-center">
-                                <Icon as={Calendar} size="sm" className="text-digitalDark" />
+                                <Icon as={Calendar} size="sm" className="text-digital-dark" />
                                 <Text size="sm" className="text-ink/80">
                                     {event.date} {event.time && `• ${event.time}`}
                                 </Text>

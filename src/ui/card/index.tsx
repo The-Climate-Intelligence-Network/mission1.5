@@ -19,7 +19,7 @@ const resolveCardBackground = (variant: ICardProps["variant"]) => {
     case "warning":
       return colors.energy;
     case "error":
-      return colors.actionDark;
+      return colors["action-dark"];
     case "secondary":
     case "flat":
     case "elevated":

@@ -13,6 +13,7 @@ import { HStack } from "@/src/ui/hstack";
 import { Icon } from "@/src/ui/icon";
 import { Button } from "@/src/ui/button";
 import { Pressable } from "@/src/ui/pressable";
+import { StatusCard } from "@/src/ui/status-card";
 import { Card } from "@/src/ui/card";
 import { Badge } from "@/src/ui/badge";
 import { Progress } from "@/src/ui/progress";
@@ -227,7 +228,7 @@ const QuestsScreen = () => {
 
     const getStatusInfo = (mission: MissionWithStats) => {
         if (mission.submission_status === "reviewed") {
-            return { text: "Completed", color: "text-digitalDark", icon: CheckCircle };
+            return { text: "Completed", color: "text-digital-dark", icon: CheckCircle };
         } else if (
             mission.submission_status === "in_progress" ||
             mission.submission_status === "started"
@@ -255,23 +256,10 @@ const QuestsScreen = () => {
                 <Scanlines />
                 <SafeAreaView style={{ flex: 1 }}>
                     <Box variant="plain" className="flex-1 p-6">
-                        <Card className="p-8">
-                            <HStack space="md" className="items-center">
-                                <Image
-                                    source={require("@/assets/icon.png")}
-                                    style={{ width: 48, height: 48 }}
-                                    resizeMode="contain"
-                                />
-                                <VStack space="xs">
-                                    <Text className="font-bold tracking-widest uppercase text-data text-xs">
-                                        System Loading
-                                    </Text>
-                                    <Text className="font-semibold tracking-wide">
-                                        Retrieving mission data...
-                                    </Text>
-                                </VStack>
-                            </HStack>
-                        </Card>
+                        <StatusCard
+                            variant="loading"
+                            title="Retrieving mission data..."
+                        />
                     </Box>
                 </SafeAreaView>
             </View>
@@ -309,26 +297,16 @@ const QuestsScreen = () => {
                         {/* Missions List */}
                         <VStack space="lg" className="w-full mt-4">
                             {filteredMissions.length === 0 ? (
-                                    <Card className="p-8">
-                                        <VStack space="xs">
-                                            <Text weight="bold" className="tracking-wide text-data">
-                                                No Missions Found
-                                            </Text>
-                                            <Text size="sm" className="tracking-wide text-ink/60">
-                                                Try adjusting your filters or check back later.
-                                            </Text>
-                                        </VStack>
-                                    </Card>
+                                <StatusCard
+                                    title="No Missions Found"
+                                    description="Try adjusting your filters or check back later."
+                                />
                             ) : activeType === "events" ? (
-                                <Card className="p-8">
-                                    <VStack space="md" className="items-center">
-                                        <Icon as={Calendar} size="xl" className="text-ink/40" />
-                                        <Heading size="md" retro>Events Coming Soon</Heading>
-                                        <Text className="text-ink/80 text-center">
-                                            Event functionality will be available soon.
-                                        </Text>
-                                    </VStack>
-                                </Card>
+                                <StatusCard
+                                    title="Events Coming Soon"
+                                    description="Event functionality will be available soon."
+                                    icon={Calendar}
+                                />
                             ) : (
                                 filteredMissions.map((mission) => (
                                     <MissionCard

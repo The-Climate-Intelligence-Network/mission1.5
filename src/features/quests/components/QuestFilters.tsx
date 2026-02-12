@@ -1,11 +1,8 @@
-import React, { useState } from "react";
-import { ScrollView, Pressable } from "react-native";
-import { Box } from "@/src/ui/box";
-import { Text } from "@/src/ui/text";
-import { VStack } from "@/src/ui/vstack";
-import { HStack } from "@/src/ui/hstack";
-import { Icon } from "@/src/ui/icon";
+import React from "react";
+import { ScrollView } from "react-native";
+import { Box, Text, VStack, HStack, FilterChip } from "@/src/ui";
 import { MapPin } from "lucide-react-native";
+import { Pressable } from "react-native";
 
 interface QuestFiltersProps {
     activeType: "missions" | "events";
@@ -20,10 +17,10 @@ interface QuestFiltersProps {
 
 const CATEGORIES = [
     "ALL",
-    "AIR QUALITY",
     "BIODIVERSITY",
     "WASTE REDUCTION",
     "WATER SOURCE",
+    "AIR QUALITY",
     "CLIMATE ACTION",
 ];
 
@@ -91,52 +88,27 @@ export const QuestFilters = ({
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={{ gap: 8 }}
             >
-                {CATEGORIES.map((category) => {
-                    const isSelected = selectedCategories.includes(category);
-                    return (
-                        <Pressable
-                            key={category}
-                            onPress={() => onCategoryToggle(category)}
-                        >
-                            <Box
-                                className={`px-4 py-2 border-2 border-ink rounded-md ${isSelected ? "bg-ink" : "bg-transparent"
-                                    }`}
-                            >
-                                <Text
-                                    size="xs"
-                                    className={`uppercase tracking-wider ${isSelected ? "text-white" : "text-ink"
-                                        }`}
-                                >
-                                    {category}
-                                </Text>
-                            </Box>
-                        </Pressable>
-                    );
-                })}
+                {CATEGORIES.map((category) => (
+                    <FilterChip
+                        key={category}
+                        label={category}
+                        isSelected={selectedCategories.includes(category)}
+                        onPress={() => onCategoryToggle(category)}
+                        variant="primary"
+                    />
+                ))}
             </ScrollView>
 
             {/* Row 3: Nearby + Submission Type Filters */}
             <HStack space="xl" className="w-full items-center">
                 {/* Nearby Filter */}
-                <Pressable onPress={onNearbyToggle}>
-                    <Box
-                        className={`px-4 py-2 border-2 border-ink rounded-md flex-row items-center ${nearbyEnabled ? "bg-ink" : "bg-transparent"
-                            }`}
-                    >
-                        <Icon
-                            as={MapPin}
-                            size="xs"
-                            className={nearbyEnabled ? "text-energy mr-2" : "text-ink mr-2"}
-                        />
-                        <Text
-                            size="xs"
-                            className={`uppercase tracking-wider ${nearbyEnabled ? "text-energy" : "text-ink"
-                                }`}
-                        >
-                            NEARBY
-                        </Text>
-                    </Box>
-                </Pressable>
+                <FilterChip
+                    label="NEARBY"
+                    isSelected={nearbyEnabled}
+                    onPress={onNearbyToggle}
+                    variant="accent"
+                    icon={MapPin}
+                />
 
                 {/* Submission Type Pills - Scrollable */}
                 <ScrollView
@@ -145,28 +117,15 @@ export const QuestFilters = ({
                     contentContainerStyle={{ gap: 8 }}
                     className="flex-1"
                 >
-                    {SUBMISSION_TYPES.map((type) => {
-                        const isSelected = selectedSubmissionTypes.includes(type);
-                        return (
-                            <Pressable
-                                key={type}
-                                onPress={() => onSubmissionTypeToggle(type)}
-                            >
-                                <Box
-                                    className={`px-4 py-2 border-2 border-ink rounded-md ${isSelected ? "bg-ink" : "bg-transparent"
-                                        }`}
-                                >
-                                    <Text
-                                        size="xs"
-                                        className={`uppercase tracking-wider ${isSelected ? "text-white" : "text-ink/60"
-                                            }`}
-                                    >
-                                        {type}
-                                    </Text>
-                                </Box>
-                            </Pressable>
-                        );
-                    })}
+                    {SUBMISSION_TYPES.map((type) => (
+                        <FilterChip
+                            key={type}
+                            label={type}
+                            isSelected={selectedSubmissionTypes.includes(type)}
+                            onPress={() => onSubmissionTypeToggle(type)}
+                            variant="muted"
+                        />
+                    ))}
                 </ScrollView>
             </HStack>
         </VStack>

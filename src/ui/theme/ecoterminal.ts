@@ -74,16 +74,16 @@ const darkSurface = mix(colors.ink, "#000000", 0.35);
 const darkSurfaceMuted = mix(colors.ink, "#000000", 0.45);
 const darkInk = mix(colors.ink, colors.surface, 0.4);
 
-const primaryScale = makeScale(colors.action, colors.surface, colors.actionDark);
+const primaryScale = makeScale(colors.action, colors.surface, colors["action-dark"]);
 const tertiaryScale = makeScale(
   colors.digital,
   colors.surface,
-  colors.digitalDark
+  colors["digital-dark"]
 );
 const successScale = makeScale(
   colors.digital,
   colors.surface,
-  colors.digitalDark
+  colors["digital-dark"]
 );
 const warningScale = makeScale(colors.energy, colors.surface, colors.ink);
 const infoScale = makeScale(colors.sky, colors.surface, colors.ink);
@@ -148,9 +148,9 @@ const lightVars = {
   "--color-ink": toVar(colors.ink),
   "--color-surface": toVar(colors.surface),
   "--color-action": toVar(colors.action),
-  "--color-action-dark": toVar(colors.actionDark),
+  "--color-action-dark": toVar(colors["action-dark"]),
   "--color-digital": toVar(colors.digital),
-  "--color-digital-dark": toVar(colors.digitalDark),
+  "--color-digital-dark": toVar(colors["digital-dark"]),
   "--color-energy": toVar(colors.energy),
   "--color-data": toVar(colors.data),
   "--color-sky": toVar(colors.sky),
@@ -172,7 +172,7 @@ const lightVars = {
   "--color-background-success": backgroundSpecialLight.success,
   "--color-background-info": backgroundSpecialLight.info,
   "--color-background-muted": backgroundSpecialLight.muted,
-  "--color-indicator-primary": toVar(colors.digitalDark),
+  "--color-indicator-primary": toVar(colors["digital-dark"]),
   "--color-indicator-info": toVar(colors.sky),
   "--color-indicator-error": toVar("#D9534F"),
 };
@@ -181,9 +181,9 @@ const darkVars = {
   "--color-ink": toVar(darkInk),
   "--color-surface": toVar(darkSurface),
   "--color-action": toVar(colors.action),
-  "--color-action-dark": toVar(colors.actionDark),
+  "--color-action-dark": toVar(colors["action-dark"]),
   "--color-digital": toVar(colors.digital),
-  "--color-digital-dark": toVar(colors.digitalDark),
+  "--color-digital-dark": toVar(colors["digital-dark"]),
   "--color-energy": toVar(colors.energy),
   "--color-data": toVar(colors.data),
   "--color-sky": toVar(colors.sky),

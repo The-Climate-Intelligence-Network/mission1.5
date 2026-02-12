@@ -1,6 +1,6 @@
 import { Tabs } from "expo-router";
 import React from "react";
-import { Home, Zap, MapPin, Users, User, Map, Search, Gamepad, Gamepad2, Gamepad2Icon, PlayIcon, Sun, BirdIcon, Bird } from "lucide-react-native";
+import { Home, Zap, MapPin, Users, User, Map, Search, Gamepad, Gamepad2, Gamepad2Icon, PlayIcon, Sun, BirdIcon, Bird, Mountain } from "lucide-react-native";
 import { Platform } from "react-native";
 import { useSession } from "@/src/core/auth/AuthProvider";
 import { useTheme } from "@/src/core/theme/ThemeProvider";
@@ -70,7 +70,7 @@ export default function TabLayout() {
         options={{
           title: "Quests",
           tabBarIcon: ({ color }) => (
-            <TabBarIcon IconComponent={Bird} color={color} />
+            <TabBarIcon IconComponent={Mountain} color={color} />
           ),
         }}
       />

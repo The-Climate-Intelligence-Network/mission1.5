@@ -14,6 +14,10 @@ module.exports = {
       pattern:
         /(bg|border|text|stroke|fill)-(primary|secondary|tertiary|error|success|warning|info|typography|outline|background|indicator)-(0|50|100|200|300|400|500|600|700|800|900|950|white|gray|black|error|warning|muted|success|info|light|dark|primary)/,
     },
+    {
+      pattern:
+        /(bg|border|text|stroke|fill)-(ink|surface|action|action-dark|digital|digital-dark|energy|brandData|sky)/,
+    },
   ],
   theme: {
     extend: {
@@ -21,9 +25,9 @@ module.exports = {
         ink: "rgb(var(--color-ink)/<alpha-value>)",
         surface: "rgb(var(--color-surface)/<alpha-value>)",
         action: "rgb(var(--color-action)/<alpha-value>)",
-        actionDark: "rgb(var(--color-action-dark)/<alpha-value>)",
+        "action-dark": "rgb(var(--color-action-dark)/<alpha-value>)",
         digital: "rgb(var(--color-digital)/<alpha-value>)",
-        digitalDark: "rgb(var(--color-digital-dark)/<alpha-value>)",
+        "digital-dark": "rgb(var(--color-digital-dark)/<alpha-value>)",
         energy: "rgb(var(--color-energy)/<alpha-value>)",
         data: "rgb(var(--color-data)/<alpha-value>)",
         sky: "rgb(var(--color-sky)/<alpha-value>)",
@@ -198,6 +202,15 @@ module.exports = {
       },
       fontSize: {
         "2xs": "10px",
+      },
+      keyframes: {
+        "pulse-live": {
+          "0%, 100%": { opacity: 1 },
+          "50%": { opacity: 0.5 },
+        },
+      },
+      animation: {
+        "pulse-live": "pulse-live 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
       },
       boxShadow: {
         "retro-sharp": "4px 4px 0 #1A4D2E",

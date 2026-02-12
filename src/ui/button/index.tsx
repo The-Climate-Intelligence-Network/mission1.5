@@ -37,7 +37,7 @@ const resolveButtonPalette = (
     primary: colors.action,
     secondary: colors.surface,
     positive: colors.digital,
-    negative: colors.actionDark,
+    negative: colors["action-dark"],
     warning: colors.energy,
     default: colors.surface,
   };

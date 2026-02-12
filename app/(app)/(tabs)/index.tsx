@@ -22,18 +22,23 @@ import {
   getUserAvailablePoints,
   Reward,
 } from "@/src/features/rewards/logic";
+import { EventRepo } from "@/src/data/repositories/EventRepo";
+import { EventQuest } from "@/src/domain/events/models";
 import { getCurrentUserProfile } from "@/src/features/profile/logic/profile.service";
 import { Scanlines } from "@/src/ui/scanlines";
 import { SegmentedProgressBar } from "@/src/ui/segmented-progress";
 import { BackgroundGradient } from "@/src/ui/background-gradient";
 import { Header } from "@/src/ui/header";
 import { colors } from "@/src/ui/tokens/colors";
+import { StatusCard } from "@/src/ui/status-card";
 
 import { MissionCard } from "@/src/features/missions/components/MissionCard";
+import { EventCard } from "@/src/features/quests/components/EventCard";
 
 const HomePage = () => {
   const router = useRouter();
   const [missions, setMissions] = useState<MissionWithStats[]>([]);
+  const [events, setEvents] = useState<EventQuest[]>([]);
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [availablePoints, setAvailablePoints] = useState<number>(0);
   const [userPoints, setUserPoints] = useState<number>(0);
@@ -48,6 +53,7 @@ const HomePage = () => {
   const loadData = async () => {
     await Promise.all([
       loadMissions(),
+      loadEvents(),
       loadRewards(),
       loadUserPoints(),
       loadUserBalance(),
@@ -93,6 +99,15 @@ const HomePage = () => {
       console.error("Error loading missions:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadEvents = async () => {
+    try {
+      const data = await EventRepo.getUpcoming();
+      setEvents(data);
+    } catch (error) {
+      console.error("Error loading events:", error);
     }
   };
 
@@ -154,7 +169,7 @@ const HomePage = () => {
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
-          contentContainerStyle={{ padding: 24, paddingTop: 16 }}
+          contentContainerStyle={{ padding: 24, paddingTop: 16, paddingBottom: 80 }}
         >
           <VStack space="lg" className="w-full items-start">
             {/* Title Section */}
@@ -183,14 +198,14 @@ const HomePage = () => {
                   <Text size="sm" className="text-ink/80 uppercase">
                     CIQ
                   </Text>
-                  <Heading size="lg" className="text-action">
-                    {userStats.currentPoints}/1000
-                  </Heading>
+                  <Text size="xl" weight="bold" className="text-action">
+                    {userStats.totalEnergy}/1000
+                  </Text>
                 </VStack>
               </HStack>
 
               <SegmentedProgressBar
-                current={userStats.currentPoints || 300}
+                current={userStats.totalEnergy || 300}
                 total={1000}
                 maxSegments={16}
                 size="md"
@@ -198,43 +213,94 @@ const HomePage = () => {
             </VStack>
 
             {/* Active Missions Section */}
-            <VStack space="lg" className="mb-8 w-full items-start">
+            <VStack space="lg" className="mb-4 w-full items-start">
               <HStack className="justify-between items-center w-full">
                 <HStack space="sm" className="items-center">
-                  <Box className="w-4 h-4 rounded-full bg-action border-0" />
-                  <Heading size="md" className="text-ink uppercase">Featured Quests</Heading>
+                  <Box className="w-4 h-4 rounded-full bg-action border-0 animate-pulse-live" />
+                  <Heading size="lg" className="text-ink uppercase">Featured Missions</Heading>
                 </HStack>
                 <Pressable
                   onPress={() => router.push("/quests")}
                 >
                   <HStack space="xs" className="items-center">
-                    <Text size="sm" className="text-inkuppercase tracking-wider">
+                    <Text size="md" className="text-ink/80 uppercase tracking-wider">
                       View All
                     </Text>
-                    <Text size="sm" className="text-ink">{"[->]"}</Text>
+                    <Text size="md" className="text-ink/80">{"[>]"}</Text>
                   </HStack>
                 </Pressable>
               </HStack>
 
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ gap: 16, paddingBottom: 8, paddingRight: 8 }}
-              >
-                {featuredMissions.length > 0 ? (
-                  featuredMissions.map((mission) => (
+              {featuredMissions.length > 0 ? (
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  style={{ marginHorizontal: -24 }}
+                  contentContainerStyle={{ gap: 16, paddingBottom: 8, paddingHorizontal: 24 }}
+                >
+                  {featuredMissions.map((mission) => (
                     <MissionCard
                       key={mission.id}
                       mission={mission}
                       onPress={() => router.push(`/mission/${mission.id}`)}
                     />
-                  ))
-                ) : (
-                  <Card className="w-80 p-6 items-center justify-center border-dashed" variant="flat">
-                    <Text className="text-ink/40 uppercase">No avaliable missions</Text>
-                  </Card>
-                )}
-              </ScrollView>
+                  ))}
+                </ScrollView>
+              ) : (
+                <StatusCard title="No available missions" />
+              )}
+            </VStack>
+
+            {/* Active Events Section */}
+            <VStack space="lg" className="w-full items-start">
+              <HStack className="justify-between items-center w-full">
+                <HStack space="sm" className="items-center">
+                  <Box className="w-4 h-4 rounded-full bg-action border-0 animate-pulse-live" />
+                  <Heading size="lg" className="text-ink uppercase">Upcoming Events</Heading>
+                </HStack>
+                <Pressable
+                  onPress={() => router.push("/quests")}
+                >
+                  <HStack space="xs" className="items-center">
+                    <Text size="md" className="text-ink/80 uppercase tracking-wider">
+                      View All
+                    </Text>
+                    <Text size="md" className="text-ink/80">{"[>]"}</Text>
+                  </HStack>
+                </Pressable>
+              </HStack>
+
+              {events.length > 0 ? (
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  style={{ marginHorizontal: -24 }}
+                  contentContainerStyle={{ gap: 16, paddingBottom: 8, paddingHorizontal: 24 }}
+                >
+                  {events.map((event) => (
+                    <EventCard
+                      key={event.id}
+                      event={{
+                        id: event.id,
+                        title: event.title,
+                        description: event.description,
+                        category: "EVENT",
+                        points_awarded: event.pointsReward,
+                        ciq_reward: event.ciqReward,
+                        location: event.venue.name,
+                        date: event.eventDate,
+                        time: event.eventStartTime,
+                        attendee_count: event.registeredCount,
+                        thumbnailUrl: event.imageUrl,
+                        is_bookmarked: false,
+                      }}
+                      onPress={() => router.push(`/event/${event.id}`)}
+                    />
+                  ))}
+                </ScrollView>
+              ) : (
+                <StatusCard title="No upcoming events" />
+              )}
             </VStack>
           </VStack>
         </ScrollView>
