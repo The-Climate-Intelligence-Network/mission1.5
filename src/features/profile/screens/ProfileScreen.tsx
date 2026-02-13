@@ -63,6 +63,7 @@ import { MissionWithStats } from "../../missions/logic/types";
 import { EventRepo } from "@/src/data/repositories/EventRepo";
 import { EventQuest } from "@/src/domain/events/models";
 import { MissionCard } from "../../missions/components/MissionCard";
+import { EventCard } from "../../quests/components/EventCard";
 
 export const ProfileScreen = () => {
     const { user, signOut } = useSession();
@@ -547,34 +548,23 @@ export const ProfileScreen = () => {
                                             className="mt-2"
                                         >
                                             {filteredEvents.map((event) => {
-                                                // Map EventQuest to MissionWithStats for the card
-                                                const missionProps: MissionWithStats = {
-                                                    id: event.id,
-                                                    title: event.title,
-                                                    description: event.description,
-                                                    points_awarded: event.pointsReward,
-                                                    ciq_reward: event.ciqReward,
-                                                    thumbnailUrl: event.imageUrl,
-                                                    // Use event date as time estimate or display string
-                                                    time_estimate: `${event.eventDate} • ${event.eventStartTime}`,
-                                                    category: "EVENT",
-                                                    // Required Mission fields (placeholders)
-                                                    created_at: event.createdAt,
-                                                    updated_at: event.updatedAt,
-                                                    organization_id: "",
-                                                    created_by: "",
-                                                    energy_awarded: event.ciqReward,
-                                                    instructions: {},
-                                                    guidance_steps: {},
-                                                    is_featured: false,
-                                                    status: event.status,
-                                                    thumbnail_path: null,
-                                                };
-
                                                 return (
-                                                    <MissionCard
+                                                    <EventCard
                                                         key={event.id}
-                                                        mission={missionProps}
+                                                        event={{
+                                                            id: event.id,
+                                                            title: event.title,
+                                                            description: event.description,
+                                                            category: "EVENT",
+                                                            points_awarded: event.pointsReward,
+                                                            ciq_reward: event.ciqReward,
+                                                            location: event.venue.name,
+                                                            date: event.eventDate,
+                                                            time: event.eventStartTime,
+                                                            attendee_count: event.registeredCount,
+                                                            thumbnailUrl: event.imageUrl,
+                                                            is_bookmarked: false,
+                                                        }}
                                                         variant="compact"
                                                         onPress={() => {
                                                             // TODO: Navigate to event details
