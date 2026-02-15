@@ -4,6 +4,7 @@ import { Home, Zap, MapPin, Users, User, Map, Search, Gamepad, Gamepad2, Gamepad
 import { Platform } from "react-native";
 import { useSession } from "@/src/core/auth/AuthProvider";
 import { useTheme } from "@/src/core/theme/ThemeProvider";
+import { colors } from "@/src/ui/tokens";
 
 function TabBarIcon({
   IconComponent,
@@ -22,8 +23,8 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: "#1A4D2E", // Deep Forest
-        tabBarInactiveTintColor: "#1A4D2E66", // Deep Forest with opacity
+        tabBarActiveTintColor: colors.ink,
+        tabBarInactiveTintColor: colors.ink + "66", // Deep Forest with opacity
         headerShown: false,
         tabBarLabelStyle: {
           fontFamily: "SpaceGrotesk-Bold",
@@ -31,15 +32,11 @@ export default function TabLayout() {
           textTransform: "uppercase",
         },
         tabBarStyle: {
-          backgroundColor: "#F9FDF5", // Bio-Cream
-          borderTopColor: "#1A4D2E", // Deep Forest
+          backgroundColor: colors.surface,
+          borderTopColor: colors.ink,
           borderTopWidth: 2,
-          borderLeftColor: "#1A4D2E",
-          borderLeftWidth: 2,
-          borderRightColor: "#1A4D2E",
-          borderRightWidth: 2,
-          borderTopLeftRadius: 24,
-          borderTopRightRadius: 24,
+          borderTopLeftRadius: 0,
+          borderTopRightRadius: 0,
           height: 80,
           paddingBottom: 10,
           paddingTop: 10,
@@ -49,9 +46,6 @@ export default function TabLayout() {
           right: 0,
           elevation: 0,
           shadowOpacity: 0,
-        },
-        tabBarIconStyle: {
-          marginBottom: 2,
         },
       }}
     >

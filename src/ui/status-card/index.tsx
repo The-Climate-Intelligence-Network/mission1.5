@@ -41,7 +41,7 @@ export const StatusCard = ({
 
     if (variant === "loading") {
         return (
-            <Card className={`p-8 w-full ${className}`}>
+            <Card radius={0} className={`p-8 w-full ${className}`}>
                 <HStack space="md" className="items-center">
                     <Box className="w-12 h-12 bg-surface items-center justify-center rounded-xl">
                         <Icon as={IconComponent} size="xl" className="text-data animate-spin" />
@@ -61,7 +61,7 @@ export const StatusCard = ({
 
     return (
         <Box
-            className={`p-8 w-full items-center justify-center border-2 border-dashed border-ink/10 rounded-xl ${className}`}
+            className={`p-8 w-full items-center justify-center border-2 border-dashed border-ink/10 rounded-none ${className}`}
         >
             <VStack space="md" className="items-center">
                 <Icon as={IconComponent} size="xl" className="text-ink/20" />

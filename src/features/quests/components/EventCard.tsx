@@ -146,7 +146,7 @@ export const EventCard = ({ event, onPress, className, variant = 'vertical' }: E
                             {/*Row: Points, CIQ, Attendees*/}
                             <HStack space="lg" className="items-center">
                                 {/* Points Badge */}
-                                <Box className="px-2 py-1 bg-energy border border-ink rounded-md">
+                                <Box className="px-2 py-1 bg-energy border border-ink rounded-sm">
                                     <Text size="sm" weight="bold">
                                         {event.points_awarded || 300}
                                     </Text>
@@ -266,7 +266,7 @@ export const EventCard = ({ event, onPress, className, variant = 'vertical' }: E
                             {/*Row: Points, CIQ*/}
                             <HStack space="md" className="items-center">
                                 {/* Points Badge */}
-                                <Box className="px-2 py-0.5 bg-energy border border-ink rounded-md">
+                                <Box className="px-2 py-0.5 bg-energy border border-ink rounded-sm">
                                     <Text size="xs" weight="bold">
                                         {event.points_awarded || 300}
                                     </Text>
@@ -331,7 +331,7 @@ export const EventCard = ({ event, onPress, className, variant = 'vertical' }: E
                     </View>
 
                     {/* Category Badge */}
-                    <Box className="absolute top-3 left-3 px-2 py-1 bg-white border-0 rounded-none">
+                    <Box className="absolute top-3 left-3 px-2 py-1 bg-white border-0 rounded-sm">
                         <Text size="2xs">
                             {event.category || "EVENT"}
                         </Text>
@@ -357,7 +357,7 @@ export const EventCard = ({ event, onPress, className, variant = 'vertical' }: E
                 <VStack space="sm" className="p-4 items-start">
                     {/* Points & CIQ */}
                     <HStack space="lg" className="items-center w-full">
-                        <Box className="px-3 py-1 bg-energy border border-ink rounded-md">
+                        <Box className="px-3 py-1 bg-energy border border-ink rounded-sm">
                             <Text size="sm" weight="bold">
                                 {event.points_awarded || 300}
                             </Text>

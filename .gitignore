@@ -42,3 +42,4 @@ ios/
 android/
 AGENTS.md
 .agent
+.cursor/rules/design-aesthetic.mdc

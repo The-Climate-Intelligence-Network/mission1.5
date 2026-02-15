@@ -41,7 +41,7 @@ export const FilterChip = ({
         <Pressable onPress={onPress}>
             <Box
                 variant="plain"
-                className={`px-4 py-2 border-2 border-ink rounded-md flex-row items-center ${getBackgroundColor()} ${className}`}
+                className={`px-4 py-2 border-2 border-ink rounded-sm flex-row items-center ${getBackgroundColor()} ${className}`}
             >
                 {icon && (
                     <Icon

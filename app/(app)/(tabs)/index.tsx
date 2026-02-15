@@ -34,6 +34,7 @@ import { StatusCard } from "@/src/ui/status-card";
 
 import { MissionCard } from "@/src/features/missions/components/MissionCard";
 import { EventCard } from "@/src/features/quests/components/EventCard";
+import { HardShadowFrame } from "@/src/ui/primitives";
 
 const HomePage = () => {
   const router = useRouter();
@@ -176,41 +177,49 @@ const HomePage = () => {
             <Header title="Mission 1.5" />
 
             {/* Current Status Section */}
-            <VStack space="md" className="mb-8 w-full items-start">
-              <HStack className="justify-between items-center w-full">
-                <HStack space="md" className="items-center">
-                  <Box className="w-14 h-14 bg-surface border-2 border-ink items-center justify-center">
-                    <Image
-                      source={require("@/assets/sea-turtle.png")}
-                      style={{ width: 40, height: 40, resizeMode: "contain" }}
-                    />
-                  </Box>
-                  <VStack space="2xs" className="items-start">
-                    <Text size="sm" className="text-ink/80 uppercase">
-                      Current League
-                    </Text>
-                    <Heading size="xl" className="text-ink uppercase tracking-wide">
-                      Green Turtle
-                    </Heading>
-                  </VStack>
-                </HStack>
-                <VStack space="2xs" className="items-end self-center">
+            <HStack space="md" className="justify-between items-center w-full mb-8">
+              <HardShadowFrame
+                bg={colors.surface}
+                radius={0}
+                shadowSize={2}
+                className="p-1 border-2 border-ink"
+              >
+                <Box className="w-16 h-16 bg-surface border-0 items-center justify-center">
+                  <Image
+                    source={require("@/assets/sea-turtle.png")}
+                    style={{ width: 64, height: 64, resizeMode: "contain" }}
+                  />
+                </Box>
+              </HardShadowFrame>
+
+              <VStack space="xs" className="flex-1 justify-start">
+
+                <HStack className="items-center justify-between -mb-1">
+                  <Text size="sm" className="text-ink/80 uppercase">
+                    Current League
+                  </Text>
                   <Text size="sm" className="text-ink/80 uppercase">
                     CIQ
                   </Text>
+                </HStack>
+
+                <HStack className="items-center justify-between mb-2">
+                  <Heading size="xl" className="text-ink uppercase tracking-wide">
+                    Green Turtle
+                  </Heading>
                   <Text size="xl" weight="bold" className="text-action">
                     {userStats.totalEnergy}/1000
                   </Text>
-                </VStack>
-              </HStack>
+                </HStack>
 
-              <SegmentedProgressBar
-                current={userStats.totalEnergy || 300}
-                total={1000}
-                maxSegments={16}
-                size="md"
-              />
-            </VStack>
+                <SegmentedProgressBar
+                  current={userStats.totalEnergy || 300}
+                  total={1000}
+                  maxSegments={16}
+                  size="sm"
+                />
+              </VStack>
+            </HStack>
 
             {/* Active Missions Section */}
             <VStack space="lg" className="mb-4 w-full items-start">

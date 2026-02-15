@@ -129,7 +129,7 @@ export const MissionCard = ({ mission, onPress, className, variant = 'vertical' 
                             {/*Row: Points, CIQ, Time*/}
                             <HStack space="lg" className="items-center">
                                 {/* Points Badge */}
-                                <Box className="px-2 py-1 bg-energy border border-ink rounded-md">
+                                <Box className="px-2 py-1 bg-energy border border-ink rounded-sm">
                                     <Text size="sm" weight="bold">
                                         {mission.points_awarded || 150}
                                     </Text>
@@ -278,7 +278,7 @@ export const MissionCard = ({ mission, onPress, className, variant = 'vertical' 
                             {/*Row: Points, CIQ, Time*/}
                             <HStack space="lg" className="items-center">
                                 {/* Points Badge */}
-                                <Box className="px-2 py-1 bg-energy border border-ink rounded-md">
+                                <Box className="px-2 py-1 bg-energy border border-ink rounded-sm">
                                     <Text size="sm" weight="bold">
                                         {mission.points_awarded || 150}
                                     </Text>
@@ -341,7 +341,7 @@ export const MissionCard = ({ mission, onPress, className, variant = 'vertical' 
 
                     {/* Mission Type Badge - Top Left, Straight Corners */}
                     {/* Machine Voice: Retro style (uppercase, mono, bold) */}
-                    <Box className="absolute top-3 left-3 px-2 py-1 bg-white border-0 rounded-none">
+                    <Box className="absolute top-3 left-3 px-2 py-1 bg-white border-0 rounded-sm">
                         <Text size="2xs">
                             {mission.category || "BIODIVERSITY"}
                         </Text>
@@ -381,7 +381,7 @@ export const MissionCard = ({ mission, onPress, className, variant = 'vertical' 
 
                     {/* Row - Metadata (Points, CIQ, Time) */}
                     <HStack space="lg" className="items-center w-full mt-2">
-                        <Box className="px-3 py-1 bg-energy border border-ink rounded-md">
+                        <Box className="px-3 py-1 bg-energy border border-ink rounded-sm">
                             <Text size="sm" weight="bold">
                                 {mission.points_awarded || 150}
                             </Text>

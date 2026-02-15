@@ -587,7 +587,7 @@ export const ProfileScreen = () => {
                             <VStack space="lg" className="w-full">
                                 <HardShadowFrame
                                     bg={colors.surface}
-                                    radius={16}
+                                    radius={0}
                                     shadowSize={4}
                                     className="p-6 w-full border-2 border-ink"
                                 >
