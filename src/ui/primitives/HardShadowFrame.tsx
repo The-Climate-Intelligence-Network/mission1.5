@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { hardShadows } from "../tokens/shadows";
 import { colors } from "../tokens/colors";
+import { Scanlines } from "../scanlines";
 
 type ShadowSize = 0 | 2 | 4;
 
@@ -118,6 +119,7 @@ const HardShadowFrame = React.forwardRef<View, HardShadowFrameProps>(
           ]}
           {...props}
         >
+          <Scanlines />
           {children}
         </View>
       </View>

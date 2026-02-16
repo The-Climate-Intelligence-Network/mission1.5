@@ -8,10 +8,9 @@ import { Heading } from "@/src/ui/heading";
 import { VStack } from "@/src/ui/vstack";
 import { HStack } from "@/src/ui/hstack";
 import { Icon } from "@/src/ui/icon";
-import { Button } from "@/src/ui/button";
 import { Card } from "@/src/ui/card";
 import { Divider } from "@/src/ui/divider";
-import { Globe, Building } from "lucide-react-native";
+import { Globe, Building, Sun, ShoppingBag, Mountain } from "lucide-react-native";
 import {
   getPublishedMissions,
   getMissionThumbnailUrl,
@@ -30,6 +29,7 @@ import { SegmentedProgressBar } from "@/src/ui/segmented-progress";
 import { BackgroundGradient } from "@/src/ui/background-gradient";
 import { Header } from "@/src/ui/header";
 import { colors } from "@/src/ui/tokens/colors";
+import { radius } from "@/src/ui/tokens/radius";
 import { StatusCard } from "@/src/ui/status-card";
 
 import { MissionCard } from "@/src/features/missions/components/MissionCard";
@@ -175,26 +175,29 @@ const HomePage = () => {
           <VStack space="lg" className="w-full items-start">
             {/* Title Section */}
             <Header title="Mission 1.5" />
+            {/* <Heading size="xl" className="-mt-4 text-ink/80">Hi, Yuneth</Heading> */}
+
 
             {/* Current Status Section */}
-            <HStack space="md" className="justify-between items-center w-full mb-8">
+            <HStack space="md" className="justify-between items-center w-full mb-2">
               <HardShadowFrame
                 bg={colors.surface}
-                radius={0}
+                radius={8}
                 shadowSize={2}
-                className="p-1 border-2 border-ink"
+                className="p-0 border-2 border-ink"
               >
-                <Box className="w-16 h-16 bg-surface border-0 items-center justify-center">
+                <Box className="w-24 h-24 bg-surface border-0 items-center justify-center">
+                  <Scanlines />
                   <Image
                     source={require("@/assets/sea-turtle.png")}
-                    style={{ width: 64, height: 64, resizeMode: "contain" }}
+                    style={{ width: 80, height: 80, resizeMode: "contain" }}
                   />
                 </Box>
               </HardShadowFrame>
 
               <VStack space="xs" className="flex-1 justify-start">
 
-                <HStack className="items-center justify-between -mb-1">
+                <HStack className="items-center justify-between">
                   <Text size="sm" className="text-ink/80 uppercase">
                     Current League
                   </Text>
@@ -207,7 +210,7 @@ const HomePage = () => {
                   <Heading size="xl" className="text-ink uppercase tracking-wide">
                     Green Turtle
                   </Heading>
-                  <Text size="xl" weight="bold" className="text-action">
+                  <Text size="2xl" weight="bold" className="text-action">
                     {userStats.totalEnergy}/1000
                   </Text>
                 </HStack>
@@ -215,14 +218,59 @@ const HomePage = () => {
                 <SegmentedProgressBar
                   current={userStats.totalEnergy || 300}
                   total={1000}
-                  maxSegments={16}
+                  maxSegments={12}
                   size="sm"
                 />
               </VStack>
             </HStack>
 
+            {/* CIQ and Points Boxes */}
+            <HStack space="md" className="w-full mb-8">
+              {/* Left Box - Completed quests*/}
+              <HardShadowFrame
+                bg={colors.action}
+                radius={8}
+                shadowSize={4}
+                wrapperClassName="flex-1"
+                className="p-4 pt-2 border-2 border-ink relative overflow-hidden h-24 justify-center"
+              >
+                <Box
+                  className="absolute -right-2 -bottom-4 z-0 bg-transparent border-0"
+                // style={{ transform: [{ rotate: '-15deg' }] }}
+                >
+                  <Icon as={Mountain} size={70} className="text-ink opacity-50" />
+                </Box>
+                <VStack space="xs">
+                  <Text size="sm" weight="bold" className="text-digital uppercase tracking-widest">Completed Quests</Text>
+                  <Text weight="bold" size="3xl" className="text-white tracking-widest">
+                    {userStats.completedMissions || 12}
+                  </Text>
+                </VStack>
+              </HardShadowFrame>
+
+              {/* Right Box - CIQ (Energy) */}
+              <HardShadowFrame
+                bg={colors.data}
+                radius={8}
+                shadowSize={4}
+                wrapperClassName="flex-1"
+                className="p-4 pt-2 border-2 border-ink relative overflow-hidden h-24 justify-center"
+              >
+                <Box className="absolute -right-2 -bottom-4 z-0 bg-transparent border-0">
+                  <Icon as={Sun} size={72} className="text-ink opacity-60" />
+                </Box>
+                <VStack space="xs">
+                  <Text size="sm" weight="bold" className="text-digital uppercase tracking-widest">Total CIQ</Text>
+                  <Text weight="bold" size="3xl" className="text-white tracking-widest">
+                    {userStats.totalEnergy || 2500}
+                  </Text>
+                </VStack>
+              </HardShadowFrame>
+
+            </HStack>
+
             {/* Active Missions Section */}
-            <VStack space="lg" className="mb-4 w-full items-start">
+            <VStack space="lg" className="mb-2 w-full items-start">
               <HStack className="justify-between items-center w-full">
                 <HStack space="sm" className="items-center">
                   <Box className="w-4 h-4 rounded-full bg-action border-0 animate-pulse-live" />
@@ -261,7 +309,7 @@ const HomePage = () => {
             </VStack>
 
             {/* Active Events Section */}
-            <VStack space="lg" className="w-full items-start">
+            <VStack space="lg" className="w-full items-start mb-8">
               <HStack className="justify-between items-center w-full">
                 <HStack space="sm" className="items-center">
                   <Box className="w-4 h-4 rounded-full bg-action border-0 animate-pulse-live" />
@@ -311,6 +359,39 @@ const HomePage = () => {
                 <StatusCard title="No upcoming events" />
               )}
             </VStack>
+
+            {/* Available Funds / Open Mart Card */}
+            <HardShadowFrame
+              bg={colors.energy}
+              radius={radius.controlSm}
+              shadowSize={4}
+              className="w-full p-4 border-2 border-ink h-24"
+            >
+              <HStack className="w-full justify-between items-center">
+                <VStack space="xs">
+                  <Text size="sm" weight="bold" className="text-ink uppercase tracking-widest">
+                    Redeemable Points
+                  </Text>
+                  <Text size="4xl" weight="bold" className="text-ink tracking-widest">
+                    {availablePoints || 500}
+                  </Text>
+                </VStack>
+                <Pressable
+                  onPress={() => router.push("/rewards" as import("expo-router").Href)}
+                >
+                  <HStack
+                    space="sm"
+                    className="bg-surface border-2 border-ink px-4 py-2 rounded-xl items-center"
+                  >
+                    <Scanlines />
+                    <Icon as={ShoppingBag} size={18} className="text-ink" />
+                    <Text size="sm" weight="bold" className="text-ink uppercase tracking-wider">
+                      Open Rewards
+                    </Text>
+                  </HStack>
+                </Pressable>
+              </HStack>
+            </HardShadowFrame>
           </VStack>
         </ScrollView>
       </SafeAreaView>

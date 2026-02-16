@@ -19,7 +19,7 @@ interface HeaderProps {
 export const Header = ({ title, onNotificationPress, variant = "default", rightContent }: HeaderProps) => {
     return (
         <VStack space="sm" className="w-full mb-4">
-            <HStack className="justify-between items-center w-full px-1">
+            <HStack className="justify-between items-center w-full">
                 <Heading size="2xl" className="text-ink uppercase tracking-[2px]">
                     {title}
                 </Heading>
@@ -41,7 +41,7 @@ export const Header = ({ title, onNotificationPress, variant = "default", rightC
                     </Pressable>
                 )}
             </HStack>
-            <Divider className="bg-ink h-[2px] rounded-full mt-2"/>
+            <Divider className="bg-ink h-[2px] rounded-full mt-2" />
         </VStack>
     );
 };
